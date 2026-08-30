@@ -2,6 +2,8 @@ import type { DomainId } from "./content";
 
 export type EnrichmentTask = {
   id: string;
+  week?: number;
+  month?: number;
   domain: DomainId;
   level: 1 | 2 | 3;
   title: string;
@@ -10,6 +12,10 @@ export type EnrichmentTask = {
   launchQuestions: [string, string, string];
   hints: [string, string, string];
   familyPrompt: string;
+  materials?: string;
+  answerGuide?: string;
+  reviewNotes?: string;
+  extension?: string;
   source: {
     title: string;
     url: string;
@@ -23,6 +29,9 @@ export type CuratedContentPack = {
   version: string;
   title: string;
   description: string;
+  month?: number;
+  weekRange?: [number, number];
+  curriculumReference?: string;
   status: "approved-for-release" | "draft" | "rejected";
   reviewedAt: string;
   reviewedBy: string;
@@ -41,10 +50,14 @@ export type ContentCatalog = {
   version: string;
   status: "approved-for-release" | "draft";
   parentApprovalRequired: true;
+  program?: { months: number; weeks: number; sessionsPerWeek: number; sessions: number };
   packs: Array<{
     id: string;
     version: string;
     title: string;
+    description?: string;
+    month?: number;
+    weekRange?: [number, number];
     taskCount: number;
     url: string;
     reviewedAt: string;
@@ -60,12 +73,13 @@ export function validateCuratedPack(value: unknown): value is CuratedContentPack
   const checks = pack.reviewChecks;
   if (pack.schemaVersion !== 1 || pack.status !== "approved-for-release" || !pack.id || !pack.version) return false;
   if (!checks || !Object.values(checks).every(Boolean)) return false;
-  if (!Array.isArray(pack.tasks) || pack.tasks.length < 6) return false;
+  if (!Array.isArray(pack.tasks) || pack.tasks.length < 4) return false;
   const ids = new Set<string>();
   return pack.tasks.every((task) => {
     if (!task || typeof task !== "object" || !task.id || ids.has(task.id)) return false;
     ids.add(task.id);
     if (!task.prompt?.trim() || !task.title?.trim() || task.hints?.length !== 3 || task.launchQuestions?.length !== 3) return false;
+    if (task.week !== undefined && (!Number.isInteger(task.week) || !task.answerGuide?.trim() || !task.reviewNotes?.trim())) return false;
     try {
       const source = new URL(task.source?.url ?? "");
       return source.protocol === "https:" && ALLOWED_SOURCE_HOSTS.has(source.hostname);
@@ -73,6 +87,10 @@ export function validateCuratedPack(value: unknown): value is CuratedContentPack
       return false;
     }
   });
+}
+
+export function findPlannedTask(packs: CuratedContentPack[], taskId: string) {
+  return packs.flatMap((pack) => pack.tasks).find((task) => task.id === taskId) ?? null;
 }
 
 export function selectEnrichmentTask(pack: CuratedContentPack, completedIds: string[], dayNumber: number) {

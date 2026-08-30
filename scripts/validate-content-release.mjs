@@ -30,6 +30,12 @@ if (catalog.schemaVersion !== 1 || catalog.status !== "approved-for-release" || 
 }
 const allowedDomains = new Set(["number", "calculation", "measurement", "geometry", "data", "word"]);
 const allowedHosts = new Set(["moet.gov.vn", "nrich.maths.org", "www.youcubed.org", "youcubed.org"]);
+const taskIds = new Set();
+const coveredWeeks = new Set();
+if (catalog.program?.months !== 9 || catalog.program?.weeks !== 36 || catalog.program?.sessions !== 180) {
+  throw new Error("The reviewed catalog must cover the complete 9-month, 36-week, 180-session program.");
+}
+if (catalog.packs?.length !== 9) throw new Error("The reviewed catalog must contain exactly nine monthly packs.");
 for (const item of catalog.packs ?? []) {
   const packPath = path.join(projectRoot, "public", item.url);
   const pack = JSON.parse(await readFile(packPath, "utf8"));
@@ -38,11 +44,17 @@ for (const item of catalog.packs ?? []) {
   if (!Array.isArray(pack.tasks) || pack.tasks.length !== item.taskCount) throw new Error(`${item.id}: task count does not match the catalog.`);
   const ids = new Set();
   for (const task of pack.tasks) {
-    if (!task.id || ids.has(task.id)) throw new Error(`${item.id}: duplicate or missing task id.`);
+    if (!task.id || ids.has(task.id) || taskIds.has(task.id)) throw new Error(`${item.id}: duplicate or missing task id.`);
     ids.add(task.id);
-    if (!allowedDomains.has(task.domain) || !task.prompt || task.hints?.length !== 3 || task.launchQuestions?.length !== 3) throw new Error(`${task.id}: invalid learning structure.`);
+    taskIds.add(task.id);
+    if (!Number.isInteger(task.week) || task.week < 1 || task.week > 36 || coveredWeeks.has(task.week)) throw new Error(`${task.id}: invalid or duplicate program week.`);
+    coveredWeeks.add(task.week);
+    if (!allowedDomains.has(task.domain) || !task.prompt || task.hints?.length !== 3 || task.launchQuestions?.length !== 3 || !task.answerGuide || !task.reviewNotes || !task.extension || !task.materials) throw new Error(`${task.id}: invalid learning structure.`);
     const source = new URL(task.source?.url ?? "");
     if (source.protocol !== "https:" || !allowedHosts.has(source.hostname)) throw new Error(`${task.id}: source is not on the reviewed allowlist.`);
   }
   console.log(`Curated pack ${pack.id}@${pack.version} passed with ${pack.tasks.length} tasks.`);
 }
+if (taskIds.size !== 36 || coveredWeeks.size !== 36) throw new Error("The reviewed catalog does not contain one open task for every program week.");
+if (release.contentScope?.curatedOpenTasks !== 36 || release.contentScope?.coreSessions !== 180) throw new Error("Release scope does not match the nine-month content catalog.");
+console.log(`Nine-month program passed with ${coveredWeeks.size} weeks and ${taskIds.size} reviewed open tasks.`);

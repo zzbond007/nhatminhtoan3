@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "id": "year-month-08",
+  "version": "1.0.0",
+  "month": 8,
+  "weekRange": [
+    29,
+    32
+  ],
+  "title": "Tháng 8 · Thiết kế giải pháp",
+  "description": "Bốn bài toán mở cho tuần 29–32, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+  "status": "approved-for-release",
+  "reviewedAt": "2026-08-30",
+  "reviewedBy": "Ban nội dung Math Raccoon",
+  "curriculumReference": "Chương trình GDPT môn Toán 2018; nội dung nâng cao bổ trợ bộ Chân trời sáng tạo.",
+  "reviewChecks": {
+    "curriculumAlignment": true,
+    "answerAndConstraintCheck": true,
+    "childLanguage": true,
+    "copyrightAndSource": true,
+    "privacyAndExternalLinks": true
+  },
+  "tasks": [
+    {
+      "id": "w29-thi-nghiem-ngau-nhien",
+      "week": 29,
+      "month": 8,
+      "domain": "data",
+      "level": 3,
+      "title": "Đồng xu có nhớ không?",
+      "minutes": 20,
+      "prompt": "Tung đồng xu 40 lần, ghi theo nhóm 10 lần. Trước khi tung hãy dự đoán; sau đó so số lần ngửa giữa các nhóm và giải thích vì sao chúng không cần bằng nhau.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng một đồng xu và bảng ghi để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Lập bảng bốn hàng, mỗi hàng 10 lần.",
+        "Ghi kết quả ngay, không sửa để đẹp hơn.",
+        "So tổng 40 lần với dự đoán, nhưng không đòi đúng 20."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Một đồng xu và bảng ghi",
+      "answerGuide": "Không có kết quả duy nhất. Bài đạt khi có 40 lần ghi trung thực, tổng hợp đúng và phân biệt xu hướng gần cân bằng với sự chắc chắn.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Gộp dữ liệu của hai người để xem bức tranh có ổn định hơn không.",
+      "source": {
+        "title": "YouCubed · Data Big Ideas",
+        "url": "https://www.youcubed.org/data-big-ideas/",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w30-manh-moi-vua-du",
+      "week": 30,
+      "month": 8,
+      "domain": "word",
+      "level": 3,
+      "title": "Bộ manh mối tối thiểu",
+      "minutes": 20,
+      "prompt": "Bí mật là một số từ 1 đến 50. Hãy viết ít manh mối nhất để chỉ còn đúng một số, trong đó phải dùng ít nhất hai ý khác nhau: chẵn–lẻ, so sánh, chia hết hoặc chữ số.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng bảng số 1–50 để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Sau mỗi manh mối, gạch các số không còn phù hợp.",
+        "Ưu tiên manh mối loại được nhiều khả năng.",
+        "Bỏ thử từng manh mối để xem đáp án còn duy nhất không."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Bảng số 1–50",
+      "answerGuide": "Không có bộ duy nhất. Bài đạt khi các manh mối không mâu thuẫn, giao của chúng có đúng một số và không có manh mối thừa.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Đổi bộ manh mối cho người lớn giải rồi yêu cầu phản biện.",
+      "source": {
+        "title": "NRICH · What Is a Mathematically Rich Task?",
+        "url": "https://nrich.maths.org/articles/what-mathematically-rich-task",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w31-tu-thiet-ke-quy-luat",
+      "week": 31,
+      "month": 8,
+      "domain": "number",
+      "level": 3,
+      "title": "Hai dãy cùng mở đầu",
+      "minutes": 20,
+      "prompt": "Tạo hai quy luật khác nhau đều bắt đầu bằng 2, 5, 8 nhưng cho số thứ tư khác nhau. Viết quy tắc đủ rõ để người khác tiếp tục mỗi dãy thêm ba số.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy và bút màu để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Một dãy có thể luôn cộng 3.",
+        "Dãy kia có thể dùng các khoảng cách thay đổi sau ba số đầu.",
+        "Kiểm tra quy tắc có giải thích được cả ba bước đã viết hay không."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy và bút màu",
+      "answerGuide": "Ví dụ: dãy A cộng 3 cho 11,14,17; dãy B cộng 3,3, rồi 4,5,6 cho 12,17,23. Nhiều đáp án hợp lệ nếu quy tắc rõ.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Giải thích vì sao chỉ ba số đầu thường chưa xác định duy nhất quy luật.",
+      "source": {
+        "title": "NRICH · Number for Primary Students",
+        "url": "https://nrich.maths.org/number-primary-students",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w32-xuong-che-tao-dich",
+      "week": 32,
+      "month": 8,
+      "domain": "calculation",
+      "level": 3,
+      "title": "Xưởng chế tạo số 60",
+      "minutes": 20,
+      "prompt": "Dùng 2, 3, 5, 10, mỗi số không quá một lần, cùng các phép +, −, × và dấu ngoặc để tạo càng nhiều biểu thức bằng 60 càng tốt. Phân nhóm theo ý tưởng.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng bốn thẻ số và giấy để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Bắt đầu từ 60 và nghĩ đến 10×6 hoặc 30×2.",
+        "Thử tạo 6 từ các số còn lại.",
+        "Hai biểu thức chỉ đổi thứ tự nhân có thể thuộc cùng một ý tưởng."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Bốn thẻ số và giấy",
+      "answerGuide": "Ví dụ: 10×3×2=60 và 10×(5+3−2)=60. Chấp nhận mọi biểu thức đúng; các biểu thức chỉ đổi thứ tự được xếp cùng một nhóm ý tưởng.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Tìm một biểu thức dùng đủ cả bốn số và có phép trừ.",
+      "source": {
+        "title": "NRICH · Addition and Subtraction: Age 7–11",
+        "url": "https://nrich.maths.org/curriculum/addition-and-subtraction-age-7-11",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    }
+  ]
+}

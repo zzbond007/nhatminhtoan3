@@ -1,7 +1,7 @@
 import { DOMAINS, type DomainId, type PracticeQuestion } from "./content";
 import { MISSION_LIBRARY, type DailyPuzzle, type Mission, type MissionLevel } from "./missions";
 
-export const CURRICULUM_VERSION = 6;
+export const CURRICULUM_VERSION = 7;
 
 export type HintLadder = [string, string, string];
 export type DeepQuestion = PracticeQuestion & {

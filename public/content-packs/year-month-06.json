@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "id": "year-month-06",
+  "version": "1.0.0",
+  "month": 6,
+  "weekRange": [
+    21,
+    24
+  ],
+  "title": "Tháng 6 · Mô hình hoá đời sống",
+  "description": "Bốn bài toán mở cho tuần 21–24, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+  "status": "approved-for-release",
+  "reviewedAt": "2026-08-30",
+  "reviewedBy": "Ban nội dung Math Raccoon",
+  "curriculumReference": "Chương trình GDPT môn Toán 2018; nội dung nâng cao bổ trợ bộ Chân trời sáng tạo.",
+  "reviewChecks": {
+    "curriculumAlignment": true,
+    "answerAndConstraintCheck": true,
+    "childLanguage": true,
+    "copyrightAndSource": true,
+    "privacyAndExternalLinks": true
+  },
+  "tasks": [
+    {
+      "id": "w21-ban-do-ti-le",
+      "week": 21,
+      "month": 6,
+      "domain": "measurement",
+      "level": 3,
+      "title": "Bản đồ công viên",
+      "minutes": 20,
+      "prompt": "Trên bản đồ ô vuông, mỗi cạnh ô đại diện 25 m. Một đường đi gồm 7 đoạn ngang và 5 đoạn dọc. Tính quãng đường; sau đó thiết kế một đường khác cùng điểm đầu–cuối nhưng dài hơn.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy ô vuông và bút màu để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Đếm đoạn chứ không đếm điểm.",
+        "Quãng đường ban đầu có 7+5 đoạn.",
+        "Đường vòng phải vẫn kết thúc đúng điểm đích."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy ô vuông và bút màu",
+      "answerGuide": "Đường ban đầu dài 12×25 = 300 m. Có nhiều đường vòng đúng; phải ghi rõ số đoạn và nhân 25 m.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Tìm đường vòng dài hơn đúng 100 m.",
+      "source": {
+        "title": "NRICH · Measurement for Primary Students",
+        "url": "https://nrich.maths.org/measurement-primary-students",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w22-guong-doi-xung",
+      "week": 22,
+      "month": 6,
+      "domain": "geometry",
+      "level": 3,
+      "title": "Thông điệp qua gương",
+      "minutes": 20,
+      "prompt": "Vẽ một hình bất đối xứng trên nửa tờ giấy kẻ ô, chọn một đường làm trục rồi hoàn thành ảnh đối xứng. Giải thích cách xác định vị trí từng điểm.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy kẻ ô và bút màu để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Đếm khoảng cách vuông góc từ điểm đến trục.",
+        "Ảnh nằm phía kia và cách trục bằng đúng khoảng cách đó.",
+        "Kiểm tra bằng cách gấp giấy theo trục."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy kẻ ô và bút màu",
+      "answerGuide": "Bài đạt khi các cặp điểm cách trục bằng nhau, nối đúng thứ tự và hai nửa trùng khi gấp.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Dùng hai trục vuông góc và dự đoán số bản sao của hình.",
+      "source": {
+        "title": "NRICH · Properties of Shapes: Age 7–11",
+        "url": "https://nrich.maths.org/curriculum/properties-of-shapes-age-7-11",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w23-bieu-do-danh-lua",
+      "week": 23,
+      "month": 6,
+      "domain": "data",
+      "level": 3,
+      "title": "Hai biểu đồ, một dữ liệu",
+      "minutes": 20,
+      "prompt": "Hai đội ghi 48 và 52 điểm. Vẽ một biểu đồ có trục từ 0 và một biểu đồ có trục từ 47. So cảm giác bằng mắt và viết lời cảnh báo cho người xem.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy ô vuông và thước để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Giữ cùng dữ liệu ở cả hai biểu đồ.",
+        "Quan sát tỉ lệ phần chiều cao bị cắt bỏ.",
+        "So chênh lệch thật bằng phép trừ."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy ô vuông và thước",
+      "answerGuide": "Chênh lệch thật chỉ là 4 điểm. Trục bắt đầu ở 47 phóng đại khác biệt bằng mắt; lời cảnh báo phải nhắc người xem đọc gốc trục.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Tìm một cách trình bày trung thực hơn mà vẫn dễ đọc.",
+      "source": {
+        "title": "YouCubed · Data Big Ideas",
+        "url": "https://www.youcubed.org/data-big-ideas/",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w24-di-nguoc-du-kien",
+      "week": 24,
+      "month": 6,
+      "domain": "word",
+      "level": 3,
+      "title": "Chuyến tàu đi ngược thời gian",
+      "minutes": 20,
+      "prompt": "Một chuyến đi kết thúc lúc 10:25, gồm 35 phút di chuyển, nghỉ 10 phút và 20 phút tham quan. Chuyến đi bắt đầu lúc nào? Hãy giải bằng trục thời gian đi ngược.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy và bút để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Tính tổng thời lượng hoặc lùi từng chặng.",
+        "Lùi 20 phút trước vì đó là hoạt động cuối.",
+        "Kiểm tra bằng cách đi xuôi từ giờ bắt đầu."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy và bút",
+      "answerGuide": "Tổng thời lượng 65 phút; 10:25 lùi 65 phút là 9:20.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Thêm một chặng 15 phút nhưng giữ giờ kết thúc; giờ bắt đầu đổi thế nào?",
+      "source": {
+        "title": "NRICH · What Is a Mathematically Rich Task?",
+        "url": "https://nrich.maths.org/articles/what-mathematically-rich-task",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    }
+  ]
+}

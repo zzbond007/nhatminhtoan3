@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "id": "year-month-03",
+  "version": "1.0.0",
+  "month": 3,
+  "weekRange": [
+    9,
+    12
+  ],
+  "title": "Tháng 3 · Nhiều con đường",
+  "description": "Bốn bài toán mở cho tuần 9–12, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+  "status": "approved-for-release",
+  "reviewedAt": "2026-08-30",
+  "reviewedBy": "Ban nội dung Math Raccoon",
+  "curriculumReference": "Chương trình GDPT môn Toán 2018; nội dung nâng cao bổ trợ bộ Chân trời sáng tạo.",
+  "reviewChecks": {
+    "curriculumAlignment": true,
+    "answerAndConstraintCheck": true,
+    "childLanguage": true,
+    "copyrightAndSource": true,
+    "privacyAndExternalLinks": true
+  },
+  "tasks": [
+    {
+      "id": "w09-khung-trong-gioi-han",
+      "week": 9,
+      "month": 3,
+      "domain": "measurement",
+      "level": 2,
+      "title": "Khu vườn có cổng",
+      "minutes": 16,
+      "prompt": "Có 36 m hàng rào để làm khu vườn hình chữ nhật, nhưng chừa một cổng rộng 2 m không cần rào. Hãy tìm mọi cặp cạnh nguyên có thể và khu vườn rộng nhất.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng que tính hoặc giấy kẻ ô để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Nếu lắp cả cổng, chu vi đầy đủ sẽ là bao nhiêu?",
+        "Nửa chu vi cho biết tổng chiều dài và chiều rộng.",
+        "Liệt kê cặp cạnh theo thứ tự rồi tính diện tích."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Que tính hoặc giấy kẻ ô",
+      "answerGuide": "Chu vi đầy đủ là 38 m, nên dài + rộng = 19. Cặp gần nhau nhất 9×10 cho diện tích lớn nhất 90 m².",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Nếu cổng rộng 4 m, kết quả thay đổi thế nào?",
+      "source": {
+        "title": "NRICH · Measurement for Primary Students",
+        "url": "https://nrich.maths.org/measurement-primary-students",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w10-cat-ghep-bao-toan",
+      "week": 10,
+      "month": 3,
+      "domain": "geometry",
+      "level": 2,
+      "title": "Xưởng cắt ghép 20 ô",
+      "minutes": 16,
+      "prompt": "Vẽ hình chữ nhật 4×5. Cắt theo đường ô vuông thành hai mảnh rồi ghép thành một hình khác không chồng lấn. So sánh diện tích và chu vi trước–sau.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy kẻ ô, kéo an toàn và băng dính để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Diện tích từng mảnh cộng lại là bao nhiêu?",
+        "Đánh dấu các cạnh mới tiếp xúc khi ghép.",
+        "Diện tích giữ nguyên không có nghĩa chu vi giữ nguyên."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy kẻ ô, kéo an toàn và băng dính",
+      "answerGuide": "Diện tích luôn là 20 ô nếu không bỏ, thêm hay chồng mảnh; chu vi có thể tăng, giảm hoặc giữ tùy cách ghép.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Tìm hai hình cùng diện tích 20 nhưng có chu vi khác nhau nhiều nhất.",
+      "source": {
+        "title": "NRICH · Properties of Shapes: Age 7–11",
+        "url": "https://nrich.maths.org/curriculum/properties-of-shapes-age-7-11",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w11-cay-kha-nang",
+      "week": 11,
+      "month": 3,
+      "domain": "data",
+      "level": 2,
+      "title": "Chuyến đi không lặp",
+      "minutes": 16,
+      "prompt": "Có 3 đường từ nhà đến công viên và 2 đường từ công viên đến thư viện. Khi về, không được đi lại đúng đường đã dùng ở từng chặng. Có bao nhiêu hành trình đi–về?",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy và bút màu để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Trước hết đếm số cách đi.",
+        "Với mỗi đường đi ở chặng đầu, đường về chặng đó còn mấy lựa chọn?",
+        "Dùng cây bốn tầng hoặc phép nhân rồi kiểm tra bằng vài nhánh."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy và bút màu",
+      "answerGuide": "Cách đi: 3×2=6. Cách về với mỗi lượt đi: 1×2=2. Tổng 6×2=12 hành trình.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Nếu chặng thứ hai có 3 đường, số hành trình thay đổi ra sao?",
+      "source": {
+        "title": "YouCubed · Data Big Ideas",
+        "url": "https://www.youcubed.org/data-big-ideas/",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w12-ga-tho-dieu-chinh",
+      "week": 12,
+      "month": 3,
+      "domain": "word",
+      "level": 2,
+      "title": "Nông trại 22 chân",
+      "minutes": 16,
+      "prompt": "Trong sân có 8 con gồm gà và thỏ, tổng cộng 22 chân. Tìm số mỗi loại bằng giả sử–điều chỉnh và bằng bảng thử.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng tám nút áo và bút để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Giả sử cả 8 con đều là gà.",
+        "So 16 chân với 22 chân.",
+        "Mỗi lần đổi một gà thành một thỏ làm tăng mấy chân?"
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Tám nút áo và bút",
+      "answerGuide": "Giả sử tám gà có 16 chân, thiếu 6; mỗi thỏ thay gà tăng 2 chân, nên có 3 thỏ và 5 gà.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Tạo một bài tương tự có đúng 4 con thỏ.",
+      "source": {
+        "title": "NRICH · What Is a Mathematically Rich Task?",
+        "url": "https://nrich.maths.org/articles/what-mathematically-rich-task",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    }
+  ]
+}

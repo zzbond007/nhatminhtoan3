@@ -2,13 +2,14 @@
 
 Math Raccoon là ứng dụng web tĩnh dành cho việc luyện toán nâng cao lớp 3. Ứng dụng không gọi ChatGPT hoặc OpenAI API khi trẻ học, không yêu cầu đăng nhập và lưu tiến trình ngay trên thiết bị.
 
-Phiên bản nội dung v6 gồm:
+Phiên bản nội dung v7 gồm:
 
+- lộ trình 9 tháng gồm 36 tuần × 5 buổi, tổng cộng 180 buổi lõi;
 - 36 chủ đề cốt lõi thuộc 6 miền năng lực;
 - 12 phiên bản cho mỗi chủ đề, tương đương 432 phiên bản nhiệm vụ và hơn 2.160 câu luyện;
 - ba dải thích ứng **Gỡ nút – Vừa sức – Bứt phá** dựa trên mức tự lực, gợi ý và chuyển giao;
 - 60 câu đố nhanh;
-- kho bài toán mở có nguồn, ngày duyệt và xác nhận của phụ huynh.
+- 36 bài toán mở chia thành 9 gói tháng, có đề, vật liệu, gợi ý, hướng dẫn đáp án, nguồn và xác nhận của phụ huynh.
 
 ## Cài miễn phí bằng GitHub Pages
 
@@ -59,7 +60,9 @@ Quy trình cập nhật:
 4. Chỉ dùng nguồn trong danh sách đã duyệt; hiện gồm Bộ GDĐT, NRICH và YouCubed.
 5. Hoàn tất năm mục kiểm tra của gói: chương trình, đáp án/ràng buộc, ngôn ngữ trẻ em, bản quyền/nguồn và riêng tư/liên kết.
 6. Chạy `npm run content:validate`. Gói thiếu nguồn, trùng mã hoặc chưa đủ kiểm tra sẽ bị chặn.
-7. Sau khi GitHub Pages cập nhật, phụ huynh chọn **Kiểm tra kho bài đã duyệt → Phụ huynh đồng ý cài gói**.
+7. Sau khi GitHub Pages cập nhật, phụ huynh mở **Phòng kiểm duyệt 9 tháng**, xem từng bài rồi chọn **Tôi đã xem · Duyệt và cài tháng này**.
+
+Kho năm học được tạo lại bằng `node scripts/generate-nine-month-packs.mjs`. Tệp nguồn này chứa 36 đề nguyên bản và xuất ra 9 gói JSON; sau khi thay đổi phải chạy lại bộ sinh rồi mới kiểm tra nội dung.
 
 Gói đã cài được service worker lưu lại để học ngoại tuyến. Liên kết nguồn chỉ xuất hiện trong phần dành cho phụ huynh.
 

@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "id": "year-month-02",
+  "version": "1.0.0",
+  "month": 2,
+  "weekRange": [
+    5,
+    8
+  ],
+  "title": "Tháng 2 · Lập kế hoạch có hệ thống",
+  "description": "Bốn bài toán mở cho tuần 5–8, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+  "status": "approved-for-release",
+  "reviewedAt": "2026-08-30",
+  "reviewedBy": "Ban nội dung Math Raccoon",
+  "curriculumReference": "Chương trình GDPT môn Toán 2018; nội dung nâng cao bổ trợ bộ Chân trời sáng tạo.",
+  "reviewChecks": {
+    "curriculumAlignment": true,
+    "answerAndConstraintCheck": true,
+    "childLanguage": true,
+    "copyrightAndSource": true,
+    "privacyAndExternalLinks": true
+  },
+  "tasks": [
+    {
+      "id": "w05-du-lieu-lop-hoc",
+      "week": 5,
+      "month": 2,
+      "domain": "data",
+      "level": 2,
+      "title": "Dữ liệu chỉ nói điều đã thấy",
+      "minutes": 16,
+      "prompt": "Tám bạn chọn số cuốn sách đã đọc: 2, 1, 3, 2, 4, 2, 1, 5. Hãy vẽ một biểu đồ, viết ba nhận xét chắc chắn đúng và một nhận xét chưa đủ bằng chứng.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy ô vuông và bút màu để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Lập bảng tần số trước khi vẽ.",
+        "Mỗi nhận xét chắc chắn phải chỉ vào một con số trong dữ liệu.",
+        "Không suy rộng từ tám bạn ra cả lớp hoặc cả trường."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy ô vuông và bút màu",
+      "answerGuide": "Các nhận xét đúng có thể gồm: 2 xuất hiện ba lần; lớn nhất là 5; nhỏ nhất là 1. Kết luận về toàn trường là vượt quá bằng chứng.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Đổi cách biểu diễn dữ liệu nhưng giữ nguyên các kết luận.",
+      "source": {
+        "title": "YouCubed · Data Big Ideas",
+        "url": "https://www.youcubed.org/data-big-ideas/",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w06-keo-nguoc-cau-chuyen",
+      "week": 6,
+      "month": 2,
+      "domain": "word",
+      "level": 2,
+      "title": "Chiếc hộp đi ngược",
+      "minutes": 16,
+      "prompt": "Một hộp có một số viên bi. Thêm 8 viên, sau đó chia đều vào 4 túi, mỗi túi 7 viên. Ban đầu hộp có bao nhiêu viên? Hãy giải bằng phép tính ngược và bằng sơ đồ.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy và bút để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Từ bốn túi, tìm tổng cuối cùng.",
+        "Thao tác cuối trong câu chuyện phải được tháo trước.",
+        "Dùng kết quả ban đầu đi xuôi để kiểm tra."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy và bút",
+      "answerGuide": "Cuối có 4 × 7 = 28 viên; ban đầu có 28 − 8 = 20 viên.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Thay 7 bằng 9 và tự giải lại mà không đổi cấu trúc câu chuyện.",
+      "source": {
+        "title": "NRICH · What Is a Mathematically Rich Task?",
+        "url": "https://nrich.maths.org/articles/what-mathematically-rich-task",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w07-mat-ma-ba-chu-so",
+      "week": 7,
+      "month": 2,
+      "domain": "number",
+      "level": 2,
+      "title": "Kho mật mã 0–3–6–9",
+      "minutes": 16,
+      "prompt": "Dùng các chữ số 0, 3, 6, 9, mỗi chữ số không quá một lần, lập mọi số có ba chữ số lớn hơn 600 và là số chẵn. Có bao nhiêu số?",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng bốn thẻ số 0, 3, 6, 9 để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Hàng trăm chỉ có thể là 6 hoặc 9.",
+        "Số chẵn phải tận cùng bằng 0 hoặc 6.",
+        "Cố định hàng trăm, rồi hàng đơn vị, sau đó mới chọn hàng chục."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Bốn thẻ số 0, 3, 6, 9",
+      "answerGuide": "Có 6 số: 630, 690, 906, 930, 936 và 960. Liệt kê theo hàng trăm rồi hàng đơn vị giúp chứng minh không trùng, không sót.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Đổi điều kiện thành nhỏ hơn 600 và so số lượng.",
+      "source": {
+        "title": "NRICH · Number for Primary Students",
+        "url": "https://nrich.maths.org/number-primary-students",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w08-ba-duong-den-dich",
+      "week": 8,
+      "month": 2,
+      "domain": "calculation",
+      "level": 2,
+      "title": "Ba con đường đến 288",
+      "minutes": 16,
+      "prompt": "Tính 48 × 6 theo ba cách: tách theo hàng, bù từ 50 và dùng gấp đôi–gấp ba. Cách nào con thấy dễ giải thích nhất?",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy nháp để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Tách 48 thành 40 + 8.",
+        "Hoặc tính 50 × 6 rồi bớt 2 × 6.",
+        "Với gấp đôi–gấp ba, nhớ rằng ×6 = ×2 rồi ×3."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy nháp",
+      "answerGuide": "Ba đường đều cho 288: 240+48; 300−12; hoặc 48×2=96 rồi 96×3=288.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Tìm ba cách tương tự cho 49 × 8.",
+      "source": {
+        "title": "NRICH · Addition and Subtraction: Age 7–11",
+        "url": "https://nrich.maths.org/curriculum/addition-and-subtraction-age-7-11",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "version": "2026.08.30.1",
-  "title": "Math Raccoon · Kho học sâu và biến đổi",
+  "version": "2026.08.30.2",
+  "title": "Math Raccoon · Lộ trình nâng cao 9 tháng",
   "publishedAt": "2026-08-30",
   "contentScope": {
     "missions": 36,
@@ -9,7 +9,11 @@
     "missionVariants": 432,
     "generatedPracticeQuestions": 2160,
     "dailyPuzzles": 60,
-    "curatedOpenTasks": 12
+    "curatedOpenTasks": 36,
+    "programMonths": 9,
+    "programWeeks": 36,
+    "coreSessions": 180,
+    "reviewPacks": 9
   },
   "approval": {
     "status": "approved-for-release",
@@ -23,9 +27,9 @@
     }
   },
   "notes": [
-    "Mỗi trong 36 chủ đề có 12 phiên bản bài luyện, tổng cộng 432 phiên bản và hơn 2.160 câu hỏi.",
-    "Độ khó tự chuyển giữa Gỡ nút, Vừa sức và Bứt phá theo mức tự lực của bé.",
-    "Bổ sung kho bài toán mở từ nguồn Internet uy tín, bắt buộc qua cổng kiểm duyệt và phụ huynh xác nhận.",
-    "Mọi gói nội dung đã duyệt được lưu để tiếp tục học ngoại tuyến trên iPad."
+    "Bổ sung lộ trình 9 tháng gồm 36 tuần và 180 buổi học có cấu trúc.",
+    "Mỗi tuần có bốn phiên bản luyện thích ứng và một bài toán mở gắn cùng ý tưởng lớn.",
+    "Kho 36 bài toán mở được chia thành 9 gói tháng để phụ huynh xem đề, đáp án, gợi ý và nguồn trước khi duyệt.",
+    "Mọi gói đã duyệt được lưu để tiếp tục học ngoại tuyến trên iPad."
   ]
 }

@@ -1,15 +1,147 @@
 {
   "schemaVersion": 1,
-  "version": "2026.08.30.1",
+  "version": "2026.08.30.2",
   "status": "approved-for-release",
   "parentApprovalRequired": true,
+  "program": {
+    "months": 9,
+    "weeks": 36,
+    "sessionsPerWeek": 5,
+    "sessions": 180
+  },
   "packs": [
     {
-      "id": "rich-thinking-01",
+      "id": "year-month-01",
       "version": "1.0.0",
-      "title": "Phòng bài toán mở · Tập 1",
-      "taskCount": 12,
-      "url": "content-packs/rich-thinking-01.json",
+      "title": "Tháng 1 · Nhìn ra cấu trúc",
+      "description": "Bốn bài toán mở cho tuần 1–4, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+      "month": 1,
+      "weekRange": [
+        1,
+        4
+      ],
+      "taskCount": 4,
+      "url": "content-packs/year-month-01.json",
+      "reviewedAt": "2026-08-30",
+      "reviewedBy": "Ban nội dung Math Raccoon"
+    },
+    {
+      "id": "year-month-02",
+      "version": "1.0.0",
+      "title": "Tháng 2 · Lập kế hoạch có hệ thống",
+      "description": "Bốn bài toán mở cho tuần 5–8, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+      "month": 2,
+      "weekRange": [
+        5,
+        8
+      ],
+      "taskCount": 4,
+      "url": "content-packs/year-month-02.json",
+      "reviewedAt": "2026-08-30",
+      "reviewedBy": "Ban nội dung Math Raccoon"
+    },
+    {
+      "id": "year-month-03",
+      "version": "1.0.0",
+      "title": "Tháng 3 · Nhiều con đường",
+      "description": "Bốn bài toán mở cho tuần 9–12, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+      "month": 3,
+      "weekRange": [
+        9,
+        12
+      ],
+      "taskCount": 4,
+      "url": "content-packs/year-month-03.json",
+      "reviewedAt": "2026-08-30",
+      "reviewedBy": "Ban nội dung Math Raccoon"
+    },
+    {
+      "id": "year-month-04",
+      "version": "1.0.0",
+      "title": "Tháng 4 · Bất biến và bằng chứng",
+      "description": "Bốn bài toán mở cho tuần 13–16, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+      "month": 4,
+      "weekRange": [
+        13,
+        16
+      ],
+      "taskCount": 4,
+      "url": "content-packs/year-month-04.json",
+      "reviewedAt": "2026-08-30",
+      "reviewedBy": "Ban nội dung Math Raccoon"
+    },
+    {
+      "id": "year-month-05",
+      "version": "1.0.0",
+      "title": "Tháng 5 · Tối ưu và công bằng",
+      "description": "Bốn bài toán mở cho tuần 17–20, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+      "month": 5,
+      "weekRange": [
+        17,
+        20
+      ],
+      "taskCount": 4,
+      "url": "content-packs/year-month-05.json",
+      "reviewedAt": "2026-08-30",
+      "reviewedBy": "Ban nội dung Math Raccoon"
+    },
+    {
+      "id": "year-month-06",
+      "version": "1.0.0",
+      "title": "Tháng 6 · Mô hình hoá đời sống",
+      "description": "Bốn bài toán mở cho tuần 21–24, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+      "month": 6,
+      "weekRange": [
+        21,
+        24
+      ],
+      "taskCount": 4,
+      "url": "content-packs/year-month-06.json",
+      "reviewedAt": "2026-08-30",
+      "reviewedBy": "Ban nội dung Math Raccoon"
+    },
+    {
+      "id": "year-month-07",
+      "version": "1.0.0",
+      "title": "Tháng 7 · Kiểm chứng và phản biện",
+      "description": "Bốn bài toán mở cho tuần 25–28, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+      "month": 7,
+      "weekRange": [
+        25,
+        28
+      ],
+      "taskCount": 4,
+      "url": "content-packs/year-month-07.json",
+      "reviewedAt": "2026-08-30",
+      "reviewedBy": "Ban nội dung Math Raccoon"
+    },
+    {
+      "id": "year-month-08",
+      "version": "1.0.0",
+      "title": "Tháng 8 · Thiết kế giải pháp",
+      "description": "Bốn bài toán mở cho tuần 29–32, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+      "month": 8,
+      "weekRange": [
+        29,
+        32
+      ],
+      "taskCount": 4,
+      "url": "content-packs/year-month-08.json",
+      "reviewedAt": "2026-08-30",
+      "reviewedBy": "Ban nội dung Math Raccoon"
+    },
+    {
+      "id": "year-month-09",
+      "version": "1.0.0",
+      "title": "Tháng 9 · Nhà toán học độc lập",
+      "description": "Bốn bài toán mở cho tuần 33–36, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+      "month": 9,
+      "weekRange": [
+        33,
+        36
+      ],
+      "taskCount": 4,
+      "url": "content-packs/year-month-09.json",
       "reviewedAt": "2026-08-30",
       "reviewedBy": "Ban nội dung Math Raccoon"
     }

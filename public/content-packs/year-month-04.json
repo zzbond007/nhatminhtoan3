@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "id": "year-month-04",
+  "version": "1.0.0",
+  "month": 4,
+  "weekRange": [
+    13,
+    16
+  ],
+  "title": "Tháng 4 · Bất biến và bằng chứng",
+  "description": "Bốn bài toán mở cho tuần 13–16, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+  "status": "approved-for-release",
+  "reviewedAt": "2026-08-30",
+  "reviewedBy": "Ban nội dung Math Raccoon",
+  "curriculumReference": "Chương trình GDPT môn Toán 2018; nội dung nâng cao bổ trợ bộ Chân trời sáng tạo.",
+  "reviewChecks": {
+    "curriculumAlignment": true,
+    "answerAndConstraintCheck": true,
+    "childLanguage": true,
+    "copyrightAndSource": true,
+    "privacyAndExternalLinks": true
+  },
+  "tasks": [
+    {
+      "id": "w13-thanh-pho-chan-le",
+      "week": 13,
+      "month": 4,
+      "domain": "number",
+      "level": 3,
+      "title": "Thành phố chẵn–lẻ",
+      "minutes": 20,
+      "prompt": "Chọn ba số lẻ và hai số chẵn bất kỳ. Không tính toàn bộ, dự đoán tổng là chẵn hay lẻ; sau đó thay một số và tìm mọi cách làm tính chẵn–lẻ của tổng đổi.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng năm thẻ số tự chọn để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Ghép hai số lẻ thành một tổng chẵn.",
+        "Ba số lẻ để lại một phần lẻ.",
+        "Đổi một số lẻ thành chẵn hoặc ngược lại làm điều gì xảy ra?"
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Năm thẻ số tự chọn",
+      "answerGuide": "Ba lẻ cộng hai chẵn cho tổng lẻ. Đổi tính chẵn–lẻ của đúng một số sẽ làm tổng đổi từ lẻ sang chẵn.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Điều gì xảy ra nếu đổi cùng lúc hai số?",
+      "source": {
+        "title": "NRICH · Number for Primary Students",
+        "url": "https://nrich.maths.org/number-primary-students",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w14-may-toan-bi-mat",
+      "week": 14,
+      "month": 4,
+      "domain": "calculation",
+      "level": 3,
+      "title": "Máy toán hai chiều",
+      "minutes": 20,
+      "prompt": "Một máy lấy số vào, nhân 5, bớt 7 rồi chia 3 và cho kết quả 11. Tìm số vào, vẽ sơ đồ máy và kiểm tra đi xuôi.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy và bút để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Đi ngược từ 11 bằng phép nhân 3.",
+        "Sau đó cộng lại 7.",
+        "Cuối cùng chia cho 5."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy và bút",
+      "answerGuide": "11×3=33; 33+7=40; 40:5=8. Kiểm tra: 8×5−7=33; 33:3=11.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Thiết kế một máy ba bước có đầu vào 6 và đầu ra 10.",
+      "source": {
+        "title": "NRICH · Addition and Subtraction: Age 7–11",
+        "url": "https://nrich.maths.org/curriculum/addition-and-subtraction-age-7-11",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w15-hang-rao-rong-nhat",
+      "week": 15,
+      "month": 4,
+      "domain": "measurement",
+      "level": 3,
+      "title": "28 mét hàng rào",
+      "minutes": 20,
+      "prompt": "Có 28 m hàng rào làm hình chữ nhật cạnh nguyên. Liệt kê mọi phương án, tìm diện tích lớn nhất và mô tả quy luật con nhận ra.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng que tính hoặc giấy kẻ ô để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Nửa chu vi là 14.",
+        "Liệt kê 1+13, 2+12 rồi tiếp tục.",
+        "So tích của từng cặp và chú ý hai cạnh càng gần nhau."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Que tính hoặc giấy kẻ ô",
+      "answerGuide": "Các cặp từ 1×13 đến 7×7; diện tích lớn nhất 49 m² ở hình 7×7.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Với chu vi 30 m, hình tối ưu có còn là hình vuông không?",
+      "source": {
+        "title": "NRICH · Measurement for Primary Students",
+        "url": "https://nrich.maths.org/measurement-primary-students",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w16-truy-tim-hinh-an",
+      "week": 16,
+      "month": 4,
+      "domain": "geometry",
+      "level": 3,
+      "title": "Lưới 3×4 có bao nhiêu hình?",
+      "minutes": 20,
+      "prompt": "Trên lưới gồm 3 hàng và 4 cột ô vuông, hãy đếm tất cả hình chữ nhật. Lập bảng theo kích thước để chứng minh không bỏ sót.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy kẻ ô và bút màu để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Đếm hình cao 1 ô trước, theo từng độ rộng.",
+        "Tiếp tục với chiều cao 2 rồi 3 ô.",
+        "Một hình a×b có thể bắt đầu ở bao nhiêu vị trí?"
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy kẻ ô và bút màu",
+      "answerGuide": "Tổng số hình chữ nhật là (1+2+3)×(1+2+3+4)=6×10=60; bảng kích thước là bằng chứng phù hợp lớp 3.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Trong 60 hình đó có bao nhiêu hình vuông?",
+      "source": {
+        "title": "NRICH · Properties of Shapes: Age 7–11",
+        "url": "https://nrich.maths.org/curriculum/properties-of-shapes-age-7-11",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "id": "year-month-07",
+  "version": "1.0.0",
+  "month": 7,
+  "weekRange": [
+    25,
+    28
+  ],
+  "title": "Tháng 7 · Kiểm chứng và phản biện",
+  "description": "Bốn bài toán mở cho tuần 25–28, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+  "status": "approved-for-release",
+  "reviewedAt": "2026-08-30",
+  "reviewedBy": "Ban nội dung Math Raccoon",
+  "curriculumReference": "Chương trình GDPT môn Toán 2018; nội dung nâng cao bổ trợ bộ Chân trời sáng tạo.",
+  "reviewChecks": {
+    "curriculumAlignment": true,
+    "answerAndConstraintCheck": true,
+    "childLanguage": true,
+    "copyrightAndSource": true,
+    "privacyAndExternalLinks": true
+  },
+  "tasks": [
+    {
+      "id": "w25-lich-va-chu-ky",
+      "week": 25,
+      "month": 7,
+      "domain": "number",
+      "level": 3,
+      "title": "Hai đội gặp lại",
+      "minutes": 20,
+      "prompt": "Đội Đỏ tập 4 ngày một lần, đội Xanh tập 6 ngày một lần. Hôm nay hai đội cùng tập. Sau ít nhất bao nhiêu ngày họ lại cùng tập? Hãy chứng minh bằng hai cách.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng lịch giấy hoặc trục số để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Liệt kê các bội của 4 và của 6.",
+        "Tìm số dương nhỏ nhất xuất hiện ở cả hai danh sách.",
+        "Cách thứ hai có thể dùng lịch hoặc bước nhảy trên trục số."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Lịch giấy hoặc trục số",
+      "answerGuide": "Họ gặp lại sau 12 ngày; 12 là bội chung dương nhỏ nhất của 4 và 6.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Thêm đội Vàng tập 3 ngày một lần; ngày gặp chung có đổi không?",
+      "source": {
+        "title": "NRICH · Number for Primary Students",
+        "url": "https://nrich.maths.org/number-primary-students",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w26-uoc-luong-bat-loi",
+      "week": 26,
+      "month": 7,
+      "domain": "calculation",
+      "level": 3,
+      "title": "Thanh tra hóa đơn",
+      "minutes": 20,
+      "prompt": "Một hóa đơn có 4 món giá 48 nghìn, 73 nghìn, 96 nghìn và 31 nghìn. Bạn ghi tổng 348 nghìn. Hãy ước lượng để phát hiện điều đáng ngờ rồi tính chính xác bằng cách nhóm thuận lợi.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng bốn thẻ giá để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Làm tròn các giá về chục nghìn gần nhất.",
+        "Ghép 48 với 31 hoặc tìm cặp gần tròn trăm.",
+        "So kết quả chính xác với 348."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Bốn thẻ giá",
+      "answerGuide": "Ước lượng khoảng 250 nghìn. Tổng chính xác 48+73+96+31 = 248 nghìn, nên 348 nghìn sai 100 nghìn.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Thay một giá để tổng đúng bằng 300 nghìn.",
+      "source": {
+        "title": "NRICH · Addition and Subtraction: Age 7–11",
+        "url": "https://nrich.maths.org/curriculum/addition-and-subtraction-age-7-11",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w27-lich-khong-chong-cheo",
+      "week": 27,
+      "month": 7,
+      "domain": "measurement",
+      "level": 3,
+      "title": "Lịch câu lạc bộ 120 phút",
+      "minutes": 20,
+      "prompt": "Trong 120 phút, hãy xếp bốn hoạt động dài 35, 30, 25 và 20 phút; giữa các hoạt động cần nghỉ 5 phút. Có thể làm đủ bốn hoạt động không? Nếu không, chọn lịch hợp lý nhất và bảo vệ lựa chọn.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng các thẻ hoạt động và đồng hồ để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Bốn hoạt động có ba khoảng nghỉ.",
+        "Tính tổng thời gian nếu làm đủ.",
+        "Nếu phải bỏ một hoạt động, nêu tiêu chí chứ không chọn ngẫu nhiên."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Các thẻ hoạt động và đồng hồ",
+      "answerGuide": "Bốn hoạt động cần 110 + 15 = 125 phút nên không vừa. Bỏ hoạt động 20 phút thì lịch dùng 90+10 = 100 phút; các lựa chọn khác cũng được nếu giải thích mục tiêu.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Thiết kế lịch vừa đúng 120 phút bằng cách điều chỉnh một hoạt động.",
+      "source": {
+        "title": "NRICH · Measurement for Primary Students",
+        "url": "https://nrich.maths.org/measurement-primary-students",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w28-lat-kin-san",
+      "week": 28,
+      "month": 7,
+      "domain": "geometry",
+      "level": 3,
+      "title": "Gạch 2×3 lát sân 6×8",
+      "minutes": 20,
+      "prompt": "Có thể dùng gạch hình chữ nhật 2×3 để lát kín sân 6×8 mà không cắt gạch không? Hãy dựng ít nhất hai cách lát hoặc giải thích vì sao không thể.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy kẻ ô và tám miếng 2×3 để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "So diện tích sân với diện tích một viên gạch.",
+        "48 chia 6 cho biết cần bao nhiêu viên.",
+        "Thử đặt cạnh 3 theo chiều 6; cách khác là chia sân thành khối 6×6 và 6×2."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy kẻ ô và tám miếng 2×3",
+      "answerGuide": "Cần 8 viên. Cách 1: đặt viên 3×2 thành 2 hàng và 4 cột. Cách 2: chia sân thành khối 6×6 lát bằng sáu viên 2×3 và dải 6×2 lát bằng hai viên 3×2.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Sân 5×8 có thể lát bằng loại gạch này không?",
+      "source": {
+        "title": "NRICH · Properties of Shapes: Age 7–11",
+        "url": "https://nrich.maths.org/curriculum/properties-of-shapes-age-7-11",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    }
+  ]
+}

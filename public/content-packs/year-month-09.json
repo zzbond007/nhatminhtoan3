@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "id": "year-month-09",
+  "version": "1.0.0",
+  "month": 9,
+  "weekRange": [
+    33,
+    36
+  ],
+  "title": "Tháng 9 · Nhà toán học độc lập",
+  "description": "Bốn bài toán mở cho tuần 33–36, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+  "status": "approved-for-release",
+  "reviewedAt": "2026-08-30",
+  "reviewedBy": "Ban nội dung Math Raccoon",
+  "curriculumReference": "Chương trình GDPT môn Toán 2018; nội dung nâng cao bổ trợ bộ Chân trời sáng tạo.",
+  "reviewChecks": {
+    "curriculumAlignment": true,
+    "answerAndConstraintCheck": true,
+    "childLanguage": true,
+    "copyrightAndSource": true,
+    "privacyAndExternalLinks": true
+  },
+  "tasks": [
+    {
+      "id": "w33-ngan-sach-thong-minh",
+      "week": 33,
+      "month": 9,
+      "domain": "measurement",
+      "level": 3,
+      "title": "Chuyến dã ngoại 200 nghìn",
+      "minutes": 20,
+      "prompt": "Có 200 nghìn đồng. Cần mua ít nhất 6 chai nước giá 12 nghìn/chai, ít nhất 4 phần trái cây giá 18 nghìn/phần và để lại 20 nghìn dự phòng. Hãy lập các phương án hợp lệ và chọn phương án tốt nhất theo tiêu chí của con.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng thẻ giá và tiền giấy giả để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Trừ khoản dự phòng trước.",
+        "Tính chi phí tối thiểu bắt buộc.",
+        "Nêu tiêu chí: nhiều phần hơn, tiền dư nhiều hơn hay cân bằng."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Thẻ giá và tiền giấy giả",
+      "answerGuide": "Mức tối thiểu dùng 72+72=144 nghìn, còn 36 nghìn ngoài dự phòng. Có thể thêm 3 chai hoặc 2 phần trái cây; nhiều phương án hợp lệ tùy tiêu chí.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Nếu có thêm 30 nghìn, lựa chọn tối ưu của con thay đổi không?",
+      "source": {
+        "title": "NRICH · Measurement for Primary Students",
+        "url": "https://nrich.maths.org/measurement-primary-students",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w34-thiet-ke-hinh-toi-uu",
+      "week": 34,
+      "month": 9,
+      "domain": "geometry",
+      "level": 3,
+      "title": "Nhà kho 24 ô",
+      "minutes": 20,
+      "prompt": "Dùng 24 ô vuông tạo mọi hình chữ nhật cạnh nguyên. Nếu đường viền tốn 2 thẻ cho mỗi đơn vị chu vi, thiết kế nào ít thẻ nhất? Chứng minh.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng 24 ô giấy vuông để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Liệt kê các cặp thừa số của 24.",
+        "Tính chu vi từng hình trước khi đổi sang số thẻ.",
+        "Hình tối ưu phải được so với mọi phương án còn lại."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "24 ô giấy vuông",
+      "answerGuide": "Các hình 1×24, 2×12, 3×8, 4×6; hình 4×6 có chu vi 20 và cần 40 thẻ, ít nhất.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Nếu phải chừa một cạnh dài 2 làm cửa, cách tính vật liệu đổi ra sao?",
+      "source": {
+        "title": "NRICH · Properties of Shapes: Age 7–11",
+        "url": "https://nrich.maths.org/curriculum/properties-of-shapes-age-7-11",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w35-khao-sat-khong-dan-duong",
+      "week": 35,
+      "month": 9,
+      "domain": "data",
+      "level": 3,
+      "title": "Câu hỏi làm lệch dữ liệu",
+      "minutes": 20,
+      "prompt": "Muốn biết hoạt động sau giờ học được yêu thích, hãy viết một câu hỏi trung lập và một câu cố tình dẫn dắt. Dự đoán kết quả khác nhau, rồi thiết kế cách chọn 12 người trả lời công bằng hơn.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng phiếu khảo sát giấy để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Tìm từ khen, chê hoặc cụm “đúng không” trong câu dẫn dắt.",
+        "Cho lựa chọn cân bằng và có mục khác.",
+        "Không chỉ hỏi nhóm bạn thân hoặc một câu lạc bộ."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Phiếu khảo sát giấy",
+      "answerGuide": "Bài đạt khi chỉ rõ yếu tố dẫn dắt, có câu trung lập, cách chọn mẫu đa dạng và không khẳng định kết quả trước khi thu thập.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Thu thử dữ liệu với người trong gia đình rồi so hai cách hỏi.",
+      "source": {
+        "title": "YouCubed · Data Big Ideas",
+        "url": "https://www.youcubed.org/data-big-ideas/",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w36-chung-minh-khong-bo-sot",
+      "week": 36,
+      "month": 9,
+      "domain": "word",
+      "level": 3,
+      "title": "Hội đồng chứng minh",
+      "minutes": 20,
+      "prompt": "Một số có hai chữ số, tổng hai chữ số bằng 9 và số đó lớn hơn 40. Tìm tất cả số phù hợp rồi viết lời chứng minh rằng không còn số nào khác.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng bảng hàng chục–hàng đơn vị để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Xét hàng chục lần lượt từ 4 đến 9.",
+        "Với mỗi hàng chục, hàng đơn vị được xác định bởi tổng 9.",
+        "Loại trường hợp không lớn hơn 40 và dừng khi hàng đơn vị âm."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Bảng hàng chục–hàng đơn vị",
+      "answerGuide": "Các số là 45, 54, 63, 72, 81, 90. Xét hàng chục 4–9 theo thứ tự chứng minh không bỏ sót.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Thay tổng 9 bằng 12; cấu trúc lời chứng minh có đổi không?",
+      "source": {
+        "title": "NRICH · What Is a Mathematically Rich Task?",
+        "url": "https://nrich.maths.org/articles/what-mathematically-rich-task",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    }
+  ]
+}

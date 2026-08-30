@@ -45,7 +45,33 @@ test("emits child-friendly and offline-update styles", async () => {
   assert.match(css, /\.mission-edition-banner/);
   assert.match(css, /\.content-governance/);
   assert.match(css, /\.enrichment-card/);
+  assert.match(css, /\.nine-month-overview/);
+  assert.match(css, /\.months-roadmap/);
+  assert.match(css, /\.review-pack-grid/);
   assert.match(css, /@media\s*\(width>=768px\)\s*and\s*\(width<=1180px\)/);
+});
+
+test("covers all 36 weeks and 180 planned sessions", async () => {
+  const { ALL_DEEP_MISSIONS } = await vite.ssrLoadModule("/app/curriculum.ts");
+  const { PROGRAM_MONTHS, PROGRAM_SESSIONS, PROGRAM_WEEKS, YEAR_WEEKS } = await vite.ssrLoadModule("/app/year-plan.ts");
+  const catalog = JSON.parse(await readFile(path.join(root, "public", "content-catalog.json"), "utf8"));
+  const packs = await Promise.all(catalog.packs.map((item) => readFile(path.join(root, "public", item.url), "utf8").then(JSON.parse)));
+  const tasks = packs.flatMap((pack) => pack.tasks);
+
+  assert.equal(PROGRAM_MONTHS, 9);
+  assert.equal(PROGRAM_WEEKS, 36);
+  assert.equal(PROGRAM_SESSIONS, 180);
+  assert.equal(YEAR_WEEKS.length, 36);
+  assert.equal(new Set(YEAR_WEEKS.map((week) => week.missionId)).size, 36);
+  assert.equal(new Set(YEAR_WEEKS.map((week) => week.taskId)).size, 36);
+  assert.ok(YEAR_WEEKS.every((week) => ALL_DEEP_MISSIONS.some((mission) => mission.id === week.missionId)));
+  assert.equal(packs.length, 9);
+  assert.equal(tasks.length, 36);
+  assert.deepEqual(tasks.map((task) => task.id), YEAR_WEEKS.map((week) => week.taskId));
+  assert.deepEqual([...new Set(tasks.map((task) => task.week))].sort((a, b) => a - b), Array.from({ length: 36 }, (_, index) => index + 1));
+  for (const domain of ["number", "calculation", "measurement", "geometry", "data", "word"]) {
+    assert.equal(tasks.filter((task) => task.domain === domain).length, 6);
+  }
 });
 
 test("validates all 432 adaptive mission editions", async () => {

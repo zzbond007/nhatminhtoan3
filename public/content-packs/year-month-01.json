@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "id": "year-month-01",
+  "version": "1.0.0",
+  "month": 1,
+  "weekRange": [
+    1,
+    4
+  ],
+  "title": "Tháng 1 · Nhìn ra cấu trúc",
+  "description": "Bốn bài toán mở cho tuần 1–4, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+  "status": "approved-for-release",
+  "reviewedAt": "2026-08-30",
+  "reviewedBy": "Ban nội dung Math Raccoon",
+  "curriculumReference": "Chương trình GDPT môn Toán 2018; nội dung nâng cao bổ trợ bộ Chân trời sáng tạo.",
+  "reviewChecks": {
+    "curriculumAlignment": true,
+    "answerAndConstraintCheck": true,
+    "childLanguage": true,
+    "copyrightAndSource": true,
+    "privacyAndExternalLinks": true
+  },
+  "tasks": [
+    {
+      "id": "w01-dieu-tra-quy-luat",
+      "week": 1,
+      "month": 1,
+      "domain": "number",
+      "level": 2,
+      "title": "Điều tra viên quy luật",
+      "minutes": 16,
+      "prompt": "Dãy 4, 8, 12, 16, 21, 24 có đúng một số bị viết sai. Hãy tìm số đó, sửa dãy và nêu ít nhất hai bằng chứng cho quy luật của con.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy nháp hoặc các thẻ số để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "So khoảng cách giữa từng cặp số liên tiếp.",
+        "Thử thay 21 bằng một số để mọi khoảng cách bằng nhau.",
+        "Sau khi sửa, dự đoán thêm hai số và kiểm tra ngược."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy nháp hoặc các thẻ số",
+      "answerGuide": "Số sai là 21; thay bằng 20 để dãy tăng đều 4. Hai số tiếp theo là 28 và 32.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Tạo một dãy khác có đúng một số nhiễu để người lớn phát hiện.",
+      "source": {
+        "title": "NRICH · Number for Primary Students",
+        "url": "https://nrich.maths.org/number-primary-students",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w02-ghep-tron-chuc",
+      "week": 2,
+      "month": 1,
+      "domain": "calculation",
+      "level": 2,
+      "title": "Đội cứu hộ số tròn",
+      "minutes": 16,
+      "prompt": "Tìm ít nhất ba cách tính 198 + 67 mà không đặt tính theo cột. Khoanh cách con cho là dễ kiểm tra nhất và giải thích lựa chọn.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy và bút màu để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Đưa 198 về 200.",
+        "Có thể tách 67 thành 2 và 65.",
+        "So lại bằng cách lấy kết quả trừ 198."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy và bút màu",
+      "answerGuide": "Các cách hợp lệ đều cho 265, chẳng hạn 200 + 65; 198 + 60 + 7; hoặc 197 + 68.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Nếu thay 198 bằng 998, chiến lược nào vẫn thuận lợi?",
+      "source": {
+        "title": "NRICH · Addition and Subtraction: Age 7–11",
+        "url": "https://nrich.maths.org/curriculum/addition-and-subtraction-age-7-11",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w03-uoc-luong-do-dai",
+      "week": 3,
+      "month": 1,
+      "domain": "measurement",
+      "level": 2,
+      "title": "Phòng thí nghiệm ước lượng",
+      "minutes": 16,
+      "prompt": "Chọn năm đồ vật trong nhà. Trước khi đo, hãy ước lượng chiều dài từng vật bằng xăng-ti-mét, sau đó đo thật và xếp hạng các dự đoán từ gần nhất đến xa nhất.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng thước 30 cm, năm đồ vật an toàn để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Dùng gang tay hoặc một đồ vật dài khoảng 10 cm làm mốc.",
+        "Ghi dự đoán trước khi cầm thước.",
+        "Tính độ lệch bằng số lớn trừ số nhỏ."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Thước 30 cm, năm đồ vật an toàn",
+      "answerGuide": "Không có một bộ số duy nhất. Bài đạt khi có đủ năm dự đoán, số đo thật, độ lệch và nhận xét về mốc ước lượng.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Tìm một vật mới mà con tin có thể ước lượng sai không quá 2 cm.",
+      "source": {
+        "title": "NRICH · Measurement for Primary Students",
+        "url": "https://nrich.maths.org/measurement-primary-students",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w04-san-12-o",
+      "week": 4,
+      "month": 1,
+      "domain": "geometry",
+      "level": 2,
+      "title": "Sân chơi 12 ô",
+      "minutes": 16,
+      "prompt": "Dùng đúng 12 ô vuông đơn vị để tạo mọi hình chữ nhật khác kích thước. Tính chu vi từng hình và giải thích vì sao con đã tìm đủ.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng 12 ô giấy vuông hoặc giấy kẻ ô để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Tìm các cặp số có tích bằng 12.",
+        "Không tính riêng hình xoay lại.",
+        "So chu vi bằng công thức (dài + rộng) × 2."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "12 ô giấy vuông hoặc giấy kẻ ô",
+      "answerGuide": "Có ba hình: 1×12, 2×6, 3×4; chu vi lần lượt 26, 16, 14 đơn vị.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Với 18 ô, hình nào có chu vi nhỏ nhất?",
+      "source": {
+        "title": "NRICH · Properties of Shapes: Age 7–11",
+        "url": "https://nrich.maths.org/curriculum/properties-of-shapes-age-7-11",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    }
+  ]
+}

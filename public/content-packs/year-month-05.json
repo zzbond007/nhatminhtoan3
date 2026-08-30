@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "id": "year-month-05",
+  "version": "1.0.0",
+  "month": 5,
+  "weekRange": [
+    17,
+    20
+  ],
+  "title": "Tháng 5 · Tối ưu và công bằng",
+  "description": "Bốn bài toán mở cho tuần 17–20, nối trực tiếp với lộ trình 9 tháng của Math Raccoon.",
+  "status": "approved-for-release",
+  "reviewedAt": "2026-08-30",
+  "reviewedBy": "Ban nội dung Math Raccoon",
+  "curriculumReference": "Chương trình GDPT môn Toán 2018; nội dung nâng cao bổ trợ bộ Chân trời sáng tạo.",
+  "reviewChecks": {
+    "curriculumAlignment": true,
+    "answerAndConstraintCheck": true,
+    "childLanguage": true,
+    "copyrightAndSource": true,
+    "privacyAndExternalLinks": true
+  },
+  "tasks": [
+    {
+      "id": "w17-tro-choi-cong-bang",
+      "week": 17,
+      "month": 5,
+      "domain": "data",
+      "level": 3,
+      "title": "Cuộc đua tổng 6 và tổng 8",
+      "minutes": 20,
+      "prompt": "Tung hai xúc xắc. Bạn A thắng nếu tổng bằng 6, bạn B thắng nếu tổng bằng 8. Hãy dự đoán, lập bảng 36 khả năng rồi kết luận trò chơi có công bằng không.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng hai xúc xắc hoặc bảng 6×6 để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Viết các cặp có thứ tự tạo tổng 6.",
+        "Làm tương tự với tổng 8.",
+        "So số ô thuận lợi, không chỉ so số tổng."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Hai xúc xắc hoặc bảng 6×6",
+      "answerGuide": "Tổng 6 có 5 cặp; tổng 8 cũng có 5 cặp, nên hai bạn có cơ hội bằng nhau theo mô hình.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Thêm điều kiện hòa thế nào để mọi kết quả đều được dùng?",
+      "source": {
+        "title": "YouCubed · Data Big Ideas",
+        "url": "https://www.youcubed.org/data-big-ideas/",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w18-tim-het-loi-giai",
+      "week": 18,
+      "month": 5,
+      "domain": "word",
+      "level": 3,
+      "title": "Đúng 24 nghìn đồng",
+      "minutes": 20,
+      "prompt": "Chỉ dùng đồng 2 nghìn và 5 nghìn để có đúng 24 nghìn. Tìm mọi cách, không tính thứ tự các đồng và chứng minh đã tìm đủ.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng các thẻ ghi 2 và 5 để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Xét lần lượt 0, 1, 2, 3, 4 đồng 5 nghìn.",
+        "Phần tiền còn lại phải chia hết cho 2 nghìn.",
+        "Dừng khi số đồng 5 nghìn làm tổng vượt 24 nghìn."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Các thẻ ghi 2 và 5",
+      "answerGuide": "Có 3 cách: 12 đồng 2; 7 đồng 2 và 2 đồng 5; 2 đồng 2 và 4 đồng 5.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Nếu yêu cầu dùng đúng 6 đồng tiền thì có cách nào?",
+      "source": {
+        "title": "NRICH · What Is a Mathematically Rich Task?",
+        "url": "https://nrich.maths.org/articles/what-mathematically-rich-task",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w19-quy-luat-bi-nhieu",
+      "week": 19,
+      "month": 5,
+      "domain": "number",
+      "level": 3,
+      "title": "Dãy số gửi tín hiệu sai",
+      "minutes": 20,
+      "prompt": "Dãy 3, 6, 10, 15, 22, 28 được tạo bằng cách cộng lần lượt 3, 4, 5, 6, 7. Một số đã sai. Hãy tìm, sửa và giải thích bằng bảng sai khác.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng giấy và bút để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Viết khoảng cách mong đợi dưới từng mũi tên.",
+        "Tính từ trái sang đến khi phát hiện lệch.",
+        "Sửa số sai rồi kiểm tra cả bước sau nó."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Giấy và bút",
+      "answerGuide": "Dãy đúng là 3, 6, 10, 15, 21, 28; số 22 phải là 21.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Tạo một dãy tăng theo các số lẻ liên tiếp.",
+      "source": {
+        "title": "NRICH · Number for Primary Students",
+        "url": "https://nrich.maths.org/number-primary-students",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    },
+    {
+      "id": "w20-can-bang-hai-ve",
+      "week": 20,
+      "month": 5,
+      "domain": "calculation",
+      "level": 3,
+      "title": "Chiếc cân tổng và hiệu",
+      "minutes": 20,
+      "prompt": "Không tính theo cột: biến đổi 397 + 186 thành một tổng dễ hơn và 503 − 198 thành một hiệu dễ hơn. Giải thích chính xác vì sao giá trị không đổi.",
+      "launchQuestions": [
+        "Con dự đoán điều gì trước khi bắt đầu?",
+        "Con sẽ dùng hai đĩa giấy tượng trưng chiếc cân để tổ chức các thử nghiệm thế nào?",
+        "Bằng chứng nào sẽ làm con tin rằng lời giải đã đủ và đúng?"
+      ],
+      "hints": [
+        "Với tổng, chuyển 3 từ số hạng này sang số hạng kia.",
+        "Với hiệu, cùng tăng cả hai số thêm 2.",
+        "Tính lại bằng phép tính ngược để kiểm tra."
+      ],
+      "familyPrompt": "Để con trình bày trước. Sau đó hỏi: “Nếu đổi một điều kiện, kết luận nào còn đúng?”",
+      "materials": "Hai đĩa giấy tượng trưng chiếc cân",
+      "answerGuide": "397+186 = 400+183 = 583. 503−198 = 505−200 = 305. Tổng giữ khi chuyển lượng; hiệu giữ khi cùng tăng hai số.",
+      "reviewNotes": "Phụ huynh không cần chấm cách trình bày. Kiểm tra tính đúng của dữ kiện, bằng chứng và việc con có tự sửa sau phản biện hay không.",
+      "extension": "Tạo một cặp phép tính khác dùng được hai nguyên tắc này.",
+      "source": {
+        "title": "NRICH · Addition and Subtraction: Age 7–11",
+        "url": "https://nrich.maths.org/curriculum/addition-and-subtraction-age-7-11",
+        "adaptationNote": "Bài nguyên bản của Math Raccoon; nguồn chỉ định hướng cấu trúc bài toán mở, nhiều cách tiếp cận và mức thử thách dành cho lứa tuổi 7–11."
+      }
+    }
+  ]
+}
