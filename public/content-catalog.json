@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "version": "2026.08.30.1",
+  "status": "approved-for-release",
+  "parentApprovalRequired": true,
+  "packs": [
+    {
+      "id": "rich-thinking-01",
+      "version": "1.0.0",
+      "title": "Phòng bài toán mở · Tập 1",
+      "taskCount": 12,
+      "url": "content-packs/rich-thinking-01.json",
+      "reviewedAt": "2026-08-30",
+      "reviewedBy": "Ban nội dung Math Raccoon"
+    }
+  ]
+}

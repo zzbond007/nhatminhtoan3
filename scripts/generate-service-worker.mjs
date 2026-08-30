@@ -49,7 +49,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (request.mode === "navigate" || url.pathname.endsWith("/content-release.json")) {
+  if (request.mode === "navigate" || url.pathname.endsWith("/content-release.json") || url.pathname.endsWith("/content-catalog.json") || url.pathname.includes("/content-packs/")) {
     event.respondWith(fetch(request).then((response) => {
       if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
       return response;

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft, ArrowRight, BarChart3, BookOpenCheck, Brain, Calculator,
   Check, CheckCircle2, ClipboardCheck, Clock3, CloudDownload, Download, FileUp, Flag,
-  Lightbulb, LockKeyhole, Map, Medal, RefreshCw, Route, Ruler, Shapes,
+  Globe2, Lightbulb, LockKeyhole, Map, Medal, RefreshCw, Route, Ruler, Shapes,
   ShieldCheck, Sparkles, Target, Trophy, UserRound, Volume2, Tablet, WifiOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,13 +20,18 @@ import {
   ALL_DEEP_MISSIONS, CURRICULUM_VERSION, DAILY_PUZZLES_60, DEEP_MISSION_LIBRARY,
   type DeepMission, type DeepQuestion,
 } from "./curriculum";
+import { createMissionEdition, VARIANTS_PER_MISSION } from "./mission-variants";
+import {
+  selectEnrichmentTask, validateCuratedPack,
+  type ContentCatalog, type CuratedContentPack,
+} from "./curated-content";
 import CONTENT_RELEASE from "../public/content-release.json";
 
-type View = "dashboard" | "diagnostic-intro" | "diagnostic" | "diagnostic-result" | "mission";
+type View = "dashboard" | "diagnostic-intro" | "diagnostic" | "diagnostic-result" | "mission" | "enrichment";
 type MissionStage = "predict" | "explore" | "strategies" | "practice" | "transfer" | "reflect" | "result";
 type DomainScore = { correct: number; total: number; percent: number; status: "strong" | "developing" | "review" };
 type DiagnosticResult = { correct: number; total: number; percent: number; placement: string; scores: Record<DomainId, DomainScore>; finishedAt: string };
-type SessionEvidence = { finishedAt: string; firstScore: number; autonomy: number; averageHintDepth: number; transferFirstTry: boolean };
+type SessionEvidence = { finishedAt: string; firstScore: number; autonomy: number; averageHintDepth: number; transferFirstTry: boolean; editionId?: string; difficulty?: string };
 type MissionRecord = {
   bestFirstScore: number; autonomy: number; hintsUsed: number; maxHintDepth: number;
   retries: number; completedAt: string; reviewAt: string; reflection: string;
@@ -35,14 +40,18 @@ type MissionRecord = {
 type LearningProfile = {
   schemaVersion: number; profileId: string; nickname: string; createdAt: string; savedAt: string;
   diagnostic: DiagnosticResult | null; missionRecords: Record<string, MissionRecord>; discoveryDays: string[];
+  enrichmentCompleted: string[];
 };
 type LegacyRecord = Partial<MissionRecord>;
 type UpdateState = "idle" | "checking" | "current" | "available" | "installing" | "offline" | "rejected" | "error";
+type PackState = "idle" | "checking" | "available" | "current" | "offline" | "rejected" | "error";
 type ContentRelease = typeof CONTENT_RELEASE;
 
-const STORAGE_KEY = "math-raccoon-learning-v5";
+const STORAGE_KEY = "math-raccoon-learning-v6";
+const APPROVED_PACK_KEY = "math-raccoon-approved-pack-v1";
 const APP_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const CONTENT_RELEASE_URL = `${APP_BASE_PATH}/content-release.json`;
+const CONTENT_CATALOG_URL = `${APP_BASE_PATH}/content-catalog.json`;
 const DAY = 86_400_000;
 const SESSION_NOW = Date.now();
 const DOMAIN_ICONS: Record<DomainId, typeof Calculator> = {
@@ -64,7 +73,7 @@ function uid() {
 }
 function freshProfile(): LearningProfile {
   const now = new Date().toISOString();
-  return { schemaVersion: CURRICULUM_VERSION, profileId: uid(), nickname: "Nhà thám hiểm", createdAt: now, savedAt: now, diagnostic: null, missionRecords: {}, discoveryDays: [] };
+  return { schemaVersion: CURRICULUM_VERSION, profileId: uid(), nickname: "Nhà thám hiểm", createdAt: now, savedAt: now, diagnostic: null, missionRecords: {}, discoveryDays: [], enrichmentCompleted: [] };
 }
 function normalize(value: string, numeric = false) {
   if (numeric) return value.replace(/[^0-9-]/g, "");
@@ -131,11 +140,12 @@ function migrateProfile(raw: unknown): LearningProfile {
     diagnostic: value.diagnostic && typeof value.diagnostic === "object" ? value.diagnostic as DiagnosticResult : null,
     missionRecords,
     discoveryDays: Array.isArray(value.discoveryDays) ? value.discoveryDays.filter((day): day is string => typeof day === "string") : [],
+    enrichmentCompleted: Array.isArray(value.enrichmentCompleted) ? value.enrichmentCompleted.filter((id): id is string => typeof id === "string") : [],
   };
 }
 
-function AppHeader({ back, onHome, sparkPoints, completedMissions }: { back?: () => void; onHome: () => void; sparkPoints: number; completedMissions: number }) {
-  return <header className="app-header"><div className="header-left">{back && <Button variant="ghost" size="icon" onClick={back} aria-label="Quay lại" className="back-button"><ArrowLeft /></Button>}<button className="brand" onClick={onHome} type="button"><span className="brand-icon">🦝</span><span>Math Raccoon <small>CLB Toán nâng cao lớp 3</small></span></button></div><div className="header-badges"><span><Sparkles /> {sparkPoints} tia sáng</span><span><Trophy /> {completedMissions}/36 nhiệm vụ</span></div></header>;
+function AppHeader({ back, onHome, sparkPoints, completedMissions, totalSessions }: { back?: () => void; onHome: () => void; sparkPoints: number; completedMissions: number; totalSessions?: number }) {
+  return <header className="app-header"><div className="header-left">{back && <Button variant="ghost" size="icon" onClick={back} aria-label="Quay lại" className="back-button"><ArrowLeft /></Button>}<button className="brand" onClick={onHome} type="button"><span className="brand-icon">🦝</span><span>Math Raccoon <small>CLB Toán nâng cao lớp 3</small></span></button></div><div className="header-badges"><span><Sparkles /> {sparkPoints} tia sáng</span><span><Trophy /> {completedMissions}/36 chủ đề{typeof totalSessions === "number" ? ` · ${totalSessions} lượt` : ""}</span></div></header>;
 }
 
 function SpeakButton({ text, dark = false }: { text: string; dark?: boolean }) {
@@ -185,13 +195,18 @@ export default function Home() {
   const [offlineReady, setOfflineReady] = useState(false);
   const [updateState, setUpdateState] = useState<UpdateState>("idle");
   const [availableRelease, setAvailableRelease] = useState<ContentRelease | null>(null);
+  const [packState, setPackState] = useState<PackState>("idle");
+  const [availablePack, setAvailablePack] = useState<CuratedContentPack | null>(null);
+  const [curatedPack, setCuratedPack] = useState<CuratedContentPack | null>(null);
+  const [enrichmentHintDepth, setEnrichmentHintDepth] = useState(0);
+  const [enrichmentReflection, setEnrichmentReflection] = useState("");
   const serviceWorkerRef = useRef<ServiceWorkerRegistration | null>(null);
   const updateReloadRef = useRef(false);
 
   useEffect(() => {
     const task = window.setTimeout(() => {
       try {
-        const saved = window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem("math-raccoon-learning-v4") ?? window.localStorage.getItem("math-raccoon-learning-v3");
+        const saved = window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem("math-raccoon-learning-v5") ?? window.localStorage.getItem("math-raccoon-learning-v4") ?? window.localStorage.getItem("math-raccoon-learning-v3");
         if (saved) setLearning(migrateProfile(JSON.parse(saved)));
       } catch { setBackupStatus("Không đọc được hồ sơ cũ; một hồ sơ mới đã được mở an toàn."); }
       setHydrated(true);
@@ -202,6 +217,26 @@ export default function Home() {
     if (!hydrated) return;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...learning, schemaVersion: CURRICULUM_VERSION, savedAt: new Date().toISOString() }));
   }, [hydrated, learning]);
+  useEffect(() => {
+    if (!hydrated) return;
+    const approved = window.localStorage.getItem(APPROVED_PACK_KEY);
+    if (!approved) return;
+    const loadApprovedPack = async () => {
+      try {
+        const saved = JSON.parse(approved) as { id?: string; version?: string; url?: string };
+        if (!saved.url) return;
+        const response = await fetch(`${APP_BASE_PATH}/${saved.url.replace(/^\//, "")}`);
+        const pack = await response.json() as unknown;
+        if (validateCuratedPack(pack) && pack.id === saved.id && pack.version === saved.version) {
+          setCuratedPack(pack);
+          setPackState("current");
+        }
+      } catch {
+        setPackState(window.navigator.onLine ? "error" : "offline");
+      }
+    };
+    void loadApprovedPack();
+  }, [hydrated]);
   useEffect(() => {
     const syncOnlineState = () => setOnline(window.navigator.onLine);
     syncOnlineState();
@@ -244,17 +279,25 @@ export default function Home() {
     if (!learning.diagnostic) return DOMAINS;
     return [...DOMAINS].sort((a, b) => Math.abs(learning.diagnostic!.scores[a.id].percent - 67) - Math.abs(learning.diagnostic!.scores[b.id].percent - 67));
   }, [learning.diagnostic]);
-  const currentMission = ALL_DEEP_MISSIONS.find((mission) => mission.id === missionId) ?? ALL_DEEP_MISSIONS[0];
+  const currentBaseMission = ALL_DEEP_MISSIONS.find((mission) => mission.id === missionId) ?? ALL_DEEP_MISSIONS[0];
+  const currentRecord = learning.missionRecords[currentBaseMission.id];
+  const currentEdition = useMemo(
+    () => createMissionEdition(currentBaseMission, currentRecord?.completedCount ?? 0, currentRecord?.autonomy ?? 0),
+    [currentBaseMission, currentRecord?.completedCount, currentRecord?.autonomy],
+  );
+  const currentMission = currentEdition.mission;
   const currentPractice = currentMission.deepPractice[practiceIndex];
   const currentPracticeCorrect = practiceChecked && answerIsCorrect(currentPractice, practiceAnswer);
   const transferCorrect = transferChecked && answerIsCorrect(currentMission.transfer, transferAnswer);
   const currentDiagnostic = DIAGNOSTIC_QUESTIONS[diagnosticIndex];
   const todayPuzzle = DAILY_PUZZLES_60[Math.floor(SESSION_NOW / DAY) % DAILY_PUZZLES_60.length];
   const completedMissions = Object.keys(learning.missionRecords).filter((id) => ALL_DEEP_MISSIONS.some((mission) => mission.id === id)).length;
+  const totalSessions = Object.values(learning.missionRecords).reduce((sum, record) => sum + record.completedCount, 0);
   const reflectionCount = Object.values(learning.missionRecords).filter((record) => record.reflection.trim()).length;
   const totalHints = Object.values(learning.missionRecords).reduce((sum, record) => sum + record.hintsUsed, 0);
   const totalRetries = Object.values(learning.missionRecords).reduce((sum, record) => sum + record.retries, 0);
-  const sparkPoints = (learning.diagnostic ? 60 : 0) + completedMissions * 120 + reflectionCount * 20;
+  const sparkPoints = (learning.diagnostic ? 60 : 0) + totalSessions * 120 + reflectionCount * 20 + learning.enrichmentCompleted.length * 80;
+  const enrichmentTask = curatedPack ? selectEnrichmentTask(curatedPack, learning.enrichmentCompleted, Math.floor(SESSION_NOW / DAY)) : null;
 
   function missionIsUnlocked(mission: DeepMission) {
     if (mission.sequence === 1) return true;
@@ -325,7 +368,7 @@ export default function Home() {
     const retries = attemptCounts.reduce((sum, count) => sum + Math.max(0, count - 1), 0) + Math.max(0, transferAttempts - 1);
     const focusNeeds = currentMission.deepPractice.filter((_, index) => firstAttempts[index] === false || hintDepths[index] > 0).map((question) => question.challengeTag ?? currentMission.unit);
     if (!transferFirst) focusNeeds.push(`Chuyển giao: ${currentMission.transfer.challengeTag ?? currentMission.unit}`);
-    const session: SessionEvidence = { finishedAt: now.toISOString(), firstScore, autonomy, averageHintDepth: Number(averageHintDepth.toFixed(2)), transferFirstTry: Boolean(transferFirst) };
+    const session: SessionEvidence = { finishedAt: now.toISOString(), firstScore, autonomy, averageHintDepth: Number(averageHintDepth.toFixed(2)), transferFirstTry: Boolean(transferFirst), editionId: currentEdition.id, difficulty: currentEdition.difficulty };
     const today = now.toISOString().slice(0, 10);
     setLearning((profile) => {
       const previous = profile.missionRecords[currentMission.id];
@@ -389,6 +432,49 @@ export default function Home() {
       setUpdateState("error");
     }
   }
+  async function checkCuratedContent() {
+    if (!window.navigator.onLine) { setPackState("offline"); return; }
+    setPackState("checking");
+    try {
+      const catalogResponse = await fetch(`${CONTENT_CATALOG_URL}?t=${Date.now()}`, { cache: "no-store" });
+      if (!catalogResponse.ok) throw new Error("catalog-unavailable");
+      const catalog = await catalogResponse.json() as ContentCatalog;
+      if (catalog.schemaVersion !== 1 || catalog.status !== "approved-for-release" || catalog.parentApprovalRequired !== true || !catalog.packs.length) {
+        setPackState("rejected"); return;
+      }
+      const item = catalog.packs[0];
+      const packResponse = await fetch(`${APP_BASE_PATH}/${item.url.replace(/^\//, "")}?t=${Date.now()}`, { cache: "no-store" });
+      if (!packResponse.ok) throw new Error("pack-unavailable");
+      const pack = await packResponse.json() as unknown;
+      if (!validateCuratedPack(pack) || pack.id !== item.id || pack.version !== item.version || pack.tasks.length !== item.taskCount) {
+        setPackState("rejected"); return;
+      }
+      if (curatedPack?.id === pack.id && curatedPack.version === pack.version) { setPackState("current"); return; }
+      setAvailablePack(pack); setPackState("available");
+    } catch {
+      setPackState("error");
+    }
+  }
+  function approveCuratedPack() {
+    if (!availablePack) return;
+    const catalogPath = `content-packs/${availablePack.id}.json`;
+    window.localStorage.setItem(APPROVED_PACK_KEY, JSON.stringify({ id: availablePack.id, version: availablePack.version, url: catalogPath, approvedAt: new Date().toISOString() }));
+    setCuratedPack(availablePack); setAvailablePack(null); setPackState("current");
+  }
+  function startEnrichment() {
+    if (!enrichmentTask) return;
+    setEnrichmentHintDepth(0); setEnrichmentReflection(""); setView("enrichment"); scrollTop();
+  }
+  function completeEnrichment() {
+    if (!enrichmentTask || enrichmentReflection.trim().length < 5) return;
+    const today = new Date().toISOString().slice(0, 10);
+    setLearning((profile) => ({
+      ...profile,
+      enrichmentCompleted: profile.enrichmentCompleted.includes(enrichmentTask.id) ? profile.enrichmentCompleted : [...profile.enrichmentCompleted, enrichmentTask.id],
+      discoveryDays: profile.discoveryDays.includes(today) ? profile.discoveryDays : [...profile.discoveryDays, today],
+    }));
+    goDashboard();
+  }
   function renderAnswerInput(question: DiagnosticQuestion | DeepQuestion, value: string, onChange: (value: string) => void, disabled = false) {
     if (question.type === "number") return <div className="number-answer-wrap"><Input value={value} onChange={(event) => onChange(event.target.value)} inputMode="numeric" disabled={disabled} placeholder="Nhập đáp án" aria-label="Nhập đáp án bằng số" className="number-answer" /><span>Chỉ nhập số, không cần ghi đơn vị</span></div>;
     return <RadioGroup value={value} onValueChange={onChange} disabled={disabled} className="answer-list">{question.options?.map((option, index) => <label key={option} className="answer-row"><RadioGroupItem value={option} id={`${"id" in question ? question.id : "q"}-${index}`} /><span className="answer-letter">{String.fromCharCode(65 + index)}</span><span>{option}</span></label>)}</RadioGroup>;
@@ -405,6 +491,12 @@ export default function Home() {
     return <main className="app-shell min-h-screen"><div className="page-wrap"><AppHeader back={goDashboard} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} /><section className="result-hero"><div className="score-ring" style={{ "--score": `${result.percent * 3.6}deg` } as React.CSSProperties}><div><strong>{result.percent}%</strong><span>{result.correct}/{result.total} câu</span></div></div><div><p className="eyebrow">Hồ sơ khám phá</p><h1>{result.placement}</h1><p>Điểm đầu vào quyết định nơi bắt đầu; mức tự lực, độ sâu gợi ý và câu chuyển giao sẽ tiếp tục điều chỉnh lộ trình.</p></div></section><section className="result-layout"><div className="result-panel"><div className="panel-heading"><div><p className="eyebrow">Bản đồ tư duy</p><h2>Sáu miền năng lực</h2></div><span>3 câu / miền</span></div><div className="domain-results">{DOMAINS.map((domain) => { const score = result.scores[domain.id]; const Icon = DOMAIN_ICONS[domain.id]; return <div className="domain-result" key={domain.id}><span className="domain-result-icon" style={{ background: domain.soft, color: domain.color }}><Icon /></span><div><strong>{domain.name}</strong><Progress value={score.percent} className={`score-progress ${score.status}`} /></div><em>{score.correct}/{score.total}</em><small>{score.status === "strong" ? "Sẵn sàng bứt phá" : score.status === "developing" ? "Đúng vùng thử thách" : "Cần gợi mở từng bước"}</small></div>; })}</div></div><aside className="roadmap-panel"><p className="eyebrow">Đề xuất đầu tiên</p><h2>{recommendedMission.title}</h2><p>Bắt đầu gần vùng 67% để con có chiến thắng sớm nhưng vẫn phải suy nghĩ. Mỗi miền có 6 nhiệm vụ.</p><ol>{adaptivePlan.map((mission, index) => <li key={mission.id}><span>{index + 1}</span><div><strong>{mission.title}</strong><small>{DOMAINS.find((d) => d.id === mission.domain)?.short} · chặng {mission.sequence}/6</small></div>{index === 0 && <em>Khởi hành</em>}</li>)}</ol><Button onClick={() => startMission(recommendedMission)} className="primary-action w-full">Nhận nhiệm vụ <ArrowRight /></Button></aside></section></div></main>;
   }
 
+  if (view === "enrichment" && enrichmentTask) {
+    const domain = DOMAINS.find((item) => item.id === enrichmentTask.domain)!;
+    const Icon = DOMAIN_ICONS[enrichmentTask.domain];
+    return <main className="app-shell min-h-screen"><div className="page-wrap narrow"><AppHeader back={goDashboard} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} totalSessions={totalSessions} /><section className="enrichment-hero"><span style={{ background: domain.soft, color: domain.color }}><Icon /></span><div><p className="eyebrow">Phòng bài toán mở · {domain.short}</p><h1>{enrichmentTask.title}</h1><p>{enrichmentTask.minutes} phút · Không chỉ có một con đường đúng</p></div></section><section className="deep-card enrichment-card"><div className="source-chip"><Globe2 /><span>Nội dung Internet đã biên soạn và kiểm duyệt · không mở liên kết cho trẻ</span></div><h2>{enrichmentTask.prompt}</h2><SpeakButton text={enrichmentTask.prompt} /><div className="launch-grid">{enrichmentTask.launchQuestions.map((question, index) => <div key={question}><span>{index + 1}</span><p>{question}</p></div>)}</div><div className="enrichment-actions"><Button variant="outline" onClick={() => setEnrichmentHintDepth((depth) => Math.min(3, depth + 1))} disabled={enrichmentHintDepth === 3}><Lightbulb /> {enrichmentHintDepth === 0 ? "Mở gợi ý tầng 1" : enrichmentHintDepth === 3 ? "Đã mở đủ gợi ý" : `Mở gợi ý tầng ${enrichmentHintDepth + 1}`}</Button></div>{enrichmentHintDepth > 0 && <div className="hint-stack">{enrichmentTask.hints.slice(0, enrichmentHintDepth).map((hint, index) => <div className="hint-box" key={hint}><Lightbulb /><div><strong>Gợi ý tầng {index + 1}</strong><p>{hint}</p></div></div>)}</div>}<div className="family-prompt"><UserRound /><div><strong>Cùng người lớn đào sâu</strong><p>{enrichmentTask.familyPrompt}</p></div></div><label className="enrichment-reflection"><span>Con đã thử cách nào? Con phát hiện điều gì?</span><Textarea value={enrichmentReflection} onChange={(event) => setEnrichmentReflection(event.target.value)} placeholder="Con đã thử… và con nhận ra…" /></label><div className="stage-actions"><Button variant="outline" onClick={goDashboard}>Để lần sau</Button><Button onClick={completeEnrichment} disabled={enrichmentReflection.trim().length < 5} className="primary-action small">Ghi nhận khám phá · +80 tia sáng <Medal /></Button></div><details className="source-detail"><summary>Dành cho phụ huynh: nguồn và cách sử dụng</summary><p>{enrichmentTask.source.adaptationNote}</p><a href={enrichmentTask.source.url} target="_blank" rel="noreferrer">{enrichmentTask.source.title}</a></details></section></div></main>;
+  }
+
   if (view === "mission") {
     const domain = DOMAINS.find((item) => item.id === currentMission.domain)!; const Icon = DOMAIN_ICONS[currentMission.domain]; const record = learning.missionRecords[currentMission.id];
     if (stage === "result") {
@@ -412,6 +504,7 @@ export default function Home() {
       return <main className="app-shell min-h-screen"><div className="page-wrap narrow"><AppHeader back={goDashboard} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} /><section className="lesson-result"><div className="mastery-badge passed"><Medal /></div><p className="eyebrow">Nhiệm vụ hoàn thành · +120 tia sáng</p><h1>{(record?.autonomy ?? 0) >= 85 ? "Nhà nghiên cứu tự lực" : (record?.autonomy ?? 0) >= 65 ? "Nhà chiến lược bền bỉ" : "Nhà thám hiểm dám sửa"}</h1><p>Hệ thống ghi nhận không chỉ đáp án: đúng lần đầu, độ sâu gợi ý, số lần thử lại và khả năng dùng ý tưởng trong câu mới.</p><div className="mastery-meter"><Progress value={record?.autonomy ?? 0} /><span style={{ left: `${Math.max(8, record?.autonomy ?? 0)}%` }}>{record?.autonomy ?? 0}% tự lực</span></div><div className="evidence-grid"><div><strong>{record?.bestFirstScore ?? 0}%</strong><span>đúng lần đầu tốt nhất</span></div><div><strong>{record?.maxHintDepth ?? 0}/3</strong><span>gợi ý sâu nhất</span></div><div><strong>{record?.sessions.at(-1)?.transferFirstTry ? "Đạt" : "Cần ôn"}</strong><span>chuyển giao lần đầu</span></div></div>{record?.focusNeeds.length ? <div className="adaptive-note"><Brain /><div><strong>Động cơ thích ứng đã ghi nhận</strong><p>Gặp lại sau: {record.focusNeeds.join(" · ")}. Lịch ôn: {new Date(record.reviewAt).toLocaleDateString("vi-VN")}.</p></div></div> : <div className="adaptive-note"><CheckCircle2 /><div><strong>Ý tưởng đã đứng vững</strong><p>Con giải độc lập và chuyển được sang tình huống mới.</p></div></div>}<div className="result-advice"><Lightbulb /><div><strong>Phát hiện con đã ghi</strong><p>{record?.reflection}</p></div></div><div className="result-actions"><Button variant="outline" onClick={() => startMission(currentMission)}><RefreshCw /> Thử lại cách khác</Button><Button onClick={() => startMission(next.id === currentMission.id ? recommendedMission : next)} className="primary-action small">Nhiệm vụ tiếp theo <ArrowRight /></Button></div></section></div></main>;
     }
     return <main className="app-shell min-h-screen"><div className="page-wrap mission-wrap"><AppHeader back={goDashboard} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} /><section className="lesson-heading"><span className="lesson-icon" style={{ background: domain.soft, color: domain.color }}><Icon /></span><div><p className="eyebrow">{domain.name} · chặng {currentMission.sequence}/6</p><h1>{currentMission.title}</h1><p>{currentMission.goal}</p></div></section><nav className="deep-steps">{STAGES.map((item) => { const currentIndex = STAGES.findIndex((step) => step.id === stage); const itemIndex = STAGES.findIndex((step) => step.id === item.id); return <span key={item.id} className={item.id === stage ? "active" : itemIndex < currentIndex ? "done" : ""}><strong>{itemIndex < currentIndex ? <Check /> : item.short}</strong>{item.label}</span>; })}</nav>
+      <section className="mission-edition-banner"><div><RefreshCw /><span><strong>{currentEdition.label}</strong><small>Bài luyện thay đổi sau mỗi lần hoàn thành</small></span></div><div><Brain /><span><strong>Ống kính: {currentEdition.thinkingLens}</strong><small>Mức thích ứng: {currentEdition.difficultyLabel}</small></span></div><em>{VARIANTS_PER_MISSION * ALL_DEEP_MISSIONS.length} phiên bản trong toàn chương trình</em></section>
       <section className="mission-guide" aria-label="Chuẩn bị cho nhiệm vụ"><div><Clock3 /><span><strong>{currentMission.durationMinutes} phút</strong><small>Một buổi vừa đủ</small></span></div><div><Tablet /><span><strong>Con cần</strong><small>{currentMission.materials.join(" · ")}</small></span></div><div><Target /><span><strong>Đích khám phá</strong><small>{currentMission.realWorldConnection}</small></span></div></section>
       {stage === "predict" && <section className="deep-card predict-card"><p className="eyebrow">Thử trước khi được dạy</p><h2>{currentMission.prediction.prompt}</h2><SpeakButton text={currentMission.prediction.prompt} /><p className="stage-lead">Hãy chọn ý con đang nghĩ. Dự đoán sai vẫn có giá trị vì nó cho ta thứ để kiểm tra.</p><RadioGroup value={predictionChoice} onValueChange={(value) => { setPredictionChoice(value); setPredictionRevealed(false); }} className="prediction-options">{currentMission.prediction.options.map((option) => <label key={option}><RadioGroupItem value={option} /><span>{option}</span></label>)}</RadioGroup>{predictionRevealed && <div className="evidence-reveal"><Lightbulb /><div><strong>Giữ lại dự đoán này</strong><p>{currentMission.prediction.reveal}</p>{currentMission.prediction.answer && <small>Ý sẽ được kiểm chứng: {currentMission.prediction.answer}</small>}</div></div>}<div className="stage-actions"><Button variant="outline" onClick={() => setPredictionRevealed(true)} disabled={!predictionChoice}>Ghim dự đoán</Button><Button onClick={() => goStage("explore")} disabled={!predictionRevealed} className="primary-action small">Vào phòng thử nghiệm <ArrowRight /></Button></div></section>}
       {stage === "explore" && <section className="deep-card"><p className="eyebrow">Bài tương tác</p><h2>{currentMission.lab.prompt}</h2><SpeakButton text={currentMission.lab.prompt} /><p className="stage-lead">Chạm vào một phương án, quan sát dữ kiện rồi kiểm tra.</p><div className={`lab-options ${currentMission.lab.type === "tile-rectangles" ? "tile-lab" : ""}`}>{currentMission.lab.options.map((option) => <button type="button" key={option.value} className={labChoice === option.value ? "selected" : ""} onClick={() => { setLabChoice(option.value); setLabChecked(false); }}>{currentMission.lab.type === "tile-rectangles" && <TileRectangle value={option.value} />}<strong>{option.label}</strong><span>{option.note}</span></button>)}</div>{labChecked && <div className={`feedback ${labChoice === currentMission.lab.answer ? "correct" : "incorrect"}`}><span>{labChoice === currentMission.lab.answer ? <Check /> : <RefreshCw />}</span><div><strong>{labChoice === currentMission.lab.answer ? "Bằng chứng khớp" : "Một thử nghiệm hữu ích"}</strong><p>{labChoice === currentMission.lab.answer ? currentMission.lab.explanation : "Đọc lại dữ kiện và thử một phương án khác. Chưa cần xem lời giải."}</p></div></div>}<div className="stage-actions"><Button variant="outline" onClick={() => setLabChecked(true)} disabled={!labChoice}>Kiểm tra bằng chứng</Button><Button onClick={() => goStage("strategies")} disabled={!labChecked || labChoice !== currentMission.lab.answer} className="primary-action small">So sánh nhiều cách <ArrowRight /></Button></div></section>}
@@ -424,6 +517,9 @@ export default function Home() {
 
   return <main className="app-shell min-h-screen"><div className="page-wrap"><AppHeader onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} /><section className="dashboard-hero"><div className="hero-copy"><p className="eyebrow">Câu lạc bộ toán sau giờ học · 15–20 phút/buổi</p><h1>{learning.diagnostic ? `Hôm nay, ${learning.nickname} chọn một cuộc phiêu lưu` : "Mỗi bài toán là một cuộc phiêu lưu"}</h1><p>{learning.diagnostic ? "Chỉ ba lựa chọn để con không bị ngợp: một nhiệm vụ hệ thống đề xuất, một nhiệm vụ con tự chọn và một lần ôn đúng lúc." : "Không học lại bài trên lớp. Con dự đoán, thử, sửa và giải thích như một nhà toán học nhỏ."}</p><div className="hero-actions">{learning.diagnostic ? <Button onClick={() => startMission(recommendedMission)} className="primary-action">Bắt đầu lựa chọn đề xuất <ArrowRight /></Button> : <Button onClick={() => setView("diagnostic-intro")} className="primary-action">Khám phá năng lực <ClipboardCheck /></Button>}</div></div><aside className="daily-puzzle"><div className="puzzle-heading"><span>🦝</span><div><p className="eyebrow">Câu đố 60 ngày</p><strong>Ba mươi giây để tò mò</strong></div></div><h2>{todayPuzzle.prompt}<small>{todayPuzzle.note}</small></h2><SpeakButton text={todayPuzzle.prompt} dark /><RadioGroup value={dailyChoice} onValueChange={(value) => { setDailyChoice(value); setDailyChecked(false); }} className="puzzle-options">{todayPuzzle.options.map((option) => <label key={option}><RadioGroupItem value={option} /><span>{option}</span></label>)}</RadioGroup>{dailyChecked && <div className={`puzzle-feedback ${dailyChoice === todayPuzzle.answer ? "success" : "try"}`}>{dailyChoice === todayPuzzle.answer ? todayPuzzle.explanation : todayPuzzle.hint}</div>}<Button variant="outline" onClick={() => setDailyChecked(true)} disabled={!dailyChoice}>Mở khóa câu đố</Button></aside></section>
     {learning.diagnostic && <section className="today-section"><div className="panel-heading"><div><p className="eyebrow">Ba lựa chọn hôm nay</p><h2>Ít lựa chọn hơn, chủ động hơn</h2></div><span>Hệ thống giải thích lý do đề xuất</span></div><div className="today-grid"><button type="button" className="today-card recommended" onClick={() => startMission(recommendedMission)}><span className="today-badge"><Brain /> Hệ thống đề xuất</span><strong>{recommendedMission.title}</strong><p>{dueMissions[0] ? "Đến lịch ôn: trí nhớ cần được gọi lại trước khi học mới." : `Vừa sức theo đầu vào và mức tự lực · chặng ${recommendedMission.sequence}/6.`}</p><em>Bắt đầu <ArrowRight /></em></button><button type="button" className="today-card choice" onClick={() => startMission(choiceMission)}><span className="today-badge"><Sparkles /> Con tự chọn</span><strong>{choiceMission.title}</strong><p>Một miền khác đang mở. Quyền lựa chọn giúp con sở hữu hành trình.</p><em>Khám phá <ArrowRight /></em></button>{dueMissions[0] ? <button type="button" className="today-card review" onClick={() => startMission(dueMissions[0])}><span className="today-badge"><RefreshCw /> Ôn đúng lúc</span><strong>{dueMissions[0].title}</strong><p>Ôn ngắn để kiểm tra ý tưởng còn đứng vững sau thời gian nghỉ.</p><em>Gọi lại ý tưởng <ArrowRight /></em></button> : <div className="today-card review"><span className="today-badge"><CheckCircle2 /> Chưa có bài đến hạn</span><strong>Khoảng nghỉ cũng là học</strong><p>Câu đố 60 ngày phía trên là đủ cho lựa chọn thứ ba hôm nay.</p><em>Không cần học thêm</em></div>}</div></section>}
+    {learning.diagnostic && <section className="enrichment-strip"><div className="enrichment-copy"><span><Globe2 /></span><div><p className="eyebrow">Kho mở rộng có kiểm duyệt</p><h2>{enrichmentTask ? enrichmentTask.title : "Bài toán mới từ nguồn toán tư duy uy tín"}</h2><p>{enrichmentTask ? `Một bài mở ${enrichmentTask.minutes} phút: thử, tạo giả thuyết và bảo vệ cách làm.` : "Nội dung Internet không đi thẳng tới trẻ. Phụ huynh kiểm tra và duyệt gói trước khi sử dụng."}</p></div></div>{enrichmentTask ? <Button onClick={startEnrichment} className="primary-action small">Vào phòng bài toán mở <ArrowRight /></Button> : <span className="enrichment-wait"><ShieldCheck /> Chờ phụ huynh duyệt ở Góc đồng hành</span>}</section>}
+    {learning.diagnostic && <section className="content-governance"><div className="governance-heading"><ShieldCheck /><div><p className="eyebrow">Cổng nội dung dành cho phụ huynh</p><h2>Internet cung cấp ý tưởng; phụ huynh quyết định nội dung nào đến với con</h2><p>Chương trình chỉ nhận gói có nguồn, ngày duyệt và đủ năm kiểm tra: chương trình học, đáp án, ngôn ngữ trẻ em, bản quyền và riêng tư.</p></div></div><div className="governance-actions"><Button variant="outline" onClick={checkCuratedContent} disabled={packState === "checking"}><Globe2 /> {packState === "checking" ? "Đang kiểm tra kho…" : "Kiểm tra kho bài đã duyệt"}</Button>{packState === "current" && curatedPack && <span className="pack-success"><CheckCircle2 /> Đang dùng {curatedPack.title} · {curatedPack.tasks.length} bài</span>}{packState === "offline" && <span>Không có mạng; gói đã cài vẫn dùng ngoại tuyến.</span>}{packState === "error" && <span>Chưa kết nối được kho; nội dung hiện tại được giữ nguyên.</span>}{packState === "rejected" && <span className="pack-warning">Gói không đạt cổng kiểm duyệt nên đã bị chặn.</span>}</div>{packState === "available" && availablePack && <div className="pack-approval"><div><strong>{availablePack.title} · {availablePack.tasks.length} bài toán mở</strong><p>Duyệt ngày {new Date(availablePack.reviewedAt).toLocaleDateString("vi-VN")} bởi {availablePack.reviewedBy}. Nguồn tham khảo chỉ hiển thị trong khu vực phụ huynh.</p></div><Button onClick={approveCuratedPack} className="primary-action small">Phụ huynh đồng ý cài gói</Button></div>}</section>}
+    <section className="program-scale"><div><strong>36</strong><span>chủ đề cốt lõi</span></div><div><strong>432</strong><span>phiên bản nhiệm vụ</span></div><div><strong>2.160+</strong><span>câu luyện có gợi ý</span></div><div><strong>12</strong><span>bài toán mở/tập</span></div></section>
     <section className="learning-cycle deep-cycle"><p className="eyebrow">Chuẩn chung cho mọi nhiệm vụ</p>{["Thử trước", "Tương tác", "Hai cách", "Gợi ý 3 tầng", "Chuyển giao", "Phản tư"].map((label, index) => <div key={label}><span>{index + 1}</span><strong>{label}</strong><small>{["Ghim dự đoán", "Tạo bằng chứng", "Chọn chiến lược", "Không lộ đáp án sớm", "Dùng trong bài mới", "Nói ra điều hiểu"][index]}</small></div>)}</section>
     <section className="dashboard-layout"><div className="curriculum-panel"><div className="panel-heading"><div><p className="eyebrow">Bản đồ phiêu lưu thích ứng</p><h2>36 nhiệm vụ · 6 miền tư duy</h2></div><Button variant="outline" onClick={() => setShowFullMap((value) => !value)}>{showFullMap ? "Thu gọn bản đồ" : "Xem đủ 36 nhiệm vụ"} <Map /></Button></div>{!showFullMap ? <div className="map-summary">{DOMAINS.map((domain) => { const completed = DEEP_MISSION_LIBRARY[domain.id].filter((mission) => learning.missionRecords[mission.id]).length; const Icon = DOMAIN_ICONS[domain.id]; return <div key={domain.id}><span style={{ background: domain.soft, color: domain.color }}><Icon /></span><strong>{domain.short}</strong><Progress value={(completed / 6) * 100} /><small>{completed}/6 nhiệm vụ</small></div>; })}</div> : <div className="domain-map">{DOMAINS.map((domain) => { const Icon = DOMAIN_ICONS[domain.id]; return <section key={domain.id} className="domain-track"><div className="domain-track-heading"><span style={{ background: domain.soft, color: domain.color }}><Icon /></span><div><strong>{domain.name}</strong><small>{domain.description}</small></div></div><div className="track-missions">{DEEP_MISSION_LIBRARY[domain.id].map((mission) => { const record = learning.missionRecords[mission.id]; const unlocked = Boolean(learning.diagnostic) && missionIsUnlocked(mission); const isRecommended = learning.diagnostic && mission.id === recommendedMission.id; return <button key={mission.id} type="button" onClick={() => learning.diagnostic ? (unlocked ? startMission(mission) : undefined) : setView("diagnostic-intro")} className={`${record ? "complete" : ""} ${isRecommended ? "recommended" : ""} ${learning.diagnostic && !unlocked ? "locked" : ""}`}><span>{mission.sequence}</span><div><strong>{mission.title}</strong><small>{record ? `${record.autonomy}% tự lực · gợi ý ${record.maxHintDepth}/3` : unlocked ? "Sẵn sàng" : "Chưa mở"}</small></div>{record ? <CheckCircle2 /> : !unlocked ? <LockKeyhole /> : <Flag />}</button>; })}</div></section>; })}</div>}</div>
       <aside className="parent-panel"><p className="eyebrow">Góc đồng hành · hồ sơ v{CURRICULUM_VERSION}</p><h2>Dữ liệu để hiểu cách học, không chỉ đếm điểm</h2><div className="ipad-install-tip"><Tablet /><p><strong>Dùng như ứng dụng trên iPad</strong><span>Mở bằng Safari → Chia sẻ → Thêm vào Màn hình chính.</span></p></div><div className="offline-update-box"><div className="offline-status"><span className={online ? "online" : "offline"}>{online ? <CheckCircle2 /> : <WifiOff />}{online ? "Đang có mạng" : "Đang ngoại tuyến"}</span><span className={offlineReady ? "ready" : "pending"}>{offlineReady ? <ShieldCheck /> : <RefreshCw />}{offlineReady ? "Đã sẵn sàng học ngoại tuyến" : "Đang chuẩn bị dữ liệu ngoại tuyến"}</span></div><div className="release-heading"><CloudDownload /><p><strong>Nội dung {CONTENT_RELEASE.version}</strong><span>Chỉ nhận bản phát hành đã kiểm tra và cần phụ huynh chủ động xác nhận.</span></p></div><Button variant="outline" onClick={checkForContentUpdate} disabled={updateState === "checking" || updateState === "installing"} className="w-full"><RefreshCw /> {updateState === "checking" ? "Đang kiểm tra…" : "Kiểm tra nội dung mới"}</Button>{updateState === "current" && <small role="status" className="update-message success">Đây là bản nội dung mới nhất đã được duyệt.</small>}{updateState === "offline" && <small role="status" className="update-message">Không có mạng. Con vẫn học bằng nội dung đã lưu trên iPad.</small>}{updateState === "rejected" && <small role="alert" className="update-message warning">Bản mới chưa đủ trạng thái kiểm duyệt nên không được cài.</small>}{updateState === "error" && <small role="alert" className="update-message warning">Chưa kiểm tra được bản mới. Nội dung hiện tại vẫn được giữ nguyên.</small>}{updateState === "available" && availableRelease && <div className="update-approval" role="status"><strong>Có bản {availableRelease.version}</strong><ul>{availableRelease.notes.slice(0, 3).map((note) => <li key={note}>{note}</li>)}</ul><p>Phụ huynh xem nội dung trên rồi mới cho phép tải.</p><Button onClick={installContentUpdate} className="primary-action w-full"><CloudDownload /> Phụ huynh đồng ý cập nhật</Button></div>}{updateState === "installing" && <small role="status" className="update-message success">Đang cài bản đã duyệt và sẽ mở lại ứng dụng…</small>}</div>{learning.diagnostic ? <><label className="nickname-field"><UserRound /><span>Tên gọi của con</span><Input value={learning.nickname} maxLength={30} onChange={(event) => setLearning((profile) => ({ ...profile, nickname: event.target.value }))} /></label><div className="parent-score"><strong>{sparkPoints}</strong><span>tia sáng tò mò · {learning.discoveryDays.length} ngày khám phá</span></div><div className="adaptive-stats"><div><strong>{completedMissions}</strong><span>Nhiệm vụ / 36</span></div><div><strong>{totalHints}</strong><span>Bài đã dùng gợi ý</span></div><div><strong>{totalRetries}</strong><span>Lần thử lại</span></div><div><strong>{reflectionCount}</strong><span>Phản tư đã ghi</span></div></div><div className="adaptive-summary"><Brain /><div><strong>{dueMissions.length ? `${dueMissions.length} nhiệm vụ đến lịch ôn` : "Lịch ôn đang được giãn theo mức tự lực"}</strong><p>Đề xuất dùng đúng lần đầu, độ sâu gợi ý, chuyển giao và thời gian.</p></div></div><div className="parent-tip"><Lightbulb /><p>Hỏi con: <strong>“Bằng chứng nào làm con đổi ý?”</strong> thay vì “đúng bao nhiêu?”.</p></div><div className="backup-box"><div><ShieldCheck /><p><strong>Sao lưu hồ sơ</strong><span>Dữ liệu lưu trên thiết bị. Tải JSON để chuyển máy hoặc phòng khi trình duyệt bị xóa.</span></p></div><div><Button variant="outline" onClick={exportBackup}><Download /> Sao lưu</Button><Button variant="outline" onClick={() => importRef.current?.click()}><FileUp /> Khôi phục</Button><input ref={importRef} type="file" accept="application/json,.json" hidden onChange={(event) => importBackup(event.target.files?.[0])} /></div>{backupStatus && <small role="status">{backupStatus}</small>}</div><Button variant="outline" onClick={() => setView("diagnostic-intro")} className="w-full"><RefreshCw /> Khám phá lại năng lực</Button></> : <><div className="empty-diagnostic"><ClipboardCheck /><strong>Chưa có bản đồ tư duy</strong><p>Bài đầu vào giúp chọn đúng độ khó và mở hành trình 36 nhiệm vụ.</p></div><Button onClick={() => setView("diagnostic-intro")} className="primary-action w-full">Tạo hành trình cho con</Button></>}</aside></section>

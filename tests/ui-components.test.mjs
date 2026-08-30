@@ -42,7 +42,23 @@ test("emits child-friendly and offline-update styles", async () => {
   assert.match(css, /\.offline-update-box/);
   assert.match(css, /\.offline-status/);
   assert.match(css, /\.update-approval/);
+  assert.match(css, /\.mission-edition-banner/);
+  assert.match(css, /\.content-governance/);
+  assert.match(css, /\.enrichment-card/);
   assert.match(css, /@media\s*\(width>=768px\)\s*and\s*\(width<=1180px\)/);
+});
+
+test("validates all 432 adaptive mission editions", async () => {
+  const { ALL_DEEP_MISSIONS } = await vite.ssrLoadModule("/app/curriculum.ts");
+  const { createMissionEdition, validateMissionVariants, VARIANTS_PER_MISSION } = await vite.ssrLoadModule("/app/mission-variants.ts");
+
+  assert.equal(ALL_DEEP_MISSIONS.length * VARIANTS_PER_MISSION, 432);
+  assert.deepEqual(validateMissionVariants(ALL_DEEP_MISSIONS), []);
+  const first = createMissionEdition(ALL_DEEP_MISSIONS[0], 0, 0);
+  const repeat = createMissionEdition(ALL_DEEP_MISSIONS[0], 1, 90);
+  assert.notEqual(first.id, repeat.id);
+  assert.notEqual(first.mission.deepPractice[0].prompt, repeat.mission.deepPractice[0].prompt);
+  assert.equal(repeat.difficulty, "stretch");
 });
 
 test("forwards progress semantics to the primitive", async () => {

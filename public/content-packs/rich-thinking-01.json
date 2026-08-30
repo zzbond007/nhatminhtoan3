@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "id": "rich-thinking-01",
+  "version": "1.0.0",
+  "title": "Phòng bài toán mở · Tập 1",
+  "description": "12 bài toán mở nguyên bản, ưu tiên nhiều cách tiếp cận, thử nghiệm, khái quát hóa và trò chuyện toán học cùng gia đình.",
+  "status": "approved-for-release",
+  "reviewedAt": "2026-08-30",
+  "reviewedBy": "Ban nội dung Math Raccoon",
+  "reviewChecks": {
+    "curriculumAlignment": true,
+    "answerAndConstraintCheck": true,
+    "childLanguage": true,
+    "copyrightAndSource": true,
+    "privacyAndExternalLinks": true
+  },
+  "tasks": [
+    {
+      "id": "rich-number-stairs",
+      "domain": "number",
+      "level": 2,
+      "title": "Cầu thang tổng bằng nhau",
+      "minutes": 15,
+      "prompt": "Điền các số 1, 2, 3, 4, 5 vào năm ô của một cầu thang sao cho tổng hai ô ở mỗi tầng liên tiếp bằng nhau. Có thể tạo được mấy cách khác nhau?",
+      "launchQuestions": ["Con sẽ thử cố định ô nào trước?", "Hai cách chỉ đổi vị trí có thật sự khác nhau không?", "Làm sao biết con đã tìm đủ?"],
+      "hints": ["Bắt đầu bằng cách chọn một tổng đích.", "Ghi lại các cặp số tạo cùng tổng.", "Sắp xếp kết quả theo số ở ô giữa để tránh lặp."],
+      "familyPrompt": "Hỏi con: nếu thay số 5 bằng số 6, điều gì thay đổi trước tiên?",
+      "source": {"title": "NRICH · Rich Mathematical Tasks", "url": "https://nrich.maths.org/articles/rich-mathematical-tasks", "adaptationNote": "Bài nguyên bản của Math Raccoon, vận dụng nguyên tắc thử có hệ thống và khái quát hóa."}
+    },
+    {
+      "id": "rich-number-remainders",
+      "domain": "number",
+      "level": 3,
+      "title": "Những số để lại cùng dấu vết",
+      "minutes": 15,
+      "prompt": "Tìm các số từ 1 đến 60 mà khi chia cho 4 dư 1 và khi chia cho 3 cũng dư 1. Con thấy quy luật khoảng cách nào?",
+      "launchQuestions": ["Có thể bắt đầu từ các số chia 4 dư 1 không?", "Bảng hay trục số giúp dễ nhìn hơn?", "Số tiếp theo sau 60 sẽ là số nào?"],
+      "hints": ["Liệt kê 1, 5, 9, 13, …", "Giữ lại những số cũng chia 3 dư 1.", "So khoảng cách giữa các số còn lại."],
+      "familyPrompt": "Cùng con giải thích vì sao khoảng cách lặp lại mà không cần thử mãi.",
+      "source": {"title": "NRICH · Number for Primary Students", "url": "https://nrich.maths.org/number-primary-students", "adaptationNote": "Bài nguyên bản của Math Raccoon, phát triển từ ý tưởng nhận biết mẫu và chu kỳ số."}
+    },
+    {
+      "id": "rich-calculation-target",
+      "domain": "calculation",
+      "level": 2,
+      "title": "Xưởng chế tạo số 100",
+      "minutes": 15,
+      "prompt": "Dùng bốn số 2, 3, 5, 10; mỗi số không quá một lần. Hãy tạo càng nhiều biểu thức bằng 100 càng tốt. Được dùng +, −, × và dấu ngoặc.",
+      "launchQuestions": ["Con có thể bắt đầu từ 100 rồi đi ngược không?", "Hai biểu thức nhìn khác nhưng có cùng ý tưởng không?", "Cách nào ngắn nhất?"],
+      "hints": ["Tìm cách tạo 10 hoặc 20 trước.", "Thử ghép 10 với một biểu thức từ ba số còn lại.", "Kiểm tra thứ tự thực hiện bằng dấu ngoặc."],
+      "familyPrompt": "Mỗi người tạo một biểu thức rồi giải thích vì sao cách của mình hiệu quả.",
+      "source": {"title": "YouCubed · Activities and Tasks", "url": "https://www.youcubed.org/tasks/", "adaptationNote": "Bài nguyên bản của Math Raccoon theo hướng nhiều lời giải và so sánh chiến lược."}
+    },
+    {
+      "id": "rich-calculation-error",
+      "domain": "calculation",
+      "level": 2,
+      "title": "Phòng khám phép tính",
+      "minutes": 12,
+      "prompt": "Một bạn viết: 48 × 6 = 40 × 6 + 8 = 248. Không chỉ sửa đáp án; hãy xác định chính xác suy nghĩ nào đúng, bước nào sai và tạo một lỗi tương tự để người khác phát hiện.",
+      "launchQuestions": ["Bước tách 48 có đúng không?", "Số 8 đã được xử lý thế nào?", "Ước lượng có phát hiện lỗi không?"],
+      "hints": ["Viết 48 thành 40 + 8.", "Cả 40 và 8 đều phải nhân 6.", "So kết quả với 50 × 6."],
+      "familyPrompt": "Người lớn cố tình giải sai một cách hợp lý để con làm “bác sĩ toán”.",
+      "source": {"title": "NRICH · What Is a Mathematically Rich Task?", "url": "https://nrich.maths.org/articles/what-mathematically-rich-task", "adaptationNote": "Bài nguyên bản của Math Raccoon, khai thác phân tích lỗi và nhiều cách kiểm chứng."}
+    },
+    {
+      "id": "rich-measurement-route",
+      "domain": "measurement",
+      "level": 2,
+      "title": "Thiết kế tuyến tham quan",
+      "minutes": 18,
+      "prompt": "Một bảo tàng mở 90 phút. Có bốn phòng cần 15, 20, 25 và 30 phút; mỗi lần chuyển phòng mất 5 phút. Hãy thiết kế các lịch tham quan khác nhau và tìm lịch xem được nhiều phòng nhất.",
+      "launchQuestions": ["Giữa ba phòng có mấy lần di chuyển?", "Có cần xem hết thời gian của một phòng không?", "Hai lịch cùng số phòng thì so bằng tiêu chí nào?"],
+      "hints": ["Tính cả thời gian chuyển tiếp.", "Thử từ những phòng ngắn trước rồi kiểm tra phương án khác.", "Lập bảng gồm: phòng chọn, thời gian xem, thời gian đi."],
+      "familyPrompt": "Đề nghị con bảo vệ lịch của mình trước một phương án khác của người lớn.",
+      "source": {"title": "NRICH · Rich Tasks and Contexts", "url": "https://nrich.maths.org/articles/rich-tasks-and-contexts", "adaptationNote": "Bài nguyên bản của Math Raccoon, dùng bối cảnh thực tế và nhiều tiêu chí quyết định."}
+    },
+    {
+      "id": "rich-measurement-fence",
+      "domain": "measurement",
+      "level": 3,
+      "title": "24 đoạn hàng rào",
+      "minutes": 18,
+      "prompt": "Có 24 đoạn hàng rào dài bằng nhau. Hãy tạo các khu đất hình chữ nhật cạnh nguyên, ghi diện tích từng khu và dự đoán hình rộng nhất. Nếu cho phép hình không phải chữ nhật, câu hỏi thay đổi thế nào?",
+      "launchQuestions": ["Nửa chu vi cho biết điều gì?", "Làm sao liệt kê cặp cạnh không lặp?", "Vì sao hai cạnh gần nhau lại đáng chú ý?"],
+      "hints": ["Dài + rộng = 12.", "Thử 1×11, 2×10 rồi tiếp tục có trật tự.", "So các tích, không chỉ nhìn hình."],
+      "familyPrompt": "Dùng que tính hoặc giấy kẻ ô để cả nhà thử một hình không phải chữ nhật.",
+      "source": {"title": "YouCubed · 36 Fences", "url": "https://www.youcubed.org/tasks/36-fences/", "adaptationNote": "Bài được Math Raccoon viết mới với 24 đoạn và câu hỏi mở; nguồn chỉ cung cấp cảm hứng low-floor/high-ceiling."}
+    },
+    {
+      "id": "rich-geometry-tetromino",
+      "domain": "geometry",
+      "level": 2,
+      "title": "Bốn ô biết biến hình",
+      "minutes": 18,
+      "prompt": "Ghép bốn ô vuông cạnh nhau theo mọi cách có thể, mỗi ô phải chung ít nhất một cạnh với ô khác. Xoay hoặc lật mà trùng nhau chỉ tính một hình. Có bao nhiêu hình?",
+      "launchQuestions": ["Con sẽ cố định ba ô trước như thế nào?", "Hai hình có thể trùng sau khi xoay không?", "Dùng tiêu chí nào để không đếm lặp?"],
+      "hints": ["Bắt đầu từ hàng thẳng bốn ô.", "Sau đó xét ba ô thành hàng và gắn ô thứ tư.", "Phân nhóm theo số ô nằm trên từng hàng."],
+      "familyPrompt": "Cắt bốn ô giấy rời để kiểm tra việc xoay và lật.",
+      "source": {"title": "YouCubed · What do you see?", "url": "https://www.youcubed.org/tasks/", "adaptationNote": "Bài nguyên bản của Math Raccoon, theo tinh thần toán trực quan và giải thích cấu trúc."}
+    },
+    {
+      "id": "rich-geometry-border",
+      "domain": "geometry",
+      "level": 3,
+      "title": "Hòn đảo có cùng diện tích",
+      "minutes": 16,
+      "prompt": "Trên giấy ô vuông, vẽ ba “hòn đảo” khác nhau, mỗi đảo gồm đúng 12 ô liền cạnh. Đảo nào có bờ dài nhất, đảo nào có bờ ngắn nhất? Con có thể giải thích mà không đếm lại từng cạnh không?",
+      "launchQuestions": ["Khi hai ô ghép cạnh, bờ thay đổi thế nào?", "Hình dài và mảnh ảnh hưởng bờ ra sao?", "Có thể tạo bờ dài hơn nữa không?"],
+      "hints": ["12 ô rời có tổng 48 cạnh.", "Mỗi cạnh chung làm mất 2 cạnh khỏi đường bờ.", "Muốn bờ ngắn, hãy tạo nhiều cạnh chung."],
+      "familyPrompt": "Mỗi người vẽ một đảo, đổi giấy để kiểm tra và phản biện.",
+      "source": {"title": "NRICH · Rich Mathematical Tasks", "url": "https://nrich.maths.org/articles/rich-mathematical-tasks", "adaptationNote": "Bài nguyên bản của Math Raccoon, kết nối biểu diễn, bất biến và tối ưu."}
+    },
+    {
+      "id": "rich-data-dice",
+      "domain": "data",
+      "level": 2,
+      "title": "Cuộc đua tổng xúc xắc",
+      "minutes": 18,
+      "prompt": "Tung hai xúc xắc. Bạn A thắng nếu tổng là 5; bạn B thắng nếu tổng là 8. Trò chơi có công bằng không? Hãy lập bảng mọi khả năng trước khi thử thật.",
+      "launchQuestions": ["Có bao nhiêu cặp kết quả có thứ tự?", "Tổng 5 xuất hiện theo những cặp nào?", "Tổng 8 xuất hiện theo những cặp nào?"],
+      "hints": ["Vẽ bảng 6 hàng × 6 cột.", "Đánh dấu các ô có tổng 5 và tổng 8.", "So số ô, không chỉ số cách viết không thứ tự."],
+      "familyPrompt": "Sau khi dự đoán, tung thật 30 lần và so dữ liệu với mô hình.",
+      "source": {"title": "NRICH · Primary Teachers", "url": "https://nrich.maths.org/teachers/primary", "adaptationNote": "Bài nguyên bản của Math Raccoon, kết hợp mô hình khả năng với thử nghiệm."}
+    },
+    {
+      "id": "rich-data-survey",
+      "domain": "data",
+      "level": 2,
+      "title": "Khảo sát không dẫn đường",
+      "minutes": 15,
+      "prompt": "Thiết kế một khảo sát để biết hoạt động sau giờ học được học sinh lớp 3 yêu thích. Viết hai câu hỏi: một câu trung lập và một câu cố tình dẫn dắt; giải thích vì sao kết quả có thể khác nhau.",
+      "launchQuestions": ["Từ nào khiến người trả lời nghiêng về một đáp án?", "Ai cần được hỏi để mẫu không lệch?", "Kết quả nên biểu diễn bằng cách nào?"],
+      "hints": ["Tránh câu có “đúng không” hoặc khen trước một lựa chọn.", "Cho các lựa chọn cân bằng và có mục “khác”.", "Ghi số người được hỏi và cách chọn họ."],
+      "familyPrompt": "Người lớn trả lời cả hai câu để con quan sát tác động của cách hỏi.",
+      "source": {"title": "YouCubed · Activities and Tasks", "url": "https://www.youcubed.org/tasks/", "adaptationNote": "Bài nguyên bản của Math Raccoon theo hướng dữ liệu, phản biện và sáng tạo câu hỏi."}
+    },
+    {
+      "id": "rich-word-boxes",
+      "domain": "word",
+      "level": 2,
+      "title": "Những chiếc hộp chưa biết",
+      "minutes": 15,
+      "prompt": "Ba hộp có tổng 60 viên bi. Hộp B nhiều hơn hộp A 6 viên; hộp C gấp đôi hộp A. Tìm số bi mỗi hộp bằng ít nhất hai cách và kiểm tra lại mọi manh mối.",
+      "launchQuestions": ["Nếu hộp A thay đổi 1 viên, tổng ba hộp đổi bao nhiêu?", "Có thể dùng sơ đồ đoạn thẳng không?", "Cách thử có thể được tổ chức ra sao?"],
+      "hints": ["Gọi số bi hộp A là một phần.", "B = A + 6; C = 2 × A.", "Bỏ 6 viên riêng, phần còn lại gồm 4 phần bằng nhau."],
+      "familyPrompt": "Một người giải bằng sơ đồ, một người giải bằng thử–sửa rồi so sánh.",
+      "source": {"title": "NRICH · What Are Rich Tasks, and Why Do They Matter?", "url": "https://nrich.maths.org/articles/what-are-rich-tasks-and-why-do-they-matter", "adaptationNote": "Bài nguyên bản của Math Raccoon, được thiết kế để có nhiều phương pháp và bước kiểm chứng."}
+    },
+    {
+      "id": "rich-word-clues",
+      "domain": "word",
+      "level": 3,
+      "title": "Thám tử tạo manh mối",
+      "minutes": 15,
+      "prompt": "Chọn bí mật một số từ 1 đến 50. Viết ít manh mối nhất để người khác tìm đúng duy nhất số đó. Mỗi manh mối phải dùng một ý khác nhau: chẵn–lẻ, so sánh, chia hết hoặc chữ số.",
+      "launchQuestions": ["Sau mỗi manh mối còn bao nhiêu số?", "Manh mối nào loại được nhiều khả năng nhất?", "Có manh mối nào thừa không?"],
+      "hints": ["Viết danh sách 1 đến 50 rồi gạch dần.", "Bắt đầu bằng manh mối chia nhóm lớn.", "Bỏ thử từng manh mối để kiểm tra nó có thật sự cần."],
+      "familyPrompt": "Đổi vai: người lớn đoán, trẻ kiểm tra xem bộ manh mối có đủ và không mâu thuẫn.",
+      "source": {"title": "NRICH · Rich Tasks and Contexts", "url": "https://nrich.maths.org/articles/rich-tasks-and-contexts", "adaptationNote": "Bài nguyên bản của Math Raccoon, khuyến khích tạo bài toán, tối ưu và phản biện."}
+    }
+  ]
+}

@@ -6,7 +6,7 @@ const APP_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 export const metadata: Metadata = {
   title: "Math Raccoon · Toán nâng cao lớp 3",
   description:
-    "Câu lạc bộ toán nâng cao lớp 3 với 36 nhiệm vụ sâu, gợi ý ba tầng, câu chuyển giao và động cơ học thích ứng theo mức tự lực.",
+    "Toán nâng cao lớp 3 với 36 chủ đề, 432 phiên bản thích ứng, gợi ý ba tầng và kho bài toán mở có kiểm duyệt.",
   manifest: `${APP_BASE_PATH}/manifest.webmanifest`,
   applicationName: "Math Raccoon",
   appleWebApp: { capable: true, title: "Math Raccoon", statusBarStyle: "default" },
