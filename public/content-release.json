@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "version": "2026.08.29.1",
+  "title": "Nền tảng Math Raccoon lớp 3",
+  "publishedAt": "2026-08-29",
+  "contentScope": {
+    "missions": 36,
+    "domains": 6,
+    "dailyPuzzles": 60
+  },
+  "approval": {
+    "status": "approved-for-release",
+    "reviewedByRole": "Quy trình kiểm duyệt nội bộ Math Raccoon",
+    "parentApprovalRequired": true,
+    "checks": {
+      "curriculumAlignment": true,
+      "answerVerification": true,
+      "childLanguage": true,
+      "privacyAndExternalLinks": true
+    }
+  },
+  "notes": [
+    "Hoàn thiện 36 nhiệm vụ nâng cao thuộc 6 miền tư duy.",
+    "Bổ sung gợi ý ba tầng, chuyển giao và phản tư cho mỗi nhiệm vụ.",
+    "Tối ưu chữ tiếng Việt, thao tác cảm ứng và chế độ học trên iPad."
+  ]
+}
