@@ -79,6 +79,10 @@ test("resolves every supported GitHub Pages content route", async () => {
     parseContentRoute("/nhatminhtoan3/mission/36/", "", "/nhatminhtoan3"),
     { kind: "mission", id: 36, canonicalPath: "/nhatminhtoan3/mission/36/" },
   );
+  assert.deepEqual(
+    parseContentRoute("/nhatminhtoan3/open-task/36/", "", "/nhatminhtoan3"),
+    { kind: "open-task", id: 36, canonicalPath: "/nhatminhtoan3/open-task/36/" },
+  );
   assert.equal(contentRouteWeek({ kind: "lesson", id: 180 }), 36);
   assert.equal(contentRouteWeek({ kind: "mission", id: 12 }), 12);
   assert.equal(contentRouteWeek({ kind: "roadmap", canonicalPath: "/roadmap/" }), null);
@@ -87,7 +91,27 @@ test("resolves every supported GitHub Pages content route", async () => {
   assert.equal(parseContentRoute("/week/37"), null);
   assert.equal(parseContentRoute("/lesson/181"), null);
   assert.equal(parseContentRoute("/mission/37"), null);
+  assert.equal(parseContentRoute("/open-task/37"), null);
   assert.equal(parseContentRoute("/unrelated/1"), null);
+});
+
+test("builds specific, encouraging learning feedback", async () => {
+  const { correctOnFirstAttempt, missionStrength, wrongAnswerFeedback } =
+    await vite.ssrLoadModule("/app/learning-feedback.ts");
+
+  assert.equal(correctOnFirstAttempt(75, 4), 3);
+  assert.equal(correctOnFirstAttempt(101, 4), 4);
+  assert.equal(
+    missionStrength({ firstScore: 75, averageHintDepth: 0.4, transferFirstTry: true }),
+    "Mang ý tưởng sang một bài toán mới",
+  );
+  assert.equal(
+    wrongAnswerFeedback(
+      { type: "choice", misconception: "Hãy kiểm tra phép nhân với phần chênh lệch." },
+      "50 × 5 − 2",
+    ),
+    "Con đã chọn “50 × 5 − 2”. Hãy kiểm tra phép nhân với phần chênh lệch.",
+  );
 });
 
 test("rotates daily content at the user's local midnight", async () => {

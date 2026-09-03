@@ -1,4 +1,4 @@
-export type IndexedContentRouteKind = "week" | "topic" | "lesson" | "mission";
+export type IndexedContentRouteKind = "week" | "topic" | "lesson" | "mission" | "open-task";
 export type StandaloneContentRouteKind = "assessment" | "roadmap";
 export type ContentRouteKind = IndexedContentRouteKind | StandaloneContentRouteKind;
 
@@ -11,6 +11,7 @@ const ROUTE_LIMITS: Record<IndexedContentRouteKind, number> = {
   topic: 36,
   lesson: 180,
   mission: 36,
+  "open-task": 36,
 };
 
 function normalizeBasePath(basePath: string) {
@@ -43,7 +44,7 @@ export function parseContentRoute(
     return { kind, canonicalPath: `${normalizedBasePath}/${kind}/` };
   }
 
-  const match = candidate.match(/^\/(week|topic|lesson|mission)\/(\d+)\/?$/);
+  const match = candidate.match(/^\/(week|topic|lesson|mission|open-task)\/(\d+)\/?$/);
   if (!match) return null;
 
   const kind = match[1] as IndexedContentRouteKind;

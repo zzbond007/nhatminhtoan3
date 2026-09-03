@@ -31,6 +31,9 @@ test("renders Math Raccoon PWA metadata", async () => {
   assert.match(html, /<title>Math Raccoon · Toán nâng cao lớp 3<\/title>/i);
   assert.match(html, /<link(?=[^>]*\brel="manifest")(?=[^>]*\bhref="\/manifest\.webmanifest")[^>]*>/i);
   assert.match(html, /<link(?=[^>]*\brel="apple-touch-icon")(?=[^>]*\bhref="\/icons\/apple-touch-icon\.png")[^>]*>/i);
-  assert.match(html, /Nội dung\s*<!-- -->2026\.09\.03\.2/i);
+  assert.match(html, /Nội dung\s*<!-- -->2026\.09\.03\.3/i);
+  assert.match(html, /href="\/assessment\/"/i);
+  assert.match(html, /href="\/roadmap\/"/i);
+  assert.match(html, /aria-label="Điều hướng chính"/i);
   assert.match(html, /180/);
 });

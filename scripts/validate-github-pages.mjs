@@ -14,6 +14,8 @@ const expectedRoutes = [
   "lesson/180/index.html",
   "mission/1/index.html",
   "mission/36/index.html",
+  "open-task/1/index.html",
+  "open-task/36/index.html",
   "assessment/index.html",
   "roadmap/index.html",
 ];
@@ -30,4 +32,4 @@ if (!serviceWorker.includes("index.html")) {
   throw new Error("Offline navigation fallback is missing from the service worker.");
 }
 
-console.log("GitHub Pages routes passed: assessment, roadmap, 36 weeks, 36 topics, 36 missions, 180 lessons, and 404 fallback.");
+console.log("GitHub Pages routes passed: assessment, roadmap, 36 weeks, 36 topics, 36 missions, 36 open tasks, 180 lessons, and 404 fallback.");
