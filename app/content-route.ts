@@ -1,15 +1,16 @@
-export type ContentRouteKind = "week" | "topic" | "lesson";
+export type IndexedContentRouteKind = "week" | "topic" | "lesson" | "mission";
+export type StandaloneContentRouteKind = "assessment" | "roadmap";
+export type ContentRouteKind = IndexedContentRouteKind | StandaloneContentRouteKind;
 
-export type ContentRoute = {
-  kind: ContentRouteKind;
-  id: number;
-  canonicalPath: string;
-};
+export type ContentRoute =
+  | { kind: IndexedContentRouteKind; id: number; canonicalPath: string }
+  | { kind: StandaloneContentRouteKind; canonicalPath: string };
 
-const ROUTE_LIMITS: Record<ContentRouteKind, number> = {
+const ROUTE_LIMITS: Record<IndexedContentRouteKind, number> = {
   week: 36,
   topic: 36,
   lesson: 180,
+  mission: 36,
 };
 
 function normalizeBasePath(basePath: string) {
@@ -36,10 +37,16 @@ export function parseContentRoute(
     candidate = candidate.slice(normalizedBasePath.length) || "/";
   }
 
-  const match = candidate.match(/^\/(week|topic|lesson)\/(\d+)\/?$/);
+  const standaloneMatch = candidate.match(/^\/(assessment|roadmap)\/?$/);
+  if (standaloneMatch) {
+    const kind = standaloneMatch[1] as StandaloneContentRouteKind;
+    return { kind, canonicalPath: `${normalizedBasePath}/${kind}/` };
+  }
+
+  const match = candidate.match(/^\/(week|topic|lesson|mission)\/(\d+)\/?$/);
   if (!match) return null;
 
-  const kind = match[1] as ContentRouteKind;
+  const kind = match[1] as IndexedContentRouteKind;
   const id = Number(match[2]);
   if (!Number.isInteger(id) || id < 1 || id > ROUTE_LIMITS[kind]) return null;
 
@@ -51,6 +58,7 @@ export function parseContentRoute(
 }
 
 export function contentRouteWeek(route: ContentRoute) {
+  if (!("id" in route)) return null;
   return route.kind === "lesson" ? Math.ceil(route.id / 5) : route.id;
 }
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2026.09.03.1",
+  "version": "2026.09.03.2",
   "title": "Math Raccoon · Lộ trình nâng cao 9 tháng",
   "publishedAt": "2026-09-03",
   "contentScope": {
@@ -27,6 +27,9 @@
     }
   },
   "notes": [
+    "Khắc phục đường dẫn trực tiếp cho bài đánh giá, lộ trình và đủ 36 nhiệm vụ trên GitHub Pages.",
+    "Câu đố hằng ngày nay đổi đúng lúc 00:00 theo ngày địa phương của thiết bị.",
+    "Xác minh biểu đồ dữ liệu trong bài đánh giá d1 hiển thị đủ bốn cột và có mô tả hỗ trợ tiếp cận.",
     "Khắc phục đường dẫn trực tiếp cho đủ 36 tuần, 36 chủ đề và 180 buổi học trên GitHub Pages.",
     "Bổ sung trang chuyển tiếp 404 an toàn và chuẩn hóa dấu gạch chéo cuối đường dẫn.",
     "Bổ sung lộ trình 9 tháng gồm 36 tuần và 180 buổi học có cấu trúc.",

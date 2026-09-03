@@ -89,7 +89,7 @@ function makeTask(spec, index) {
 await mkdir(output, { recursive: true });
 const catalog = {
   schemaVersion: 1,
-  version: "2026.09.03.1",
+  version: "2026.09.03.2",
   status: "approved-for-release",
   parentApprovalRequired: true,
   program: { months: 9, weeks: 36, sessionsPerWeek: 5, sessions: 180 },

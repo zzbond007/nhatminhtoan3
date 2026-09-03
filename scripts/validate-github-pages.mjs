@@ -12,6 +12,10 @@ const expectedRoutes = [
   "topic/36/index.html",
   "lesson/1/index.html",
   "lesson/180/index.html",
+  "mission/1/index.html",
+  "mission/36/index.html",
+  "assessment/index.html",
+  "roadmap/index.html",
 ];
 
 await Promise.all(expectedRoutes.map((route) => access(path.join(outputRoot, route))));
@@ -26,4 +30,4 @@ if (!serviceWorker.includes("index.html")) {
   throw new Error("Offline navigation fallback is missing from the service worker.");
 }
 
-console.log("GitHub Pages routes passed: 36 weeks, 36 topics, 180 lessons, and 404 fallback.");
+console.log("GitHub Pages routes passed: assessment, roadmap, 36 weeks, 36 topics, 36 missions, 180 lessons, and 404 fallback.");

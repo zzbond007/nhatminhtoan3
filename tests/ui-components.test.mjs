@@ -67,12 +67,52 @@ test("resolves every supported GitHub Pages content route", async () => {
     ),
     { kind: "topic", id: 36, canonicalPath: "/nhatminhtoan3/topic/36/" },
   );
+  assert.deepEqual(
+    parseContentRoute("/nhatminhtoan3/assessment/", "", "/nhatminhtoan3"),
+    { kind: "assessment", canonicalPath: "/nhatminhtoan3/assessment/" },
+  );
+  assert.deepEqual(
+    parseContentRoute("/nhatminhtoan3/roadmap", "", "/nhatminhtoan3"),
+    { kind: "roadmap", canonicalPath: "/nhatminhtoan3/roadmap/" },
+  );
+  assert.deepEqual(
+    parseContentRoute("/nhatminhtoan3/mission/36/", "", "/nhatminhtoan3"),
+    { kind: "mission", id: 36, canonicalPath: "/nhatminhtoan3/mission/36/" },
+  );
   assert.equal(contentRouteWeek({ kind: "lesson", id: 180 }), 36);
+  assert.equal(contentRouteWeek({ kind: "mission", id: 12 }), 12);
+  assert.equal(contentRouteWeek({ kind: "roadmap", canonicalPath: "/roadmap/" }), null);
   assert.equal(lessonStageIndex(1), 0);
   assert.equal(lessonStageIndex(5), 4);
   assert.equal(parseContentRoute("/week/37"), null);
   assert.equal(parseContentRoute("/lesson/181"), null);
+  assert.equal(parseContentRoute("/mission/37"), null);
   assert.equal(parseContentRoute("/unrelated/1"), null);
+});
+
+test("rotates daily content at the user's local midnight", async () => {
+  const { localCalendarDayIndex } = await vite.ssrLoadModule("/app/calendar-day.ts");
+  const beforeMidnight = new Date(2026, 8, 3, 23, 59, 59);
+  const afterMidnight = new Date(2026, 8, 4, 0, 0, 1);
+  const laterSameDay = new Date(2026, 8, 4, 18, 30, 0);
+
+  assert.equal(localCalendarDayIndex(afterMidnight), localCalendarDayIndex(laterSameDay));
+  assert.equal(localCalendarDayIndex(afterMidnight) - localCalendarDayIndex(beforeMidnight), 1);
+});
+
+test("renders the d1 diagnostic chart with all values and accessible context", async () => {
+  const { DataChart } = await vite.ssrLoadModule("/components/data-chart.tsx");
+  const { DIAGNOSTIC_QUESTIONS } = await vite.ssrLoadModule("/app/content.ts");
+  const question = DIAGNOSTIC_QUESTIONS.find((item) => item.id === "d1");
+  assert.ok(question?.context);
+
+  const html = renderToStaticMarkup(
+    React.createElement(DataChart, { question, color: "#1b9a83" }),
+  );
+  assert.match(html, /role="img"/);
+  assert.match(html, /Số trang: T2 5, T3 9, T4 3, T5 7/);
+  assert.match(html, /height:100%/);
+  assert.equal((html.match(/<small>/g) ?? []).length, 4);
 });
 
 test("covers all 36 weeks and 180 planned sessions", async () => {

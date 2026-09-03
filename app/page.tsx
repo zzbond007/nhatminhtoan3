@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import { DataChart } from "@/components/data-chart";
 import {
   DIAGNOSTIC_QUESTIONS, DOMAINS,
   type DiagnosticQuestion, type DomainId, type PracticeQuestion,
@@ -29,6 +30,7 @@ import {
   MONTH_THEMES, PROGRAM_SESSIONS, WEEKLY_RHYTHM, YEAR_WEEKS, weekProgress,
 } from "./year-plan";
 import { contentRouteWeek, lessonStageIndex, parseContentRoute } from "./content-route";
+import { localCalendarDayIndex } from "./calendar-day";
 import CONTENT_RELEASE from "../public/content-release.json";
 
 type View = "dashboard" | "diagnostic-intro" | "diagnostic" | "diagnostic-result" | "mission" | "enrichment" | "year-plan" | "content-review";
@@ -59,6 +61,7 @@ const CONTENT_RELEASE_URL = `${APP_BASE_PATH}/content-release.json`;
 const CONTENT_CATALOG_URL = `${APP_BASE_PATH}/content-catalog.json`;
 const DAY = 86_400_000;
 const SESSION_NOW = Date.now();
+const LOCAL_DAY_INDEX = localCalendarDayIndex(new Date(SESSION_NOW));
 const DOMAIN_ICONS: Record<DomainId, typeof Calculator> = {
   number: Target, calculation: Calculator, measurement: Ruler,
   geometry: Shapes, data: BarChart3, word: BookOpenCheck,
@@ -226,16 +229,23 @@ export default function Home() {
       const route = parseContentRoute(window.location.pathname, window.location.search, APP_BASE_PATH);
       if (!route) return;
       deepLinkHandledRef.current = true;
-      const weekNumber = contentRouteWeek(route);
-      setLinkedWeekNumber(weekNumber);
 
       if (window.location.pathname !== route.canonicalPath) {
         window.history.replaceState(null, "", route.canonicalPath);
       }
-      if (route.kind === "week") {
+      if (route.kind === "assessment") {
+        setView("diagnostic-intro");
+        return;
+      }
+      if (route.kind === "roadmap" || route.kind === "week") {
+        const routeWeek = contentRouteWeek(route);
+        if (routeWeek) setLinkedWeekNumber(routeWeek);
         setView("year-plan");
         return;
       }
+      const weekNumber = contentRouteWeek(route);
+      if (!weekNumber) return;
+      setLinkedWeekNumber(weekNumber);
       if (!learning.diagnostic) {
         setView("diagnostic-intro");
         return;
@@ -363,7 +373,7 @@ export default function Home() {
   const currentPracticeCorrect = practiceChecked && answerIsCorrect(currentPractice, practiceAnswer);
   const transferCorrect = transferChecked && answerIsCorrect(currentMission.transfer, transferAnswer);
   const currentDiagnostic = DIAGNOSTIC_QUESTIONS[diagnosticIndex];
-  const todayPuzzle = DAILY_PUZZLES_60[Math.floor(SESSION_NOW / DAY) % DAILY_PUZZLES_60.length];
+  const todayPuzzle = DAILY_PUZZLES_60[LOCAL_DAY_INDEX % DAILY_PUZZLES_60.length];
   const completedMissions = Object.keys(learning.missionRecords).filter((id) => ALL_DEEP_MISSIONS.some((mission) => mission.id === id)).length;
   const totalSessions = Object.values(learning.missionRecords).reduce((sum, record) => sum + record.completedCount, 0);
   const reflectionCount = Object.values(learning.missionRecords).filter((record) => record.reflection.trim()).length;
@@ -379,7 +389,7 @@ export default function Home() {
   const activeWeekProgress = activeYearItem.progress;
   const plannedEnrichmentTask = findPlannedTask(curatedPacks, activeWeek.taskId);
   const fallbackPack = curatedPacks[0];
-  const enrichmentTask = plannedEnrichmentTask ?? (fallbackPack ? selectEnrichmentTask(fallbackPack, learning.enrichmentCompleted, Math.floor(SESSION_NOW / DAY)) : null);
+  const enrichmentTask = plannedEnrichmentTask ?? (fallbackPack ? selectEnrichmentTask(fallbackPack, learning.enrichmentCompleted, LOCAL_DAY_INDEX) : null);
 
   function missionIsUnlocked(mission: DeepMission) {
     if (mission.sequence === 1) return true;
@@ -643,9 +653,4 @@ export default function Home() {
 function TileRectangle({ value }: { value: string }) {
   const [rows, columns] = value.split("x").map(Number);
   return <span className="tile-rectangle" style={{ "--rows": rows, "--columns": columns } as React.CSSProperties} aria-label={`Hình ${rows} hàng, ${columns} cột`}>{Array.from({ length: rows * columns }, (_, index) => <i key={index} />)}</span>;
-}
-function DataChart({ question, color }: { question: DiagnosticQuestion; color: string }) {
-  if (!question.context) return null;
-  const max = Math.max(...question.context.values.map((item) => item.value));
-  return <div className="data-chart" role="img" aria-label={`${question.context.label}: ${question.context.values.map((item) => `${item.name} ${item.value}`).join(", ")}`}>{question.context.values.map((item) => <div key={item.name}><span>{item.value}</span><i style={{ height: `${(item.value / max) * 100}%`, background: color }} /><small>{item.name}</small></div>)}</div>;
 }
