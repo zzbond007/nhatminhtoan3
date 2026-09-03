@@ -1,8 +1,8 @@
 # Math Raccoon – Toán nâng cao lớp 3
 
-Math Raccoon là ứng dụng web tĩnh dành cho việc luyện toán nâng cao lớp 3. Ứng dụng không gọi ChatGPT hoặc OpenAI API khi trẻ học. Lịch sử học tập được mã hóa trên thiết bị rồi ghi vào nhánh `learning-data` của GitHub; Safari không còn là nguồn lưu hồ sơ.
+Math Raccoon là ứng dụng web tĩnh dành cho việc luyện toán nâng cao lớp 3. Ứng dụng không gọi ChatGPT hoặc OpenAI API khi trẻ học, không yêu cầu đăng nhập và lưu tiến trình ngay trên thiết bị.
 
-Phiên bản hồ sơ v8 gồm:
+Phiên bản nội dung v7 gồm:
 
 - lộ trình 9 tháng gồm 36 tuần × 5 buổi, tổng cộng 180 buổi lõi;
 - 36 chủ đề cốt lõi thuộc 6 miền năng lực;
@@ -28,10 +28,9 @@ Mỗi lần nhánh `main` nhận thay đổi đã được duyệt, GitHub Actio
 2. Chờ mục **Góc đồng hành** báo **Đã sẵn sàng học ngoại tuyến**.
 3. Nhấn **Chia sẻ → Thêm vào Màn hình chính → Thêm**.
 4. Mở Math Raccoon từ icon mới trên màn hình iPad.
-5. Tại cổng phụ huynh, nhập fine-grained token GitHub và mật khẩu mã hóa để mở hồ sơ.
-6. Nội dung có thể mở ngoại tuyến sau lần tải đầu; lịch sử chỉ được xác nhận khi có mạng và trạng thái hiển thị **Đã đồng bộ**.
+5. Thử tắt Wi-Fi và mở lại ứng dụng để xác nhận chế độ ngoại tuyến.
 
-Nếu iPad vẫn hiện icon cũ, hãy xóa biểu tượng cũ khỏi Màn hình chính rồi thêm lại từ Safari. Hồ sơ chính thức nằm trên GitHub nên có thể mở lại bằng đúng token và mật khẩu mã hóa.
+Nếu iPad vẫn hiện icon cũ, hãy xóa biểu tượng cũ khỏi Màn hình chính rồi thêm lại từ Safari. Việc này không xóa tiến trình trong Safari, nhưng vẫn nên dùng nút **Sao lưu** trước khi thay đổi lớn.
 
 ## Cập nhật nội dung có kiểm duyệt
 
@@ -69,16 +68,13 @@ Gói đã cài được service worker lưu lại để học ngoại tuyến. L
 
 Nếu bản phát hành thiếu trạng thái kiểm duyệt, quy trình dựng website sẽ dừng và ứng dụng trên iPad từ chối cài bản đó.
 
-## Lịch sử học tập trên GitHub
+## Sao lưu tiến trình
 
-Hồ sơ được lưu tại `profiles/math-raccoon.enc.json` trên nhánh `learning-data`. Tệp chứa bản mã AES-GCM; mật khẩu giải mã và token GitHub không được ghi vào Safari, service worker hay repository.
+Tiến trình học nằm trong bộ nhớ Safari của từng thiết bị, không nằm trong GitHub và không gắn với tài khoản ChatGPT.
 
-- Tạo fine-grained token chỉ cho repository `nhatminhtoan3`, quyền **Contents: Read and write**.
-- Nhập token và mật khẩu mã hóa tại cổng phụ huynh mỗi khi mở ứng dụng.
-- Ứng dụng đọc hồ sơ từ GitHub, giải mã trong bộ nhớ và tự đồng bộ sau thay đổi.
-- Hồ sơ Safari từ v3–v7 chỉ được đọc một lần để chuyển đổi; chỉ xóa sau khi GitHub lưu và đọc lại đúng `profileId`.
-- Nút **Sao lưu** vẫn cho phép tải JSON dự phòng; **Khôi phục** chỉ hợp nhất tệp có cùng `profileId`.
-- Mỗi lần ghi tạo một commit Git, vì vậy có thể phục hồi phiên bản trước từ lịch sử nhánh dữ liệu.
+- Chọn **Sao lưu** để tải tệp JSON.
+- Chọn **Khôi phục** để chuyển hồ sơ sang iPad khác.
+- Nên sao lưu mỗi tháng hoặc trước khi xóa dữ liệu Safari.
 
 ## Lệnh dành cho người phát triển
 
@@ -94,8 +90,6 @@ Bản GitHub Pages được xuất vào thư mục `out/`. Service worker đư�
 
 ## Giới hạn dữ liệu
 
-- GitHub Pages không có máy chủ động; trình duyệt phải được phụ huynh cấp token GitHub để đọc/ghi lịch sử.
-- Không lưu token hoặc mật khẩu mã hóa; phụ huynh phải nhập lại khi mở hồ sơ trên thiết bị mới hoặc sau khi đóng ứng dụng.
-- Nếu mất mạng giữa buổi, không đóng ứng dụng cho đến khi trạng thái trở lại **Đã đồng bộ**.
-- Quên mật khẩu mã hóa sẽ khiến tệp GitHub không thể giải mã; cần giữ mật khẩu ở nơi an toàn.
+- Không có đồng bộ đám mây giữa nhiều thiết bị.
+- Xóa dữ liệu Safari có thể xóa tiến trình nếu chưa sao lưu.
 - Giọng đọc tiếng Việt phụ thuộc vào giọng hệ thống có sẵn trên iPad.

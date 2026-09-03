@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": "2026.09.02.1",
-  "title": "Math Raccoon · Lịch sử học tập chính thức trên GitHub",
-  "publishedAt": "2026-09-02",
+  "version": "2026.08.30.2",
+  "title": "Math Raccoon · Lộ trình nâng cao 9 tháng",
+  "publishedAt": "2026-08-30",
   "contentScope": {
     "missions": 36,
     "domains": 6,
@@ -13,9 +13,7 @@
     "programMonths": 9,
     "programWeeks": 36,
     "coreSessions": 180,
-    "reviewPacks": 9,
-    "profileSchema": 8,
-    "profileStorage": "github-encrypted"
+    "reviewPacks": 9
   },
   "approval": {
     "status": "approved-for-release",
@@ -29,10 +27,6 @@
     }
   },
   "notes": [
-    "Chuyển nguồn lưu lịch sử học tập chính thức từ Safari sang nhánh learning-data trên GitHub.",
-    "Mã hóa hồ sơ bằng AES-GCM trước khi gửi; token và mật khẩu mã hóa chỉ giữ trong phiên đang mở.",
-    "Tự động chuyển hồ sơ Safari cũ lên GitHub và chỉ xóa bản cũ sau khi đọc lại xác minh thành công.",
-    "Lưu cả lịch sử phiên học và gói nội dung phụ huynh đã duyệt trong hồ sơ GitHub.",
     "Bổ sung lộ trình 9 tháng gồm 36 tuần và 180 buổi học có cấu trúc.",
     "Mỗi tuần có bốn phiên bản luyện thích ứng và một bài toán mở gắn cùng ý tưởng lớn.",
     "Kho 36 bài toán mở được chia thành 9 gói tháng để phụ huynh xem đề, đáp án, gợi ý và nguồn trước khi duyệt.",
