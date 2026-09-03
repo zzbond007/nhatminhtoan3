@@ -8,6 +8,32 @@ const basePath = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
 const release = JSON.parse(await readFile(path.join(projectRoot, "public", "content-release.json"), "utf8"));
 const includedExtensions = new Set([".html", ".js", ".css", ".json", ".svg", ".png", ".webmanifest", ".woff", ".woff2"]);
 
+const redirect404 = `<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Đang mở Math Raccoon…</title>
+</head>
+<body>
+  <p>Đang mở nội dung Math Raccoon…</p>
+  <script>
+    (() => {
+      const basePath = ${JSON.stringify(basePath)};
+      const currentPath = window.location.pathname;
+      const route = basePath && currentPath.startsWith(basePath)
+        ? currentPath.slice(basePath.length)
+        : currentPath;
+      const target = basePath + "/?route=" + encodeURIComponent(route || "/");
+      window.location.replace(target);
+    })();
+  </script>
+</body>
+</html>
+`;
+
+await writeFile(path.join(outputRoot, "404.html"), redirect404);
+
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
@@ -65,4 +91,4 @@ self.addEventListener("fetch", (event) => {
 `;
 
 await writeFile(path.join(outputRoot, "sw.js"), source);
-console.log(`Generated offline worker with ${precache.length} cached files.`);
+console.log(`Generated offline worker with ${precache.length} cached files and GitHub Pages fallback.`);

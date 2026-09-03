@@ -51,6 +51,30 @@ test("emits child-friendly and offline-update styles", async () => {
   assert.match(css, /@media\s*\(width>=768px\)\s*and\s*\(width<=1180px\)/);
 });
 
+test("resolves every supported GitHub Pages content route", async () => {
+  const { contentRouteWeek, lessonStageIndex, parseContentRoute } =
+    await vite.ssrLoadModule("/app/content-route.ts");
+
+  assert.deepEqual(
+    parseContentRoute("/nhatminhtoan3/week/1/", "", "/nhatminhtoan3"),
+    { kind: "week", id: 1, canonicalPath: "/nhatminhtoan3/week/1/" },
+  );
+  assert.deepEqual(
+    parseContentRoute(
+      "/nhatminhtoan3/",
+      "?route=%2Ftopic%2F36",
+      "/nhatminhtoan3",
+    ),
+    { kind: "topic", id: 36, canonicalPath: "/nhatminhtoan3/topic/36/" },
+  );
+  assert.equal(contentRouteWeek({ kind: "lesson", id: 180 }), 36);
+  assert.equal(lessonStageIndex(1), 0);
+  assert.equal(lessonStageIndex(5), 4);
+  assert.equal(parseContentRoute("/week/37"), null);
+  assert.equal(parseContentRoute("/lesson/181"), null);
+  assert.equal(parseContentRoute("/unrelated/1"), null);
+});
+
 test("covers all 36 weeks and 180 planned sessions", async () => {
   const { ALL_DEEP_MISSIONS } = await vite.ssrLoadModule("/app/curriculum.ts");
   const { PROGRAM_MONTHS, PROGRAM_SESSIONS, PROGRAM_WEEKS, YEAR_WEEKS } = await vite.ssrLoadModule("/app/year-plan.ts");

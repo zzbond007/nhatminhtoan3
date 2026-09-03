@@ -22,6 +22,14 @@ Phiên bản nội dung v7 gồm:
 
 Mỗi lần nhánh `main` nhận thay đổi đã được duyệt, GitHub Actions tự kiểm tra nội dung, dựng bản web tĩnh và cập nhật website.
 
+Các đường dẫn nội dung được xuất sẵn thành trang tĩnh để GitHub Pages mở trực tiếp:
+
+- `/week/1/` đến `/week/36/`;
+- `/topic/1/` đến `/topic/36/`;
+- `/lesson/1/` đến `/lesson/180/`.
+
+`404.html` giữ vai trò chuyển tiếp dự phòng cho URL cũ chưa có dấu gạch chéo cuối. Bộ kiểm tra sau khi dựng sẽ dừng triển khai nếu thiếu bất kỳ nhóm đường dẫn nào.
+
 ## Cài trên iPad
 
 1. Mở địa chỉ GitHub Pages bằng Safari khi đang có mạng.

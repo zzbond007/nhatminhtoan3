@@ -28,6 +28,7 @@ import {
 import {
   MONTH_THEMES, PROGRAM_SESSIONS, WEEKLY_RHYTHM, YEAR_WEEKS, weekProgress,
 } from "./year-plan";
+import { contentRouteWeek, lessonStageIndex, parseContentRoute } from "./content-route";
 import CONTENT_RELEASE from "../public/content-release.json";
 
 type View = "dashboard" | "diagnostic-intro" | "diagnostic" | "diagnostic-result" | "mission" | "enrichment" | "year-plan" | "content-review";
@@ -206,6 +207,8 @@ export default function Home() {
   const [enrichmentReflection, setEnrichmentReflection] = useState("");
   const serviceWorkerRef = useRef<ServiceWorkerRegistration | null>(null);
   const updateReloadRef = useRef(false);
+  const deepLinkHandledRef = useRef(false);
+  const [linkedWeekNumber, setLinkedWeekNumber] = useState<number | null>(null);
 
   useEffect(() => {
     const task = window.setTimeout(() => {
@@ -217,6 +220,66 @@ export default function Home() {
     }, 0);
     return () => window.clearTimeout(task);
   }, []);
+  useEffect(() => {
+    if (!hydrated || deepLinkHandledRef.current) return;
+    const task = window.setTimeout(() => {
+      const route = parseContentRoute(window.location.pathname, window.location.search, APP_BASE_PATH);
+      if (!route) return;
+      deepLinkHandledRef.current = true;
+      const weekNumber = contentRouteWeek(route);
+      setLinkedWeekNumber(weekNumber);
+
+      if (window.location.pathname !== route.canonicalPath) {
+        window.history.replaceState(null, "", route.canonicalPath);
+      }
+      if (route.kind === "week") {
+        setView("year-plan");
+        return;
+      }
+      if (!learning.diagnostic) {
+        setView("diagnostic-intro");
+        return;
+      }
+
+      const linkedWeek = YEAR_WEEKS[weekNumber - 1];
+      const linkedMission = ALL_DEEP_MISSIONS.find((mission) => mission.id === linkedWeek?.missionId);
+      if (!linkedMission) {
+        setView("year-plan");
+        return;
+      }
+      const linkedStage: MissionStage = route.kind === "lesson"
+        ? (["predict", "strategies", "practice", "transfer", "reflect"] as MissionStage[])[lessonStageIndex(route.id)]
+        : "predict";
+      setMissionId(linkedMission.id);
+      setStage(linkedStage);
+      setPredictionChoice("");
+      setPredictionRevealed(false);
+      setLabChoice("");
+      setLabChecked(false);
+      setPracticeIndex(0);
+      setPracticeAnswer("");
+      setPracticeChecked(false);
+      setFirstAttempts(Array(linkedMission.deepPractice.length).fill(null));
+      setAttemptCounts(Array(linkedMission.deepPractice.length).fill(0));
+      setHintDepths(Array(linkedMission.deepPractice.length).fill(0));
+      setTransferAnswer("");
+      setTransferChecked(false);
+      setTransferFirst(null);
+      setTransferAttempts(0);
+      setTransferHintDepth(0);
+      setReflectionPrompt(0);
+      setReflectionDraft("");
+      setView("mission");
+    }, 0);
+    return () => window.clearTimeout(task);
+  }, [hydrated, learning.diagnostic]);
+  useEffect(() => {
+    if (view !== "year-plan" || !linkedWeekNumber) return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(`week-${linkedWeekNumber}`)?.scrollIntoView({ block: "center" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [linkedWeekNumber, view]);
   useEffect(() => {
     if (!hydrated) return;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...learning, schemaVersion: CURRICULUM_VERSION, savedAt: new Date().toISOString() }));
@@ -310,7 +373,8 @@ export default function Home() {
   const missionCounts = Object.fromEntries(Object.entries(learning.missionRecords).map(([id, record]) => [id, record.completedCount]));
   const yearProgress = YEAR_WEEKS.map((week) => ({ week, progress: weekProgress(week, missionCounts, learning.enrichmentCompleted) }));
   const completedWeeks = yearProgress.filter((item) => item.progress.complete).length;
-  const activeYearItem = yearProgress.find((item) => !item.progress.complete) ?? yearProgress[yearProgress.length - 1];
+  const linkedYearItem = linkedWeekNumber ? yearProgress[linkedWeekNumber - 1] : null;
+  const activeYearItem = linkedYearItem ?? yearProgress.find((item) => !item.progress.complete) ?? yearProgress[yearProgress.length - 1];
   const activeWeek = activeYearItem.week;
   const activeWeekProgress = activeYearItem.progress;
   const plannedEnrichmentTask = findPlannedTask(curatedPacks, activeWeek.taskId);

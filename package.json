@@ -9,7 +9,7 @@
     "install:ci": "bash scripts/install-ci.sh",
     "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vite",
     "build": "bash scripts/build-verified.sh",
-    "build:github": "GITHUB_PAGES=true next build && node scripts/generate-service-worker.mjs",
+    "build:github": "GITHUB_PAGES=true next build && node scripts/generate-service-worker.mjs && node scripts/validate-github-pages.mjs",
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
     "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "bash scripts/sites-env.sh -- eslint . --ignore-pattern dist --ignore-pattern .next",
