@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": "2026.09.03.3",
+  "version": "2026.09.16.1",
   "title": "Math Raccoon · Lộ trình nâng cao 9 tháng",
-  "publishedAt": "2026-09-03",
+  "publishedAt": "2026-09-16",
   "contentScope": {
     "missions": 36,
     "domains": 6,
@@ -13,7 +13,9 @@
     "programMonths": 9,
     "programWeeks": 36,
     "coreSessions": 180,
-    "reviewPacks": 9
+    "reviewPacks": 9,
+    "skillLabStrands": 8,
+    "skillLabQuestions": 48
   },
   "approval": {
     "status": "approved-for-release",
@@ -27,6 +29,9 @@
     }
   },
   "notes": [
+    "Bổ sung Phòng luyện xoắn ốc gồm 48 câu thuộc 8 mảng: giá trị hàng, phân số, biểu thức, lý thuyết số, logic, tổ hợp, IQ hình và Toán tiếng Anh.",
+    "Mỗi vòng luyện trộn 10 câu, ưu tiên nội dung chưa học hoặc chưa vững và có chế độ ôn riêng các câu từng làm sai.",
+    "Mọi câu bổ sung có ba tầng gợi ý, phản hồi theo sai lầm thường gặp, lời giải và không dùng đồng hồ đếm ngược.",
     "Bổ sung đường dẫn trực tiếp cho đủ 36 bài toán mở và dẫn đúng tới gói tháng cần phụ huynh duyệt.",
     "Thêm điều hướng toàn cục giữa Trang chủ, Đánh giá và Lộ trình; các badge tiến độ nay có thể bấm.",
     "Màn hình kết quả hiển thị số câu đúng lần đầu, điểm mạnh nổi bật và phản hồi gắn với phương án bé đã chọn.",

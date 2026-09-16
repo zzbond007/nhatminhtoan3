@@ -32,9 +32,13 @@ import {
 import { contentRouteWeek, lessonStageIndex, parseContentRoute } from "./content-route";
 import { localCalendarDayIndex } from "./calendar-day";
 import { correctOnFirstAttempt, missionStrength, wrongAnswerFeedback } from "./learning-feedback";
+import {
+  buildSkillLabSession, SKILL_LAB_QUESTIONS, SKILL_LAB_QUESTION_COUNT, SKILL_LAB_STRANDS,
+  type SkillLabMode, type SkillLabQuestion, type SkillLabRecordLike,
+} from "./skill-lab";
 import CONTENT_RELEASE from "../public/content-release.json";
 
-type View = "dashboard" | "diagnostic-intro" | "diagnostic" | "diagnostic-result" | "mission" | "enrichment" | "year-plan" | "content-review";
+type View = "dashboard" | "diagnostic-intro" | "diagnostic" | "diagnostic-result" | "mission" | "enrichment" | "skill-lab" | "year-plan" | "content-review";
 type MissionStage = "predict" | "explore" | "strategies" | "practice" | "transfer" | "reflect" | "result";
 type DomainScore = { correct: number; total: number; percent: number; status: "strong" | "developing" | "review" };
 type DiagnosticResult = { correct: number; total: number; percent: number; placement: string; scores: Record<DomainId, DomainScore>; finishedAt: string };
@@ -44,17 +48,19 @@ type MissionRecord = {
   retries: number; completedAt: string; reviewAt: string; reflection: string;
   prediction: string; focusNeeds: string[]; completedCount: number; sessions: SessionEvidence[];
 };
+type SkillLabRecord = SkillLabRecordLike;
+type SkillLabSession = { finishedAt: string; mode: SkillLabMode; correctFirst: number; total: number; questionIds: string[] };
 type LearningProfile = {
   schemaVersion: number; profileId: string; nickname: string; createdAt: string; savedAt: string;
   diagnostic: DiagnosticResult | null; missionRecords: Record<string, MissionRecord>; discoveryDays: string[];
-  enrichmentCompleted: string[];
+  enrichmentCompleted: string[]; skillLabRecords: Record<string, SkillLabRecord>; skillLabSessions: SkillLabSession[];
 };
 type LegacyRecord = Partial<MissionRecord>;
 type UpdateState = "idle" | "checking" | "current" | "available" | "installing" | "offline" | "rejected" | "error";
 type PackState = "idle" | "checking" | "available" | "current" | "offline" | "rejected" | "error";
 type ContentRelease = typeof CONTENT_RELEASE;
 
-const STORAGE_KEY = "math-raccoon-learning-v7";
+const STORAGE_KEY = "math-raccoon-learning-v8";
 const APPROVED_PACK_KEY = "math-raccoon-approved-packs-v2";
 const LEGACY_APPROVED_PACK_KEY = "math-raccoon-approved-pack-v1";
 const APP_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -82,7 +88,7 @@ function uid() {
 }
 function freshProfile(): LearningProfile {
   const now = new Date().toISOString();
-  return { schemaVersion: CURRICULUM_VERSION, profileId: uid(), nickname: "Nhà thám hiểm", createdAt: now, savedAt: now, diagnostic: null, missionRecords: {}, discoveryDays: [], enrichmentCompleted: [] };
+  return { schemaVersion: CURRICULUM_VERSION, profileId: uid(), nickname: "Nhà thám hiểm", createdAt: now, savedAt: now, diagnostic: null, missionRecords: {}, discoveryDays: [], enrichmentCompleted: [], skillLabRecords: {}, skillLabSessions: [] };
 }
 function normalize(value: string, numeric = false) {
   if (numeric) return value.replace(/[^0-9-]/g, "");
@@ -140,6 +146,20 @@ function migrateProfile(raw: unknown): LearningProfile {
       missionRecords[`${domain}-1`] = migrateRecord({ bestFirstScore: score, autonomy: score });
     });
   }
+  const skillLabRecords: Record<string, SkillLabRecord> = {};
+  if (value.skillLabRecords && typeof value.skillLabRecords === "object") {
+    Object.entries(value.skillLabRecords).forEach(([id, record]) => {
+      if (!record || typeof record !== "object") return;
+      const candidate = record as Partial<SkillLabRecord>;
+      skillLabRecords[id] = {
+        attempts: Math.max(0, Number(candidate.attempts) || 0),
+        correct: Math.max(0, Number(candidate.correct) || 0),
+        streak: Math.max(0, Number(candidate.streak) || 0),
+        needsReview: Boolean(candidate.needsReview),
+        lastAttemptAt: typeof candidate.lastAttemptAt === "string" ? candidate.lastAttemptAt : "",
+      };
+    });
+  }
   return {
     schemaVersion: CURRICULUM_VERSION,
     profileId: typeof value.profileId === "string" ? value.profileId : base.profileId,
@@ -150,6 +170,8 @@ function migrateProfile(raw: unknown): LearningProfile {
     missionRecords,
     discoveryDays: Array.isArray(value.discoveryDays) ? value.discoveryDays.filter((day): day is string => typeof day === "string") : [],
     enrichmentCompleted: Array.isArray(value.enrichmentCompleted) ? value.enrichmentCompleted.filter((id): id is string => typeof id === "string") : [],
+    skillLabRecords,
+    skillLabSessions: Array.isArray(value.skillLabSessions) ? value.skillLabSessions.filter((session): session is SkillLabSession => Boolean(session && typeof session === "object" && typeof session.finishedAt === "string")).slice(-30) : [],
   };
 }
 
@@ -160,17 +182,17 @@ function AppHeader({ back, onHome, sparkPoints, completedMissions, totalSessions
   return <header className="app-header"><div className="header-left">{back && <Button variant="ghost" size="icon" onClick={back} aria-label="Quay lại" className="back-button"><ArrowLeft /></Button>}<button className="brand" onClick={onHome} type="button"><span className="brand-icon">🦝</span><span>Math Raccoon <small>CLB Toán nâng cao lớp 3</small></span></button></div><nav className="global-nav" aria-label="Điều hướng chính"><a href={homePath}><House /> Trang chủ</a><a href={assessmentPath}><ClipboardCheck /> Đánh giá</a><a href={roadmapPath}><CalendarDays /> Lộ trình</a></nav><div className="header-badges"><a href={roadmapPath} aria-label={`${sparkPoints} tia sáng, mở trang tiến độ`}><Sparkles /> {sparkPoints}<span> tia sáng</span></a><a href={roadmapPath} aria-label={`${completedMissions} trên 36 chủ đề, mở lộ trình`}><Trophy /> {completedMissions}/36<span>{typeof totalSessions === "number" ? ` · ${totalSessions} lượt` : " chủ đề"}</span></a></div></header>;
 }
 
-function SpeakButton({ text, dark = false }: { text: string; dark?: boolean }) {
+function SpeakButton({ text, dark = false, lang = "vi-VN", label = "Nghe đọc đề" }: { text: string; dark?: boolean; lang?: "vi-VN" | "en-US"; label?: string }) {
   function speak() {
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text.normalize("NFC"));
-    utterance.lang = "vi-VN";
-    utterance.rate = .88;
+    utterance.lang = lang;
+    utterance.rate = lang === "en-US" ? .82 : .88;
     utterance.pitch = 1.05;
     window.speechSynthesis.speak(utterance);
   }
-  return <Button type="button" variant="outline" onClick={speak} className={`speak-button ${dark ? "dark" : ""}`} aria-label="Nghe đọc đề"><Volume2 /> Nghe đọc đề</Button>;
+  return <Button type="button" variant="outline" onClick={speak} className={`speak-button ${dark ? "dark" : ""}`} aria-label={label}><Volume2 /> {label}</Button>;
 }
 
 export default function Home() {
@@ -203,6 +225,15 @@ export default function Home() {
   const [showFullMap, setShowFullMap] = useState(false);
   const [dailyChoice, setDailyChoice] = useState("");
   const [dailyChecked, setDailyChecked] = useState(false);
+  const [skillLabMode, setSkillLabMode] = useState<SkillLabMode>("spiral");
+  const [skillLabQuestionIds, setSkillLabQuestionIds] = useState<string[]>([]);
+  const [skillLabIndex, setSkillLabIndex] = useState(0);
+  const [skillLabAnswer, setSkillLabAnswer] = useState("");
+  const [skillLabChecked, setSkillLabChecked] = useState(false);
+  const [skillLabHintDepth, setSkillLabHintDepth] = useState(0);
+  const [skillLabFirstTry, setSkillLabFirstTry] = useState<boolean | null>(null);
+  const [skillLabResults, setSkillLabResults] = useState<Array<{ id: string; firstTry: boolean }>>([]);
+  const [skillLabFinished, setSkillLabFinished] = useState(false);
   const [online, setOnline] = useState(true);
   const [offlineReady, setOfflineReady] = useState(false);
   const [updateState, setUpdateState] = useState<UpdateState>("idle");
@@ -221,7 +252,7 @@ export default function Home() {
   useEffect(() => {
     const task = window.setTimeout(() => {
       try {
-        const saved = window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem("math-raccoon-learning-v6") ?? window.localStorage.getItem("math-raccoon-learning-v5") ?? window.localStorage.getItem("math-raccoon-learning-v4") ?? window.localStorage.getItem("math-raccoon-learning-v3");
+        const saved = window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem("math-raccoon-learning-v7") ?? window.localStorage.getItem("math-raccoon-learning-v6") ?? window.localStorage.getItem("math-raccoon-learning-v5") ?? window.localStorage.getItem("math-raccoon-learning-v4") ?? window.localStorage.getItem("math-raccoon-learning-v3");
         if (saved) setLearning(migrateProfile(JSON.parse(saved)));
       } catch { setBackupStatus("Không đọc được hồ sơ cũ; một hồ sơ mới đã được mở an toàn."); }
       setHydrated(true);
@@ -384,12 +415,19 @@ export default function Home() {
   const transferCorrect = transferChecked && answerIsCorrect(currentMission.transfer, transferAnswer);
   const currentDiagnostic = DIAGNOSTIC_QUESTIONS[diagnosticIndex];
   const todayPuzzle = DAILY_PUZZLES_60[LOCAL_DAY_INDEX % DAILY_PUZZLES_60.length];
+  const skillLabQuestions = skillLabQuestionIds.map((id) => SKILL_LAB_QUESTIONS.find((question) => question.id === id)).filter((question): question is SkillLabQuestion => Boolean(question));
+  const currentSkillLabQuestion = skillLabQuestions[skillLabIndex];
+  const currentSkillLabStrand = currentSkillLabQuestion ? SKILL_LAB_STRANDS.find((strand) => strand.id === currentSkillLabQuestion.strand) : null;
+  const currentSkillLabCorrect = Boolean(currentSkillLabQuestion && skillLabChecked && answerIsCorrect(currentSkillLabQuestion, skillLabAnswer));
+  const skillLabReviewCount = Object.values(learning.skillLabRecords).filter((record) => record.needsReview).length;
+  const skillLabMasteredCount = Object.values(learning.skillLabRecords).filter((record) => record.streak >= 2 && !record.needsReview).length;
+  const skillLabAttemptedCount = Object.values(learning.skillLabRecords).filter((record) => record.attempts > 0).length;
   const completedMissions = Object.keys(learning.missionRecords).filter((id) => ALL_DEEP_MISSIONS.some((mission) => mission.id === id)).length;
   const totalSessions = Object.values(learning.missionRecords).reduce((sum, record) => sum + record.completedCount, 0);
   const reflectionCount = Object.values(learning.missionRecords).filter((record) => record.reflection.trim()).length;
   const totalHints = Object.values(learning.missionRecords).reduce((sum, record) => sum + record.hintsUsed, 0);
   const totalRetries = Object.values(learning.missionRecords).reduce((sum, record) => sum + record.retries, 0);
-  const sparkPoints = (learning.diagnostic ? 60 : 0) + totalSessions * 120 + reflectionCount * 20 + learning.enrichmentCompleted.length * 80;
+  const sparkPoints = (learning.diagnostic ? 60 : 0) + totalSessions * 120 + reflectionCount * 20 + learning.enrichmentCompleted.length * 80 + skillLabMasteredCount * 15;
   const missionCounts = Object.fromEntries(Object.entries(learning.missionRecords).map(([id, record]) => [id, record.completedCount]));
   const yearProgress = YEAR_WEEKS.map((week) => ({ week, progress: weekProgress(week, missionCounts, learning.enrichmentCompleted) }));
   const completedWeeks = yearProgress.filter((item) => item.progress.complete).length;
@@ -434,6 +472,57 @@ export default function Home() {
 
   function scrollTop() { window.scrollTo({ top: 0, behavior: "smooth" }); }
   function goDashboard() { setLinkedOpenTaskWeek(null); setView("dashboard"); scrollTop(); }
+  function openSkillLab() {
+    setSkillLabQuestionIds([]); setSkillLabIndex(0); setSkillLabAnswer(""); setSkillLabChecked(false);
+    setSkillLabHintDepth(0); setSkillLabFirstTry(null); setSkillLabResults([]); setSkillLabFinished(false);
+    setView("skill-lab"); scrollTop();
+  }
+  function startSkillLab(mode: SkillLabMode) {
+    const session = buildSkillLabSession(learning.skillLabRecords, LOCAL_DAY_INDEX + learning.skillLabSessions.length, mode, 10);
+    setSkillLabMode(mode); setSkillLabQuestionIds(session.map((question) => question.id)); setSkillLabIndex(0);
+    setSkillLabAnswer(""); setSkillLabChecked(false); setSkillLabHintDepth(0); setSkillLabFirstTry(null);
+    setSkillLabResults([]); setSkillLabFinished(false); setView("skill-lab"); scrollTop();
+  }
+  function checkSkillLab() {
+    if (!currentSkillLabQuestion || !skillLabAnswer || skillLabChecked) return;
+    const correct = answerIsCorrect(currentSkillLabQuestion, skillLabAnswer);
+    const now = new Date().toISOString();
+    setSkillLabChecked(true);
+    if (skillLabFirstTry === null) setSkillLabFirstTry(correct);
+    setLearning((profile) => {
+      const previous = profile.skillLabRecords[currentSkillLabQuestion.id] ?? { attempts: 0, correct: 0, streak: 0, needsReview: false, lastAttemptAt: "" };
+      const streak = correct ? previous.streak + 1 : 0;
+      const next: SkillLabRecord = {
+        attempts: previous.attempts + 1,
+        correct: previous.correct + (correct ? 1 : 0),
+        streak,
+        needsReview: correct ? previous.needsReview && streak < 2 : true,
+        lastAttemptAt: now,
+      };
+      return { ...profile, skillLabRecords: { ...profile.skillLabRecords, [currentSkillLabQuestion.id]: next } };
+    });
+  }
+  function retrySkillLab() { setSkillLabAnswer(""); setSkillLabChecked(false); scrollTop(); }
+  function nextSkillLabQuestion() {
+    if (!currentSkillLabQuestion || !currentSkillLabCorrect) return;
+    const finalResults = [...skillLabResults, { id: currentSkillLabQuestion.id, firstTry: Boolean(skillLabFirstTry) }];
+    if (skillLabIndex === skillLabQuestions.length - 1) {
+      const today = new Date().toISOString().slice(0, 10);
+      const session: SkillLabSession = {
+        finishedAt: new Date().toISOString(), mode: skillLabMode,
+        correctFirst: finalResults.filter((result) => result.firstTry).length,
+        total: finalResults.length, questionIds: finalResults.map((result) => result.id),
+      };
+      setLearning((profile) => ({
+        ...profile,
+        skillLabSessions: [...profile.skillLabSessions, session].slice(-30),
+        discoveryDays: profile.discoveryDays.includes(today) ? profile.discoveryDays : [...profile.discoveryDays, today],
+      }));
+      setSkillLabResults(finalResults); setSkillLabFinished(true); scrollTop(); return;
+    }
+    setSkillLabResults(finalResults); setSkillLabIndex((index) => index + 1); setSkillLabAnswer("");
+    setSkillLabChecked(false); setSkillLabHintDepth(0); setSkillLabFirstTry(null); scrollTop();
+  }
   function startYearRecommendation() {
     if (activeWeekNeedsOpenTask) {
       if (plannedEnrichmentTask) startEnrichment();
@@ -602,9 +691,21 @@ export default function Home() {
     }));
     goDashboard();
   }
-  function renderAnswerInput(question: DiagnosticQuestion | DeepQuestion, value: string, onChange: (value: string) => void, disabled = false) {
+  function renderAnswerInput(question: DiagnosticQuestion | DeepQuestion | SkillLabQuestion, value: string, onChange: (value: string) => void, disabled = false) {
     if (question.type === "number") return <div className="number-answer-wrap"><Input value={value} onChange={(event) => onChange(event.target.value)} inputMode="numeric" disabled={disabled} placeholder="Nhập đáp án" aria-label="Nhập đáp án bằng số" className="number-answer" /><span>Chỉ nhập số, không cần ghi đơn vị</span></div>;
     return <RadioGroup value={value} onValueChange={onChange} disabled={disabled} className="answer-list">{question.options?.map((option, index) => <label key={option} className="answer-row"><RadioGroupItem value={option} id={`${"id" in question ? question.id : "q"}-${index}`} /><span className="answer-letter">{String.fromCharCode(65 + index)}</span><span>{option}</span></label>)}</RadioGroup>;
+  }
+  if (view === "skill-lab") {
+    if (skillLabFinished) {
+      const firstTryScore = skillLabResults.filter((result) => result.firstTry).length;
+      const reviewStrands = [...new Set(skillLabResults.filter((result) => !result.firstTry).map((result) => SKILL_LAB_QUESTIONS.find((question) => question.id === result.id)?.strand).filter(Boolean))]
+        .map((id) => SKILL_LAB_STRANDS.find((strand) => strand.id === id)).filter((strand): strand is NonNullable<typeof strand> => Boolean(strand));
+      return <main className="app-shell min-h-screen"><div className="page-wrap narrow"><AppHeader back={goDashboard} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} totalSessions={totalSessions} /><section className="skill-lab-result"><div className="skill-lab-result-mark">{firstTryScore === skillLabResults.length ? "🌟" : "🧭"}</div><p className="eyebrow">Kết thúc vòng luyện xoắn ốc</p><h1>{firstTryScore}/{skillLabResults.length} câu đúng ngay lần đầu</h1><p>Mọi câu đều đã được con giải đúng. Hệ thống chỉ giữ lại những ý tưởng cần gọi lại, không phạt việc thử và sửa.</p><div className="skill-lab-result-stats"><div><strong>{skillLabMasteredCount}</strong><span>Câu đã vững</span></div><div><strong>{skillLabReviewCount}</strong><span>Câu cần gọi lại</span></div><div><strong>{learning.skillLabSessions.length}</strong><span>Vòng đã hoàn thành</span></div></div>{reviewStrands.length > 0 ? <div className="skill-lab-focus"><Lightbulb /><div><strong>Lần sau nên gọi lại</strong><p>{reviewStrands.map((strand) => strand.short).join(" · ")}</p></div></div> : <div className="skill-lab-focus success"><CheckCircle2 /><div><strong>Vòng này không có câu nào cần sửa</strong><p>Con có thể nghỉ hoặc trở lại lộ trình 36 tuần.</p></div></div>}<div className="result-actions"><Button variant="outline" onClick={() => startSkillLab("spiral")}><RefreshCw /> Vòng 10 câu mới</Button><Button onClick={goDashboard} className="primary-action small">Về hành trình chính <ArrowRight /></Button></div></section></div></main>;
+    }
+    if (!currentSkillLabQuestion || !currentSkillLabStrand) {
+      return <main className="app-shell min-h-screen"><div className="page-wrap"><AppHeader back={goDashboard} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} totalSessions={totalSessions} /><section className="skill-lab-hero"><div><p className="eyebrow">Phòng luyện xoắn ốc · nội dung bổ sung</p><h1>Lấp khoảng trống, không biến việc học thành cày đề</h1><p>Mỗi vòng chọn 10 câu từ tám mảng còn thiếu trong lộ trình chính. Câu làm sai sẽ quay lại có chủ đích; mỗi câu vẫn giữ ba tầng gợi ý và lời giải.</p><div className="skill-lab-actions"><Button onClick={() => startSkillLab("spiral")} className="primary-action"><RefreshCw /> Bắt đầu 10 câu hôm nay</Button><Button variant="outline" onClick={() => startSkillLab("review")} disabled={skillLabReviewCount === 0}><Lightbulb /> {skillLabReviewCount ? `Ôn ${skillLabReviewCount} câu chưa vững` : "Chưa có câu cần ôn"}</Button></div></div><div className="skill-lab-summary"><span><strong>{SKILL_LAB_QUESTION_COUNT}</strong> câu gốc</span><span><strong>8</strong> mảng bổ sung</span><span><strong>{skillLabAttemptedCount}</strong> câu đã thử</span><span><strong>{skillLabMasteredCount}</strong> câu đã vững</span></div></section><section className="skill-lab-strands"><div className="panel-heading"><div><p className="eyebrow">Ma trận bổ sung</p><h2>Tám mảng được chọn sau khi đối chiếu chương trình</h2></div><span>Mỗi mảng 6 câu · không đếm giờ</span></div><div>{SKILL_LAB_STRANDS.map((strand) => { const records = SKILL_LAB_QUESTIONS.filter((question) => question.strand === strand.id).map((question) => learning.skillLabRecords[question.id]).filter(Boolean); const mastered = records.filter((record) => record.streak >= 2 && !record.needsReview).length; return <article key={strand.id}><span style={{ background: strand.soft, color: strand.color }}>{strand.emoji}</span><div><strong>{strand.name}</strong><p>{strand.description}</p><small>{mastered}/6 câu đã vững</small></div></article>; })}</div></section><p className="skill-lab-note"><ShieldCheck /> Nội dung được biên soạn lại theo triết lý Math Raccoon; không sao chép ngân hàng câu hỏi của chương trình đối chiếu.</p></div></main>;
+    }
+    return <main className="app-shell min-h-screen"><div className="page-wrap narrow"><AppHeader back={openSkillLab} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} totalSessions={totalSessions} /><section className="skill-lab-progress"><div><p className="eyebrow">{skillLabMode === "review" ? "Ôn câu chưa vững" : "Vòng luyện xoắn ốc"}</p><strong>Câu {skillLabIndex + 1}/{skillLabQuestions.length}</strong></div><span>{currentSkillLabStrand.emoji} {currentSkillLabStrand.short}</span></section><Progress value={((skillLabIndex + (currentSkillLabCorrect ? 1 : 0)) / skillLabQuestions.length) * 100} className="diagnostic-progress" /><section className="skill-lab-card"><div className="question-meta"><span style={{ background: currentSkillLabStrand.soft, color: currentSkillLabStrand.color }}>{currentSkillLabStrand.emoji}</span><div><small>Mảng bổ sung</small><strong>{currentSkillLabStrand.name}</strong></div><em>Gợi ý {skillLabHintDepth}/3</em></div><h1>{currentSkillLabQuestion.prompt}</h1><SpeakButton text={currentSkillLabQuestion.prompt} />{currentSkillLabQuestion.englishPrompt && <div className="math-english-prompt"><Globe2 /><div><small>Math English</small><strong>{currentSkillLabQuestion.englishPrompt}</strong><SpeakButton text={currentSkillLabQuestion.englishPrompt} lang="en-US" label="Nghe tiếng Anh" /></div></div>}{currentSkillLabQuestion.diagram && <pre className="skill-lab-diagram" role="img" aria-label={`Sơ đồ cho câu hỏi: ${currentSkillLabQuestion.diagram.replace(/\n/g, "; ")}`}>{currentSkillLabQuestion.diagram}</pre>}{renderAnswerInput(currentSkillLabQuestion, skillLabAnswer, setSkillLabAnswer, skillLabChecked)}{skillLabHintDepth > 0 && !currentSkillLabCorrect && <div className="hint-box"><Lightbulb /><div><strong>Gợi ý tầng {skillLabHintDepth}</strong><p>{currentSkillLabQuestion.hints[skillLabHintDepth - 1]}</p></div></div>}{skillLabChecked && <div className={`feedback ${currentSkillLabCorrect ? "correct" : "incorrect"}`}><span>{currentSkillLabCorrect ? <Check /> : <RefreshCw />}</span><div><strong>{currentSkillLabCorrect ? "Đúng rồi—ý tưởng đang đứng vững" : "Chưa khớp—hãy sửa cách nghĩ"}</strong><p>{currentSkillLabCorrect ? currentSkillLabQuestion.explanation : currentSkillLabQuestion.misconception}</p></div></div>}<div className="practice-actions">{!currentSkillLabCorrect && <Button variant="outline" onClick={() => setSkillLabHintDepth((depth) => Math.min(3, depth + 1))} disabled={skillLabHintDepth === 3}><Lightbulb /> {skillLabHintDepth === 3 ? "Đã mở đủ 3 tầng" : `Mở gợi ý tầng ${skillLabHintDepth + 1}`}</Button>}{skillLabChecked && !currentSkillLabCorrect ? <Button onClick={retrySkillLab}>Sửa cách làm</Button> : currentSkillLabCorrect ? <Button onClick={nextSkillLabQuestion} className="primary-action small">{skillLabIndex === skillLabQuestions.length - 1 ? "Xem kết quả" : "Câu tiếp theo"} <ArrowRight /></Button> : <Button onClick={checkSkillLab} disabled={!skillLabAnswer}>Kiểm tra</Button>}</div></section><p className="diagnostic-note"><LockKeyhole /> Không có đồng hồ đếm ngược. Câu sai sẽ được đưa vào vòng ôn riêng.</p></div></main>;
   }
   if (view === "diagnostic-intro") return <main className="app-shell min-h-screen"><div className="page-wrap"><AppHeader back={goDashboard} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} /><section className="assessment-intro"><div className="assessment-mark"><ClipboardCheck /></div><p className="eyebrow">Khám phá năng lực</p><h1>Tìm đúng vùng thử thách<br />khiến con muốn tiến thêm</h1><p className="lead">18 câu quan sát sáu kiểu tư duy. Kết quả chỉ dùng để chọn độ khó và thứ tự nhiệm vụ—không xếp hạng con, không chạy đua thời gian.</p><div className="assessment-facts"><div><Clock3 /><strong>15–20 phút</strong><span>Có thể nghỉ giữa chừng</span></div><div><Brain /><strong>6 kiểu tư duy</strong><span>Từ quy luật đến logic</span></div><div><Route /><strong>36 nhiệm vụ sâu</strong><span>Mỗi nhiệm vụ có chuyển giao</span></div></div><div className="assessment-rules"><h2>Ba điều giúp dữ liệu phản ánh đúng con</h2><ul><li>Để con tự nghĩ; người lớn chỉ giúp đọc đề nếu cần.</li><li>Không nhắc đáp án. Câu chưa làm được giúp chọn điểm bắt đầu.</li><li>Khuyến khích con nói “con đang thử cách này”.</li></ul></div><Button size="lg" onClick={beginDiagnostic} className="primary-action">Bắt đầu khám phá <ArrowRight /></Button></section></div></main>;
 
@@ -664,6 +765,7 @@ export default function Home() {
   }
 
   return <main className="app-shell min-h-screen"><div className="page-wrap"><AppHeader onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} /><section className="dashboard-hero"><div className="hero-copy"><p className="eyebrow">{learning.diagnostic ? `Xin chào ${learning.nickname}` : "Chương trình nâng cao 9 tháng · 15–20 phút/buổi"}</p><h1>{learning.diagnostic ? `Tuần ${activeWeek.week}: ${activeWeek.title}` : "Mỗi bài toán là một cuộc phiêu lưu"}</h1><p>{learning.diagnostic ? `${activeWeek.bigQuestion} Con đang ở buổi ${Math.min(5, activeWeekProgress.total + 1)}/5 của tuần này.` : "Không học lại bài trên lớp. Con dự đoán, thử, sửa và giải thích như một nhà toán học nhỏ."}</p><div className="hero-actions">{learning.diagnostic ? <><Button onClick={startYearRecommendation} className="primary-action">{activeWeekNeedsOpenTask ? plannedEnrichmentTask ? "Làm bài toán mở" : "Nhờ người lớn duyệt nội dung" : "Bắt đầu buổi hôm nay"} <ArrowRight /></Button><Button variant="outline" onClick={() => { setView("year-plan"); scrollTop(); }}><CalendarDays /> Xem lộ trình 9 tháng</Button></> : <Button onClick={() => setView("diagnostic-intro")} className="primary-action">Khám phá năng lực <ClipboardCheck /></Button>}</div></div><aside className="daily-puzzle"><div className="puzzle-heading"><span>🦝</span><div><p className="eyebrow">Câu đố 60 ngày</p><strong>Ba mươi giây để tò mò</strong></div></div><h2>{todayPuzzle.prompt}<small>{todayPuzzle.note}</small></h2><SpeakButton text={todayPuzzle.prompt} dark /><RadioGroup value={dailyChoice} onValueChange={(value) => { setDailyChoice(value); setDailyChecked(false); }} className="puzzle-options">{todayPuzzle.options.map((option) => <label key={option}><RadioGroupItem value={option} /><span>{option}</span></label>)}</RadioGroup>{dailyChecked && <div className={`puzzle-feedback ${dailyChoice === todayPuzzle.answer ? "success" : "try"}`}>{dailyChoice === todayPuzzle.answer ? todayPuzzle.explanation : todayPuzzle.hint}</div>}<Button variant="outline" onClick={() => setDailyChecked(true)} disabled={!dailyChoice}>Mở khóa câu đố</Button></aside></section>
+    <section className="skill-lab-strip"><div className="skill-lab-strip-icon">🧠</div><div><p className="eyebrow">Mới · Phòng luyện xoắn ốc</p><h2>Phân số, biểu thức, lý thuyết số, IQ hình và Toán tiếng Anh</h2><p>10 câu ngắn được trộn từ tám mảng bổ sung; câu chưa vững tự quay lại ở vòng sau.</p></div><div className="skill-lab-strip-stats"><span><strong>{skillLabMasteredCount}</strong> đã vững</span><span><strong>{skillLabReviewCount}</strong> cần ôn</span></div><Button onClick={openSkillLab} className="primary-action small">Mở phòng luyện <ArrowRight /></Button></section>
     {learning.diagnostic && <section className="today-section"><div className="panel-heading"><div><p className="eyebrow">Ba lựa chọn hôm nay</p><h2>Có lộ trình, vẫn giữ quyền lựa chọn</h2></div><span>Tuần {activeWeek.week}/36 · {activeWeekProgress.total}/5 buổi</span></div><div className="today-grid"><button type="button" className="today-card recommended" onClick={startYearRecommendation}><span className="today-badge"><CalendarDays /> Theo lộ trình 9 tháng</span><strong>{activeWeekNeedsOpenTask ? plannedEnrichmentTask?.title ?? "Chờ phụ huynh mở bài toán tuần" : recommendedMission.title}</strong><p>{activeWeekNeedsOpenTask ? "Buổi 5: điều tra một bài toán mở và bảo vệ cách làm." : `Buổi ${activeWeekProgress.guided + 1}/5 · phiên bản mới thích ứng theo mức tự lực.`}</p><em>Bắt đầu <ArrowRight /></em></button><button type="button" className="today-card choice" onClick={() => startMission(choiceMission)}><span className="today-badge"><Sparkles /> Con tự chọn</span><strong>{choiceMission.title}</strong><p>Một miền khác đang mở. Quyền lựa chọn giúp con sở hữu hành trình.</p><em>Khám phá <ArrowRight /></em></button>{dueMissions[0] ? <button type="button" className="today-card review" onClick={() => startMission(dueMissions[0])}><span className="today-badge"><RefreshCw /> Ôn đúng lúc</span><strong>{dueMissions[0].title}</strong><p>Ôn ngắn để kiểm tra ý tưởng còn đứng vững sau thời gian nghỉ.</p><em>Gọi lại ý tưởng <ArrowRight /></em></button> : <div className="today-card review"><span className="today-badge"><CheckCircle2 /> Chưa có bài đến hạn</span><strong>Khoảng nghỉ cũng là học</strong><p>Câu đố 60 ngày phía trên là đủ cho lựa chọn thứ ba hôm nay.</p><em>Không cần học thêm</em></div>}</div></section>}
     {learning.diagnostic && <section className="enrichment-strip"><div className="enrichment-copy"><span><Globe2 /></span><div><p className="eyebrow">Kho mở rộng có kiểm duyệt</p><h2>{enrichmentTask ? enrichmentTask.title : "Bài toán mới từ nguồn toán tư duy uy tín"}</h2><p>{enrichmentTask ? `Một bài mở ${enrichmentTask.minutes} phút: thử, tạo giả thuyết và bảo vệ cách làm.` : "Nội dung Internet không đi thẳng tới trẻ. Phụ huynh kiểm tra và duyệt gói trước khi sử dụng."}</p></div></div>{enrichmentTask ? <Button onClick={startEnrichment} className="primary-action small">Vào phòng bài toán mở <ArrowRight /></Button> : <span className="enrichment-wait"><ShieldCheck /> Chờ phụ huynh duyệt ở Góc đồng hành</span>}</section>}
     {learning.diagnostic && <section className="content-governance"><div className="governance-heading"><ShieldCheck /><div><p className="eyebrow">Cổng nội dung dành cho phụ huynh</p><h2>Kho 9 tháng đã được chia nhỏ để anh xem và duyệt</h2><p>36 bài toán mở nằm trong 9 gói tháng. Mỗi bài có hướng dẫn đáp án, vật liệu, câu mở rộng và nguồn phương pháp; không có nội dung Internet nào đi thẳng tới trẻ.</p></div></div><div className="governance-actions"><Button variant="outline" onClick={() => { setView("content-review"); scrollTop(); }}><ListChecks /> Mở phòng kiểm duyệt 9 tháng</Button><span className="pack-success"><CheckCircle2 /> {curatedPacks.filter((pack) => pack.month).length}/9 tháng đã duyệt trên iPad</span></div></section>}

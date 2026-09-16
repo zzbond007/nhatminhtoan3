@@ -2,7 +2,7 @@
 
 Math Raccoon là ứng dụng web tĩnh dành cho việc luyện toán nâng cao lớp 3. Ứng dụng không gọi ChatGPT hoặc OpenAI API khi trẻ học, không yêu cầu đăng nhập và lưu tiến trình ngay trên thiết bị.
 
-Phiên bản nội dung v7 gồm:
+Phiên bản nội dung v8 gồm:
 
 - lộ trình 9 tháng gồm 36 tuần × 5 buổi, tổng cộng 180 buổi lõi;
 - 36 chủ đề cốt lõi thuộc 6 miền năng lực;
@@ -10,6 +10,8 @@ Phiên bản nội dung v7 gồm:
 - ba dải thích ứng **Gỡ nút – Vừa sức – Bứt phá** dựa trên mức tự lực, gợi ý và chuyển giao;
 - 60 câu đố nhanh;
 - 36 bài toán mở chia thành 9 gói tháng, có đề, vật liệu, gợi ý, hướng dẫn đáp án, nguồn và xác nhận của phụ huynh.
+- **Phòng luyện xoắn ốc** với 48 câu thuộc 8 mảng bổ sung: giá trị hàng, phân số, thứ tự phép tính, lý thuyết số, logic quan hệ/toán tuổi, tổ hợp, IQ hình và Toán tiếng Anh;
+- vòng luyện 10 câu ưu tiên nội dung chưa học hoặc chưa vững, kèm kho ôn câu sai, ba tầng gợi ý và phản hồi theo sai lầm thường gặp.
 
 ## Cài miễn phí bằng GitHub Pages
 
