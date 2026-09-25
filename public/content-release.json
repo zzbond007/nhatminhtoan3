@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2026.09.25.1",
+  "version": "2026.09.25.2",
   "title": "Math Raccoon · Lộ trình nâng cao 9 tháng",
   "publishedAt": "2026-09-25",
   "contentScope": {
@@ -16,7 +16,9 @@
     "reviewPacks": 9,
     "skillLabStrands": 8,
     "skillLabQuestions": 48,
-    "dinoSpecies": 36
+    "dinoSpecies": 36,
+    "dinoRareSpecies": 12,
+    "authenticTasks": 36
   },
   "approval": {
     "status": "approved-for-release",
@@ -30,6 +32,13 @@
     }
   },
   "notes": [
+    "Thêm Mã tiến trình trong Góc đồng hành: xuất toàn bộ tiến độ thành một đoạn mã để cất giữ và dán vào máy khác khi cần khôi phục; lần đầu mở ứng dụng có lời nhắc về việc dữ liệu lưu trên trình duyệt.",
+    "Đảo Khủng Long có 48 loài vẽ riêng từng dáng (36 loài theo nhiệm vụ và 12 loài Hiếm/Huyền thoại), Tổ ấm để chăm sóc bạn đồng hành, Bộ sưu tập hiện đủ ô cho loài chưa gặp, và Trứng Bí Ẩn xuất hiện bất ngờ sau một số buổi học.",
+    "Bản đồ nhiệm vụ trở thành Hành trình 36 trạm; mỗi 6 tuần có một trạm ẩn chỉ mở khi con Bứt phá ở tuần đó.",
+    "36 nhiệm vụ có câu chuyện, câu dự đoán và câu thử nghiệm đặt trong bối cảnh khủng long của từng vùng; số liệu và đáp án giữ nguyên.",
+    "Mỗi nhiệm vụ có thêm một Nhiệm vụ đời thực làm cùng người lớn cho Buổi 4, có thể in ra một trang.",
+    "Chuỗi ngày học có 2 ngày nghỉ có phép mỗi tháng; ngày chưa học hiện “Hôm nay Khủng Long nghỉ ngơi” thay vì số 0.",
+    "Bài đánh giá: biểu đồ d1 ghi số trên đỉnh cột, câu d3 có hình 30 chấm minh hoạ mẫu khảo sát, câu w3 cho con tự xếp cột chiều cao trước khi trả lời.",
     "Bổ sung Đảo Khủng Long: mỗi nhiệm vụ giữ một quả trứng; hoàn thành một phiên bản nhiệm vụ cho 1–3 mảnh trứng, đủ 4 mảnh thì trứng nở thành một trong 36 loài khủng long; trứng nở trong phiên bản Bứt phá có độ hiếm Hiếm.",
     "Số mảnh trứng dựa trên mức Gỡ nút – Vừa sức – Bứt phá, độ sâu gợi ý và việc giải bằng hai cách (không tính phản tư vì bé chưa tự đánh chữ); bé khủng long lớn lên khi con ôn lại nhiệm vụ ở vòng xoắn ốc.",
     "Bước Phản tư có thêm ô để con và người lớn xác nhận đã giải bằng cả hai cách để nhận thêm một mảnh trứng.",

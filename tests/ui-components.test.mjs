@@ -54,6 +54,13 @@ test("emits child-friendly and offline-update styles", async () => {
   assert.match(css, /\.dino-island/);
   assert.match(css, /\.dino-nest/);
   assert.match(css, /\.dino-hatch-note/);
+  assert.match(css, /\.dino-journey-station/);
+  assert.match(css, /\.dino-gallery-card/);
+  assert.match(css, /\.dino-nest-scene/);
+  assert.match(css, /\.progress-code-box/);
+  assert.match(css, /\.storage-notice/);
+  assert.match(css, /\.authentic-task/);
+  assert.match(css, /@keyframes dino-breathe/);
   assert.match(css, /@media\s*\(width>=768px\)\s*and\s*\(width<=1180px\)/);
 });
 

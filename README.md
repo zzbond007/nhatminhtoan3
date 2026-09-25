@@ -2,7 +2,7 @@
 
 Math Raccoon là ứng dụng web tĩnh dành cho việc luyện toán nâng cao lớp 3. Ứng dụng không gọi ChatGPT hoặc OpenAI API khi trẻ học, không yêu cầu đăng nhập và lưu tiến trình ngay trên thiết bị.
 
-Phiên bản nội dung v9 gồm:
+Phiên bản nội dung v10 gồm:
 
 - lộ trình 9 tháng gồm 36 tuần × 5 buổi, tổng cộng 180 buổi lõi;
 - 36 chủ đề cốt lõi thuộc 6 miền năng lực;
@@ -12,7 +12,11 @@ Phiên bản nội dung v9 gồm:
 - 36 bài toán mở chia thành 9 gói tháng, có đề, vật liệu, gợi ý, hướng dẫn đáp án, nguồn và xác nhận của phụ huynh.
 - **Phòng luyện xoắn ốc** với 48 câu thuộc 8 mảng bổ sung: giá trị hàng, phân số, thứ tự phép tính, lý thuyết số, logic quan hệ/toán tuổi, tổ hợp, IQ hình và Toán tiếng Anh;
 - vòng luyện 10 câu ưu tiên nội dung chưa học hoặc chưa vững, kèm kho ôn câu sai, ba tầng gợi ý và phản hồi theo sai lầm thường gặp;
-- **Đảo Khủng Long**: 36 loài khủng long ứng với 36 nhiệm vụ; mỗi phiên bản nhiệm vụ hoàn thành cho mảnh trứng theo dải thích ứng, độ sâu gợi ý và việc giải hai cách; đủ 4 mảnh thì trứng nở, ôn lại nhiệm vụ ở vòng sau thì khủng long lớn lên; bài toán mở nở trứng Huyền thoại, mốc 7/30/60 ngày học nở trứng Đặc biệt.
+- **Đảo Khủng Long**: 36 loài khủng long ứng với 36 nhiệm vụ; mỗi phiên bản nhiệm vụ hoàn thành cho mảnh trứng theo dải thích ứng, độ sâu gợi ý và việc giải hai cách; đủ 4 mảnh thì trứng nở, ôn lại nhiệm vụ ở vòng sau thì khủng long lớn lên; bài toán mở nở trứng Huyền thoại, mốc 7/30/60 ngày học nở trứng Đặc biệt;
+- 48 loài khủng long vẽ bằng SVG theo 6 dáng cơ thể (36 loài theo nhiệm vụ và 12 loài Hiếm/Huyền thoại), lớn lên thấy rõ qua 3 giai đoạn; **Tổ ấm** chăm sóc bạn đồng hành, **Bộ sưu tập** hiện đủ ô cho loài chưa gặp, **Trứng Bí Ẩn** xuất hiện sau một số buổi học không báo trước;
+- **Hành trình 36 trạm** thay bản đồ tĩnh, mỗi 6 tuần có một trạm ẩn chỉ mở khi con Bứt phá ở tuần đó;
+- câu chuyện, câu dự đoán và câu thử nghiệm của 36 nhiệm vụ đặt trong bối cảnh khủng long (số liệu giữ nguyên), kèm 36 **Nhiệm vụ đời thực** cho Buổi 4;
+- chuỗi ngày học có 2 ngày nghỉ có phép mỗi tháng.
 
 ## Cài miễn phí bằng GitHub Pages
 
@@ -83,6 +87,8 @@ Nếu bản phát hành thiếu trạng thái kiểm duyệt, quy trình dựng 
 
 Tiến trình học nằm trong bộ nhớ Safari của từng thiết bị, không nằm trong GitHub và không gắn với tài khoản ChatGPT.
 
+- Chọn **Xuất mã tiến trình** để có một đoạn mã (bắt đầu bằng `MR1`) chứa toàn bộ tiến độ; dán mã vào Ghi chú hoặc gửi cho chính mình.
+- Trên máy khác, dán mã vào ô **Nhập mã tiến trình** để học tiếp. Mã có phần kiểm tra nên nếu chép thiếu ký tự, ứng dụng sẽ báo và giữ nguyên dữ liệu hiện tại.
 - Chọn **Sao lưu** để tải tệp JSON.
 - Chọn **Khôi phục** để chuyển hồ sơ sang iPad khác.
 - Nên sao lưu mỗi tháng hoặc trước khi xóa dữ liệu Safari.

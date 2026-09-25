@@ -1,7 +1,8 @@
 import { DOMAINS, type DomainId, type PracticeQuestion } from "./content";
 import { MISSION_LIBRARY, type DailyPuzzle, type Mission, type MissionLevel } from "./missions";
+import { DINO_MISSION_STORIES } from "./dino/dino-mission-stories";
 
-export const CURRICULUM_VERSION = 9;
+export const CURRICULUM_VERSION = 10;
 
 export type HintLadder = [string, string, string];
 export type DeepQuestion = PracticeQuestion & {
@@ -409,12 +410,38 @@ function standardize(mission: Mission, sequence: DeepMission["sequence"]): DeepM
   };
 }
 
-export const DEEP_MISSION_LIBRARY = Object.fromEntries(DOMAINS.map((domain) => {
+/** Nhiệm vụ trước khi phủ bối cảnh khủng long — giữ lại để kiểm tra số liệu không đổi. */
+export const BASE_DEEP_MISSION_LIBRARY = Object.fromEntries(DOMAINS.map((domain) => {
   const originals = MISSION_LIBRARY[domain.id];
   const added = extensions[domain.id].map((spec, index) => makeExtension(originals[index], spec, (index + 4) as 4 | 5 | 6));
   const six = [...originals, ...added].map((mission, index) => standardize(mission, (index + 1) as DeepMission["sequence"]));
   return [domain.id, six];
 })) as Record<DomainId, DeepMission[]>;
+
+/** Phủ bối cảnh khủng long lên câu chữ; số liệu, đáp án và lựa chọn giữ nguyên. */
+function withDinoStory(mission: DeepMission): DeepMission {
+  const story = DINO_MISSION_STORIES[mission.id];
+  if (!story) return mission;
+  const [first, ...rest] = mission.practice;
+  const practice = [{ ...first, prompt: story.practice, explanation: story.explanation ?? first.explanation }, ...rest];
+  const choiceLab = mission.lab.type === "choice";
+  return {
+    ...mission,
+    hook: story.hook,
+    wonder: story.wonder,
+    practice,
+    prediction: { ...mission.prediction, prompt: story.wonder },
+    lab: {
+      ...mission.lab,
+      prompt: story.labPrompt ?? (choiceLab ? story.practice : mission.lab.prompt),
+      explanation: choiceLab && story.explanation ? story.explanation : mission.lab.explanation,
+    },
+  };
+}
+
+export const DEEP_MISSION_LIBRARY = Object.fromEntries(
+  Object.entries(BASE_DEEP_MISSION_LIBRARY).map(([domain, missions]) => [domain, missions.map(withDinoStory)]),
+) as Record<DomainId, DeepMission[]>;
 
 export const ALL_DEEP_MISSIONS = Object.values(DEEP_MISSION_LIBRARY).flat();
 

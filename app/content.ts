@@ -17,7 +17,13 @@ export type DiagnosticQuestion = PracticeQuestion & {
   skill: string;
   difficulty: 1 | 2 | 3;
   context?: { label: string; values: { name: string; value: number }[] };
+  /** Hình minh hoạ cụ thể hoá câu hỏi trừu tượng (theo góp ý hội đồng cho d3 và w3). */
+  visual?: DiagnosticVisual;
 };
+
+export type DiagnosticVisual =
+  | { kind: "sample-dots"; total: number; asked: number; liked: number }
+  | { kind: "height-order"; people: string[]; clues: string[] };
 
 export type Lesson = {
   domain: DomainId;
@@ -73,10 +79,10 @@ export const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
   q("g3", "geometry", 3, "Đếm cấu hình", "Một hình chữ nhật có diện tích 24 ô vuông. Có bao nhiêu cặp chiều dài–chiều rộng là số tự nhiên? (Không tính đổi chỗ)", "number", "4", "Tìm các cặp số có tích bằng 24.", "Các cặp là 1×24, 2×12, 3×8 và 4×6: có 4 cặp."),
   q("d1", "data", 1, "Đọc và so sánh dữ liệu", "Biểu đồ cho biết số trang sách bốn ngày. Ngày đọc nhiều nhất hơn ngày đọc ít nhất bao nhiêu trang?", "number", "6", "Tìm cột cao nhất và thấp nhất rồi lấy hiệu.", "Ngày cao nhất 9 trang, thấp nhất 3 trang; chênh lệch 6 trang.", undefined, { label: "Số trang", values: [{ name: "T2", value: 5 }, { name: "T3", value: 9 }, { name: "T4", value: 3 }, { name: "T5", value: 7 }] }),
   q("d2", "data", 2, "Đếm khả năng", "Có 3 chiếc áo và 2 chiếc quần khác nhau. Chọn 1 áo và 1 quần thì có bao nhiêu cách phối?", "number", "6", "Mỗi chiếc áo có thể đi với mấy chiếc quần?", "Mỗi trong 3 áo đi với 2 quần: 3 × 2 = 6 cách."),
-  q("d3", "data", 3, "Suy luận từ dữ liệu", "Khảo sát 10 bạn trong một lớp thấy 6 bạn thích cờ vua. Có thể kết luận chắc chắn cả lớp thích cờ vua không?", "choice", "Không, mẫu khảo sát chưa đủ", "Mười bạn có đại diện chắc chắn cho tất cả học sinh không?", "Kết quả chỉ mô tả 10 bạn được hỏi; chưa đủ để kết luận chắc chắn cho cả lớp.", ["Có, vì 6 lớn hơn 5", "Có, vì đã hỏi 10 bạn", "Không, mẫu khảo sát chưa đủ", "Không, vì cờ vua khó"]),
+  { ...q("d3", "data", 3, "Suy luận từ dữ liệu", "Lớp có 30 bạn. Ta chỉ hỏi 10 bạn đứng gần cửa thì thấy 6 bạn thích cờ vua. Có thể kết luận chắc chắn cả lớp thích cờ vua không?", "choice", "Không, mẫu khảo sát chưa đủ", "Nhìn hình: còn bao nhiêu bạn chưa được hỏi?", "Kết quả chỉ mô tả 10 bạn được hỏi; 20 bạn còn lại chưa được hỏi nên chưa đủ để kết luận chắc chắn cho cả lớp.", ["Có, vì 6 lớn hơn 5", "Có, vì đã hỏi 10 bạn", "Không, mẫu khảo sát chưa đủ", "Không, vì cờ vua khó"]), visual: { kind: "sample-dots", total: 30, asked: 10, liked: 6 } },
   q("w1", "word", 1, "Suy luận điều kiện", "Có 4 con vật gồm gà và thỏ, tổng cộng 12 chân. Có bao nhiêu con thỏ?", "number", "2", "Nếu cả 4 đều là gà thì có 8 chân; mỗi lần đổi một gà thành một thỏ tăng 2 chân.", "Cần tăng từ 8 lên 12 chân, tức tăng 4 chân; vậy đổi 2 con thành thỏ."),
   q("w2", "word", 2, "Suy luận ngược", "Một số được nhân 3, sau đó cộng 7 thì bằng 34. Số ban đầu là bao nhiêu?", "number", "9", "Đi ngược từ 34: làm phép trừ trước rồi mới chia.", "34 − 7 = 27; 27 : 3 = 9."),
-  q("w3", "word", 3, "Logic thứ tự", "An cao hơn Bình. Chi thấp hơn Bình. Ai cao nhất?", "choice", "An", "Xếp ba bạn theo thứ tự từ thấp đến cao.", "Chi thấp hơn Bình, còn Bình thấp hơn An; vì vậy An cao nhất.", ["An", "Bình", "Chi", "Không xác định được"]),
+  { ...q("w3", "word", 3, "Logic thứ tự", "An cao hơn Bình. Chi thấp hơn Bình. Ai cao nhất?", "choice", "An", "Xếp ba bạn theo thứ tự từ thấp đến cao.", "Chi thấp hơn Bình, còn Bình thấp hơn An; vì vậy An cao nhất.", ["An", "Bình", "Chi", "Không xác định được"]), visual: { kind: "height-order", people: ["Bình", "Chi", "An"], clues: ["An cao hơn Bình.", "Chi thấp hơn Bình."] } },
 ];
 
 const p = (prompt: string, type: AnswerType, answer: string, hint: string, explanation: string, options?: string[], challengeTag?: string): PracticeQuestion =>

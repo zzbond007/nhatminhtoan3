@@ -18,11 +18,14 @@ export function DataChart({
     >
       {question.context.values.map((item) => (
         <div key={item.name}>
-          <span>{item.value}</span>
-          <i
-            style={{ height: `${(item.value / max) * 100}%`, background: color }}
-            aria-hidden="true"
-          />
+          <div className="data-chart-bar">
+            {/* Số nằm ngay trên đỉnh cột để trẻ không phải đoán chiều cao. */}
+            <b className="data-chart-value" aria-hidden="true">{item.value}</b>
+            <i
+              style={{ height: `${(item.value / max) * 100}%`, background: color }}
+              aria-hidden="true"
+            />
+          </div>
           <small>{item.name}</small>
         </div>
       ))}
