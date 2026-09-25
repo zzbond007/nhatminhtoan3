@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": "2026.09.25.2",
+  "version": "2026.09.26.1",
   "title": "Math Raccoon · Lộ trình nâng cao 9 tháng",
-  "publishedAt": "2026-09-25",
+  "publishedAt": "2026-09-26",
   "contentScope": {
     "missions": 36,
     "domains": 6,
@@ -18,7 +18,9 @@
     "skillLabQuestions": 48,
     "dinoSpecies": 36,
     "dinoRareSpecies": 12,
-    "authenticTasks": 36
+    "authenticTasks": 36,
+    "monthlyCheckIns": 9,
+    "checkInQuestions": 9
   },
   "approval": {
     "status": "approved-for-release",
@@ -32,6 +34,14 @@
     }
   },
   "notes": [
+    "Đồng bộ tuỳ chọn qua Google Sheets của chính gia đình (Apps Script), có mã gia đình và mã PIN; tự động lưu không thể ghi đè dữ liệu từ một máy mới còn trống.",
+    "Đánh giá Tháng: 9 câu sau mỗi 4 tuần, không gợi ý, không đồng hồ, không lặp câu cũ; so với lần trước bằng thanh tiến trình và Bản đồ Năng lực 6 Chiều.",
+    "Kết quả đánh giá đầu vào có Bản đồ Năng lực 6 Chiều kèm gợi ý bằng lời cho phụ huynh.",
+    "Phòng luyện ưu tiên Mảng nổi bật của tuần; câu chỉ vào hàng ôn khi con đã mở đủ 3 tầng gợi ý mà vẫn chưa ra.",
+    "Trứng Dũng cảm trước mỗi câu khuyến khích thử trước khi xin gợi ý; mỗi phiên bản nhiệm vụ chỉ trao mảnh trứng một lần.",
+    "Khoảnh khắc nở trứng có hoạt ảnh; âm thanh thưởng mặc định tắt, bật trong Góc đồng hành hoặc Đảo Khủng Long.",
+    "Bài toán mở có nhãn thời lượng, ghi rõ cần người lớn cùng làm, và Thẻ gợi mở cho phụ huynh.",
+    "Bấm Nghe đọc đề sẽ phóng to chữ đề bài; ô nhập số chỉ nhận chữ số; huy hiệu số 0 đổi thành lời mời bắt đầu.",
     "Thêm Mã tiến trình trong Góc đồng hành: xuất toàn bộ tiến độ thành một đoạn mã để cất giữ và dán vào máy khác khi cần khôi phục; lần đầu mở ứng dụng có lời nhắc về việc dữ liệu lưu trên trình duyệt.",
     "Đảo Khủng Long có 48 loài vẽ riêng từng dáng (36 loài theo nhiệm vụ và 12 loài Hiếm/Huyền thoại), Tổ ấm để chăm sóc bạn đồng hành, Bộ sưu tập hiện đủ ô cho loài chưa gặp, và Trứng Bí Ẩn xuất hiện bất ngờ sau một số buổi học.",
     "Bản đồ nhiệm vụ trở thành Hành trình 36 trạm; mỗi 6 tuần có một trạm ẩn chỉ mở khi con Bứt phá ở tuần đó.",

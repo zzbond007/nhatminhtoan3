@@ -1,4 +1,4 @@
-import type { AnswerType } from "./content";
+import type { AnswerType, DomainId } from "./content";
 
 export type SkillLabStrandId =
   | "place-value"
@@ -43,6 +43,31 @@ export type SkillLabRecordLike = {
 };
 
 export type SkillLabMode = "spiral" | "review";
+
+export const SKILL_LAB_HINT_TIERS = 3;
+
+/**
+ * Ghi một lần kiểm tra đáp án. Quy tắc "3 gợi ý trước khi đánh dấu sai":
+ * câu chỉ vào hàng ôn khi con đã mở đủ 3 tầng gợi ý mà vẫn sai. Sai khi chưa dùng hết gợi ý
+ * được coi là "đang khám phá" — không phạt, không đưa vào hàng ôn.
+ */
+export function nextSkillLabRecord(
+  previous: SkillLabRecordLike | undefined,
+  correct: boolean,
+  hintDepth: number,
+  now: string,
+): SkillLabRecordLike {
+  const base = previous ?? { attempts: 0, correct: 0, streak: 0, needsReview: false, lastAttemptAt: "" };
+  const streak = correct ? base.streak + 1 : 0;
+  const exhaustedHints = hintDepth >= SKILL_LAB_HINT_TIERS;
+  return {
+    attempts: base.attempts + 1,
+    correct: base.correct + (correct ? 1 : 0),
+    streak,
+    needsReview: correct ? base.needsReview && streak < 2 : base.needsReview || exhaustedHints,
+    lastAttemptAt: now,
+  };
+}
 
 export const SKILL_LAB_STRANDS: SkillLabStrand[] = [
   { id: "place-value", name: "Số và giá trị hàng", short: "Giá trị hàng", emoji: "🔢", description: "Đọc, viết, tách và so sánh số có nhiều chữ số.", color: "#b85f13", soft: "#fff0dd" },
@@ -130,11 +155,23 @@ function priority(question: SkillLabQuestion, records: Record<string, SkillLabRe
   return 2 + Math.min(3, record.streak);
 }
 
+/** "Mảng nổi bật tuần này": mảng bổ sung gần nhất với miền của nhiệm vụ tuần đó. */
+export const WEEKLY_FOCUS_STRANDS: Record<DomainId, SkillLabStrandId[]> = {
+  number: ["place-value", "number-theory"],
+  calculation: ["operations", "number-theory"],
+  measurement: ["fractions", "operations"],
+  geometry: ["visual-spatial"],
+  data: ["combinatorics", "math-english"],
+  word: ["logic"],
+};
+export const FOCUS_QUESTIONS_PER_SESSION = 4;
+
 export function buildSkillLabSession(
   records: Record<string, SkillLabRecordLike>,
   dayIndex: number,
   mode: SkillLabMode = "spiral",
   count = 10,
+  focus: SkillLabStrandId[] = [],
 ) {
   const dayOrder = rotated(SKILL_LAB_QUESTIONS, dayIndex * 7);
   const ranked = [...dayOrder].sort((left, right) => {
@@ -149,6 +186,8 @@ export function buildSkillLabSession(
   }
 
   const chosen: SkillLabQuestion[] = [];
+  // Mảng nổi bật đi trước để con thấy tiến bộ theo chiều dọc trong tuần; phần còn lại vẫn trộn đủ mảng.
+  ranked.filter((question) => focus.includes(question.strand)).slice(0, Math.min(FOCUS_QUESTIONS_PER_SESSION, count)).forEach((question) => chosen.push(question));
   const strandOrder = rotated(SKILL_LAB_STRANDS, dayIndex);
   strandOrder.forEach((strand) => {
     const candidate = ranked.find((question) => question.strand === strand.id && !chosen.includes(question));

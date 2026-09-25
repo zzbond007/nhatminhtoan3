@@ -2,7 +2,7 @@
 
 Math Raccoon là ứng dụng web tĩnh dành cho việc luyện toán nâng cao lớp 3. Ứng dụng không gọi ChatGPT hoặc OpenAI API khi trẻ học, không yêu cầu đăng nhập và lưu tiến trình ngay trên thiết bị.
 
-Phiên bản nội dung v10 gồm:
+Phiên bản nội dung v11 gồm:
 
 - lộ trình 9 tháng gồm 36 tuần × 5 buổi, tổng cộng 180 buổi lõi;
 - 36 chủ đề cốt lõi thuộc 6 miền năng lực;
@@ -16,7 +16,12 @@ Phiên bản nội dung v10 gồm:
 - 48 loài khủng long vẽ bằng SVG theo 6 dáng cơ thể (36 loài theo nhiệm vụ và 12 loài Hiếm/Huyền thoại), lớn lên thấy rõ qua 3 giai đoạn; **Tổ ấm** chăm sóc bạn đồng hành, **Bộ sưu tập** hiện đủ ô cho loài chưa gặp, **Trứng Bí Ẩn** xuất hiện sau một số buổi học không báo trước;
 - **Hành trình 36 trạm** thay bản đồ tĩnh, mỗi 6 tuần có một trạm ẩn chỉ mở khi con Bứt phá ở tuần đó;
 - câu chuyện, câu dự đoán và câu thử nghiệm của 36 nhiệm vụ đặt trong bối cảnh khủng long (số liệu giữ nguyên), kèm 36 **Nhiệm vụ đời thực** cho Buổi 4;
-- chuỗi ngày học có 2 ngày nghỉ có phép mỗi tháng.
+- chuỗi ngày học có 2 ngày nghỉ có phép mỗi tháng;
+- **Đánh giá Tháng** 9 câu sau mỗi 4 tuần, không lặp câu cũ, so với lần trước bằng thanh tiến trình và **Bản đồ Năng lực 6 Chiều** (cũng có ngay sau bài đánh giá đầu vào);
+- Phòng luyện ưu tiên **Mảng nổi bật của tuần**; câu chỉ vào hàng ôn khi đã mở đủ 3 tầng gợi ý mà vẫn chưa ra;
+- **Trứng Dũng cảm** khuyến khích thử trước khi xin gợi ý, mỗi phiên bản nhiệm vụ chỉ trao mảnh trứng một lần, hoạt ảnh nở trứng có âm thanh tuỳ chọn;
+- Thẻ gợi mở cho phụ huynh và nhãn thời lượng ở bài toán mở; chữ lớn khi đọc to đề;
+- đồng bộ tuỳ chọn qua Google Sheets của gia đình (xem [docs/cloud-sync/HUONG_DAN.md](docs/cloud-sync/HUONG_DAN.md)).
 
 ## Cài miễn phí bằng GitHub Pages
 
@@ -89,6 +94,7 @@ Tiến trình học nằm trong bộ nhớ Safari của từng thiết bị, kh�
 
 - Chọn **Xuất mã tiến trình** để có một đoạn mã (bắt đầu bằng `MR1`) chứa toàn bộ tiến độ; dán mã vào Ghi chú hoặc gửi cho chính mình.
 - Trên máy khác, dán mã vào ô **Nhập mã tiến trình** để học tiếp. Mã có phần kiểm tra nên nếu chép thiếu ký tự, ứng dụng sẽ báo và giữ nguyên dữ liệu hiện tại.
+- Muốn đồng bộ nhiều máy tự động, cài **Đồng bộ Google Sheets** theo [hướng dẫn](docs/cloud-sync/HUONG_DAN.md).
 - Chọn **Sao lưu** để tải tệp JSON.
 - Chọn **Khôi phục** để chuyển hồ sơ sang iPad khác.
 - Nên sao lưu mỗi tháng hoặc trước khi xóa dữ liệu Safari.
@@ -107,6 +113,6 @@ Bản GitHub Pages được xuất vào thư mục `out/`. Service worker đư�
 
 ## Giới hạn dữ liệu
 
-- Không có đồng bộ đám mây giữa nhiều thiết bị.
+- Đồng bộ đám mây là tuỳ chọn và cần phụ huynh tự cài Apps Script trong Google Sheets của gia đình.
 - Xóa dữ liệu Safari có thể xóa tiến trình nếu chưa sao lưu.
 - Giọng đọc tiếng Việt phụ thuộc vào giọng hệ thống có sẵn trên iPad.

@@ -2,7 +2,8 @@
 // Giao diện Đảo Khủng Long: Hành trình nhiều trạm, Bộ sưu tập (Gallery) và Tổ ấm.
 // Component chỉ hiển thị; mọi dữ liệu và hành động do page.tsx truyền vào.
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { playRewardSound } from "./dino-sound";
 import { DinoEgg, DinoFigure, NestScene } from "./dino-art";
 import { DINO_STAGE_LABELS, EGG_RARITY_LABELS, SHARDS_TO_HATCH, type DinoStage, type EggRarity } from "./dino-collection-engine";
 import { bondLabel, CARE_ACTIONS, type CareAction } from "./dino-rewards";
@@ -122,6 +123,28 @@ export function DinoJourney({
           </button>
         );
       })}
+    </div>
+  );
+}
+
+// ===== Khoảnh khắc nở trứng =====
+
+/** Trứng lắc → nứt đôi → bé khủng long bật ra. Chỉ dùng CSS; phát âm thanh nếu phụ huynh đã bật. */
+export function HatchReveal({ kind, stage = "con-non", soundOn, caption }: { kind: DinoKind; stage?: DinoStage; soundOn: boolean; caption: string }) {
+  useEffect(() => {
+    const timer = window.setTimeout(() => playRewardSound("hatch", soundOn), 1100);
+    return () => window.clearTimeout(timer);
+  }, [kind.id, soundOn]);
+  return (
+    <div className="hatch-reveal" role="img" aria-label={caption}>
+      <div className="hatch-reveal-stage" aria-hidden="true">
+        <span className="hatch-reveal-glow" />
+        <span className="hatch-reveal-egg left"><DinoEgg cracks={3} /></span>
+        <span className="hatch-reveal-egg right"><DinoEgg cracks={3} /></span>
+        <span className="hatch-reveal-dino"><DinoFigure kind={kind} stage={stage} animated /></span>
+        {[0, 1, 2, 3, 4, 5].map((index) => <i key={index} className={`hatch-reveal-spark s${index}`} />)}
+      </div>
+      <strong>{caption}</strong>
     </div>
   );
 }

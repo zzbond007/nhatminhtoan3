@@ -61,6 +61,13 @@ test("emits child-friendly and offline-update styles", async () => {
   assert.match(css, /\.storage-notice/);
   assert.match(css, /\.authentic-task/);
   assert.match(css, /@keyframes dino-breathe/);
+  assert.match(css, /\.ability-radar/);
+  assert.match(css, /\.checkin-compare/);
+  assert.match(css, /\.brave-egg/);
+  assert.match(css, /\.hatch-reveal-dino/);
+  assert.match(css, /\.cloud-sync-box/);
+  assert.match(css, /\.parent-prompts/);
+  assert.match(css, /read-aloud-large/);
   assert.match(css, /@media\s*\(width>=768px\)\s*and\s*\(width<=1180px\)/);
 });
 

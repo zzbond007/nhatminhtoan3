@@ -7,7 +7,7 @@
 import type { DinoStage, MissionCompletionResult } from "./dino-collection-engine";
 import { DINO_RARE_SPECIES, getRareSpeciesById, type DinoRareSpecies } from "./dino-species";
 
-export type RareSource = "but-pha" | "hai-cach" | "bai-toan-mo" | "trung-bi-an" | "tram-an";
+export type RareSource = "but-pha" | "hai-cach" | "dung-cam" | "bai-toan-mo" | "trung-bi-an" | "tram-an";
 
 export interface RareFind {
   rarity: DinoRareSpecies["rarity"];
@@ -35,6 +35,7 @@ export interface NestState {
 export const RARE_SOURCE_LABELS: Record<RareSource, string> = {
   "but-pha": "may mắn khi Bứt phá",
   "hai-cach": "may mắn khi giải hai cách",
+  "dung-cam": "Trứng Dũng cảm",
   "bai-toan-mo": "may mắn từ bài toán mở",
   "trung-bi-an": "Trứng Bí Ẩn",
   "tram-an": "trạm ẩn trên Hành trình",
@@ -59,9 +60,26 @@ export function nextMysteryTarget(roll: number) {
   return MYSTERY_MIN_SESSIONS + Math.min(span - 1, Math.floor(Math.max(0, roll) * span));
 }
 
-/** Xác suất nhận loài hiếm sau một nhiệm vụ: chỉ khi Bứt phá hoặc giải hai cách. */
-export function missionRareChance(result: Pick<MissionCompletionResult, "band" | "usedTwoStrategies">) {
-  return (result.band === "stretch" ? 0.15 : 0) + (result.usedTwoStrategies ? 0.1 : 0);
+/** Thêm cơ hội khi mọi câu trong buổi đều được giải đúng ngay lần đầu mà không mở gợi ý. */
+export const BRAVE_RARE_BONUS = 0.2;
+
+/** Xác suất nhận loài hiếm sau một nhiệm vụ: khi Bứt phá, giải hai cách, hoặc giữ trọn Trứng Dũng cảm. */
+export function missionRareChance(result: Pick<MissionCompletionResult, "band" | "usedTwoStrategies">, braveAll = false) {
+  return (result.band === "stretch" ? 0.15 : 0) + (result.usedTwoStrategies ? 0.1 : 0) + (braveAll ? BRAVE_RARE_BONUS : 0);
+}
+
+/** Đếm số câu "dũng cảm": đúng ngay lần đầu và không mở gợi ý nào. */
+export function countBraveAnswers(firstTries: Array<boolean | null>, hintDepths: number[]) {
+  return firstTries.filter((firstTry, index) => firstTry === true && (hintDepths[index] ?? 0) === 0).length;
+}
+
+/** Chống "cày" mảnh trứng: mỗi phiên bản nhiệm vụ (mã edition) chỉ trao mảnh một lần. */
+export const REWARDED_EDITIONS_LIMIT = 600;
+export function editionAlreadyRewarded(rewarded: string[], editionId: string) {
+  return rewarded.includes(editionId);
+}
+export function markEditionRewarded(rewarded: string[], editionId: string) {
+  return rewarded.includes(editionId) ? rewarded : [...rewarded, editionId].slice(-REWARDED_EDITIONS_LIMIT);
 }
 
 function availableRandomRares(rares: RareCollection) {

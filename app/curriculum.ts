@@ -2,7 +2,7 @@ import { DOMAINS, type DomainId, type PracticeQuestion } from "./content";
 import { MISSION_LIBRARY, type DailyPuzzle, type Mission, type MissionLevel } from "./missions";
 import { DINO_MISSION_STORIES } from "./dino/dino-mission-stories";
 
-export const CURRICULUM_VERSION = 10;
+export const CURRICULUM_VERSION = 11;
 
 export type HintLadder = [string, string, string];
 export type DeepQuestion = PracticeQuestion & {
