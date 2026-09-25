@@ -51,6 +51,9 @@ test("emits child-friendly and offline-update styles", async () => {
   assert.match(css, /\.skill-lab-strip/);
   assert.match(css, /\.skill-lab-card/);
   assert.match(css, /\.math-english-prompt/);
+  assert.match(css, /\.dino-island/);
+  assert.match(css, /\.dino-nest/);
+  assert.match(css, /\.dino-hatch-note/);
   assert.match(css, /@media\s*\(width>=768px\)\s*and\s*\(width<=1180px\)/);
 });
 

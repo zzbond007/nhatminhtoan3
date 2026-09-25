@@ -650,6 +650,49 @@ button.today-card:hover { transform: translateY(-2px); border-color: var(--green
 .skill-lab-focus p { margin-top: .2rem; font-size: .74rem; line-height: 1.45; }
 .skill-lab-result .result-actions { justify-content: center; }
 
+.dino-island { margin: 1rem 0; padding: 1.25rem; border: 1px solid #cfc8ff; border-radius: 1.45rem; background: linear-gradient(135deg,#fff 55%,#f0edff); box-shadow: 0 16px 42px rgba(49,43,94,.07); }
+.dino-island-stats { display: flex; gap: .45rem; }
+.dino-island-stats span { display: flex; min-width: 88px; flex-direction: column; padding: .55rem .65rem; border-radius: .8rem; background: rgba(255,255,255,.85); border: 1px solid var(--line); color: var(--ink-soft); font-size: .68rem; font-weight: 750; }
+.dino-island-stats strong { color: #4937bd; font: 900 1.15rem var(--font-display); }
+.dino-island-lead { max-width: 760px; margin: .35rem 0 1rem; color: var(--ink-soft); font-size: .78rem; line-height: 1.55; }
+.dino-island-regions { display: grid; grid-template-columns: repeat(3,1fr); gap: .7rem; }
+.dino-island-region { padding: .8rem; border: 1px solid var(--line); border-radius: 1rem; background: white; }
+.dino-island-region-heading { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: .55rem; margin-bottom: .65rem; }
+.dino-island-region-heading > span { display: grid; width: 2.25rem; height: 2.25rem; place-items: center; border-radius: .7rem; }
+.dino-island-region-heading svg { width: 1rem; }
+.dino-island-region-heading strong { display: block; font-size: .8rem; }
+.dino-island-region-heading small { color: var(--ink-soft); font-size: .64rem; font-weight: 750; }
+.dino-nest-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: .35rem; }
+.dino-nest { display: flex; min-height: 56px; flex-direction: column; align-items: center; justify-content: center; gap: .25rem; padding: .35rem .15rem; border: 1px solid var(--line); border-radius: .8rem; background: var(--paper); cursor: pointer; transition: transform .15s ease, border-color .15s ease; }
+.dino-nest:hover, .dino-nest:focus-visible { border-color: #9c90ee; outline: 2px solid transparent; transform: translateY(-1px); }
+.dino-nest.selected { border-color: var(--green); background: #eeecff; box-shadow: 0 0 0 2px rgba(92,73,216,.18); }
+.dino-nest-figure { font-size: 1.25rem; line-height: 1; }
+.dino-nest[data-stage="empty"] .dino-nest-figure { filter: grayscale(1); opacity: .45; }
+.dino-nest[data-stage="con-non"] { background: #fff8df; }
+.dino-nest[data-stage="thieu-nien"] { background: #fff0d9; }
+.dino-nest[data-stage="thieu-nien"] .dino-nest-figure { font-size: 1.5rem; }
+.dino-nest[data-stage="truong-thanh"] { border-color: var(--amber); background: #fff4c9; }
+.dino-nest[data-stage="truong-thanh"] .dino-nest-figure { font-size: 1.75rem; }
+.dino-nest-shards { display: flex; gap: 2px; }
+.dino-nest-shards i { width: .38rem; height: .38rem; border-radius: 50%; background: var(--line-strong); }
+.dino-nest-shards i.filled { background: var(--amber); }
+.dino-island-detail { display: grid; grid-template-columns: auto 1fr; gap: .8rem; align-items: start; margin-top: .9rem; padding: .95rem 1rem; border-radius: 1rem; background: #fff6dc; color: #5b400b; }
+.dino-island-detail > span { display: grid; width: 3rem; height: 3rem; place-items: center; border-radius: 1rem; background: white; font-size: 1.7rem; }
+.dino-island-detail strong { display: block; font: 850 1rem var(--font-display); }
+.dino-island-detail small { color: #77510d; font-size: .68rem; font-weight: 750; }
+.dino-island-detail p { margin-top: .3rem; font-size: .76rem; line-height: 1.5; }
+.dino-island-detail em { display: block; margin-top: .35rem; color: #4937bd; font-size: .7rem; font-style: normal; font-weight: 850; }
+.dino-hatch-note { display: grid; grid-template-columns: auto 1fr; gap: .7rem; align-items: center; margin-top: .8rem; padding: .9rem 1rem; border: 1px solid #f1dca0; border-radius: 1rem; background: #fff8df; color: #5b400b; text-align: left; }
+.dino-hatch-note.celebrate { border-color: var(--amber); background: linear-gradient(125deg,#fff4c9,#f0edff); }
+.dino-hatch-note > span { display: grid; width: 2.8rem; height: 2.8rem; place-items: center; border-radius: .9rem; background: white; font-size: 1.55rem; }
+.dino-hatch-note strong { font-size: .88rem; }
+.dino-hatch-note p { margin-top: .2rem; font-size: .75rem; line-height: 1.5; }
+.dino-island .dino-hatch-note { grid-template-columns: auto 1fr auto; margin: 0 0 1rem; }
+.dino-hatch-note > button { border-radius: 999px; background: white; }.dino-strategy-check { display: flex; align-items: flex-start; gap: .65rem; margin-top: .9rem; padding: .8rem .9rem; border: 1px solid var(--line); border-radius: 1rem; background: #f8f7ff; cursor: pointer; }
+.dino-strategy-check input { width: 1.25rem; height: 1.25rem; margin-top: .1rem; accent-color: var(--green); }
+.dino-strategy-check strong { display: block; font-size: .82rem; }
+.dino-strategy-check small { color: var(--ink-soft); font-size: .7rem; }
+
 .enrichment-strip { display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin: 1rem 0; padding: 1.2rem 1.35rem; border: 1px solid #aee0cf; border-radius: 1.25rem; background: linear-gradient(125deg,#e9f8f2,#fff8df); }
 .enrichment-copy { display: grid; grid-template-columns: auto 1fr; gap: .8rem; align-items: center; }
 .enrichment-copy > span { display: grid; width: 3rem; height: 3rem; place-items: center; border-radius: 1rem; background: #267a5e; color: white; }
@@ -798,6 +841,7 @@ button.today-card:hover { transform: translateY(-2px); border-color: var(--green
   .skill-lab-strip > button { grid-column: 3; grid-row: 1/3; }
   .skill-lab-hero { grid-template-columns: minmax(0,1.1fr) minmax(280px,.9fr); }
   .skill-lab-strands > div:last-child { grid-template-columns: repeat(2,1fr); }
+  .dino-island-regions { grid-template-columns: repeat(2,1fr); }
 }
 
 @media (max-width: 767px) {
@@ -842,6 +886,13 @@ button.today-card:hover { transform: translateY(-2px); border-color: var(--green
   .skill-lab-card .question-meta { grid-template-columns: auto 1fr; }
   .skill-lab-card .question-meta em { grid-column: 2; }
   .skill-lab-result-stats { grid-template-columns: 1fr; }
+  .dino-island { padding: .8rem; }
+  .dino-island .panel-heading { flex-direction: column; align-items: flex-start; }
+  .dino-island-stats { width: 100%; }
+  .dino-island-stats span { flex: 1; }
+  .dino-island-regions { grid-template-columns: 1fr; }
+  .dino-island .dino-hatch-note { grid-template-columns: auto 1fr; }
+  .dino-island .dino-hatch-note > button { grid-column: 1/-1; width: 100%; }
 }
 
 @media (hover: none) {

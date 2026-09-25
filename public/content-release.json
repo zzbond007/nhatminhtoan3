@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": "2026.09.16.1",
+  "version": "2026.09.25.1",
   "title": "Math Raccoon · Lộ trình nâng cao 9 tháng",
-  "publishedAt": "2026-09-16",
+  "publishedAt": "2026-09-25",
   "contentScope": {
     "missions": 36,
     "domains": 6,
@@ -15,7 +15,8 @@
     "coreSessions": 180,
     "reviewPacks": 9,
     "skillLabStrands": 8,
-    "skillLabQuestions": 48
+    "skillLabQuestions": 48,
+    "dinoSpecies": 36
   },
   "approval": {
     "status": "approved-for-release",
@@ -29,6 +30,10 @@
     }
   },
   "notes": [
+    "Bổ sung Đảo Khủng Long: mỗi nhiệm vụ giữ một quả trứng; hoàn thành một phiên bản nhiệm vụ cho 1–3 mảnh trứng, đủ 4 mảnh thì trứng nở thành một trong 36 loài khủng long; trứng nở trong phiên bản Bứt phá có độ hiếm Hiếm.",
+    "Số mảnh trứng dựa trên mức Gỡ nút – Vừa sức – Bứt phá, độ sâu gợi ý và việc giải bằng hai cách (không tính phản tư vì bé chưa tự đánh chữ); bé khủng long lớn lên khi con ôn lại nhiệm vụ ở vòng xoắn ốc.",
+    "Bước Phản tư có thêm ô để con và người lớn xác nhận đã giải bằng cả hai cách để nhận thêm một mảnh trứng.",
+    "Hoàn thành một bài toán mở làm nở ngay trứng Huyền thoại của nhiệm vụ tuần đó; mốc 7, 30 và 60 ngày học nở trứng Đặc biệt. Hồ sơ cũ được tính lại trứng từ các buổi đã hoàn thành.",
     "Bổ sung Phòng luyện xoắn ốc gồm 48 câu thuộc 8 mảng: giá trị hàng, phân số, biểu thức, lý thuyết số, logic, tổ hợp, IQ hình và Toán tiếng Anh.",
     "Mỗi vòng luyện trộn 10 câu, ưu tiên nội dung chưa học hoặc chưa vững và có chế độ ôn riêng các câu từng làm sai.",
     "Mọi câu bổ sung có ba tầng gợi ý, phản hồi theo sai lầm thường gặp, lời giải và không dùng đồng hồ đếm ngược.",
