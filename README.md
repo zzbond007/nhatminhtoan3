@@ -23,6 +23,17 @@ Phiên bản nội dung v11 gồm:
 - Thẻ gợi mở cho phụ huynh và nhãn thời lượng ở bài toán mở; chữ lớn khi đọc to đề;
 - đồng bộ tuỳ chọn qua Google Sheets của gia đình (xem [docs/cloud-sync/HUONG_DAN.md](docs/cloud-sync/HUONG_DAN.md)).
 
+### Nâng cấp trải nghiệm học (v12)
+
+- **Bàn phím số ảo** (`components/virtual-numpad.tsx`): ô đáp án chỉ đọc nên iPad không bật bàn phím hệ thống; phím ≥ 54px, rung nhẹ khi hỗ trợ. **Chế độ tập trung** ẩn điều hướng và dải thông tin khi con đang giải bài.
+- **Bảng vẽ nháp** (`components/scratchpad.tsx`): lớp canvas trong suốt, bút 3 màu, tẩy, xóa hết, vẽ đa điểm bằng ngón tay/Apple Pencil.
+- **Đọc đề karaoke** (`app/speech-service.ts`): tô sáng từng từ theo `onboundary`; tự chuyển sang ước lượng thời gian nếu giọng Việt trên iPad không phát sự kiện này.
+- **Gợi ý 3 tầng có khoá 15 giây** và thưởng Tia sáng 10/5/2/1 theo độ sâu gợi ý (`app/hint-scaffold.ts`).
+- **Phòng Luyện Xoắn Ốc — biến thể** (`app/spiral-engine.ts`): dạng bài sai quay lại sau 24 giờ với số liệu mới cùng cấu trúc; sai 2 lần liên tiếp thì hạ bậc (số nhỏ, sơ đồ đoạn thẳng mở sẵn).
+- **Bảo tàng Hóa thạch** (`app/fossil-streak.ts`): nhịp 5 buổi/tuần, không reset về 0, 2 Khiên hóa thạch mỗi tháng.
+- **Cổng Phụ Huynh** ở Buổi 5 và **Báo cáo Radar Canvas** kèm khuyến nghị sau bài khảo sát 18 câu.
+- `migrateStorageData()` (`app/storage-migration.ts`) giữ nguyên tiến trình cũ, cất một bản sao `math-raccoon-backup-before-v12` trước lần nâng cấp đầu tiên.
+
 ## Cài miễn phí bằng GitHub Pages
 
 1. Tạo một repository **Public** trên GitHub, gợi ý tên `math-raccoon`.

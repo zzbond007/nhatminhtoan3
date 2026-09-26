@@ -1,0 +1,193 @@
+/* ═══════════════════ v12 · Nâng cấp trải nghiệm học (6 module) ═══════════════════
+   Tách riêng khỏi globals.css để dễ bảo trì; được nạp sau globals.css trong app/layout.tsx. */
+
+/* Tiêu đề đề bài nay nằm trong .karaoke-reader: giữ nguyên cỡ chữ cũ của .deep-card > h2 */
+.deep-card > .karaoke-reader > h2 { max-width: 780px; margin: .45rem 0 .5rem; font: 780 clamp(1.5rem,3.3vw,2.35rem)/1.2 var(--font-display); }
+.child-ui .deep-card > .karaoke-reader > h2 { font: 850 clamp(1.65rem,3vw,2.4rem)/1.22 var(--font-display); letter-spacing: -.02em; }
+.child-ui .practice-deep > .karaoke-reader > h2 { margin-top: 1rem; font: 850 clamp(1.5rem,3vw,2.15rem)/1.3 var(--font-display); }
+
+/* ───── Module 1 · Bàn phím số ảo ───── */
+.numpad-answer { display: grid; gap: .6rem; width: 100%; max-width: 360px; }
+.numpad-display { display: grid; gap: .25rem; }
+.numpad-display > span { color: var(--ink-soft); font-size: .7rem; font-weight: 800; }
+.numpad-input { height: 60px; width: 100%; padding: 0 1rem; border: 2px solid var(--line-strong); border-radius: 12px; background: #fff; color: var(--ink); font: 850 1.6rem var(--font-display); letter-spacing: .06em; text-align: center; caret-color: transparent; cursor: default; }
+.numpad-input::placeholder { color: #b8bfd6; }
+.numpad-answer:not(.is-disabled) .numpad-input { border-color: #a99ef5; box-shadow: 0 0 0 4px rgba(92,73,216,.1); }
+.virtual-numpad { display: grid; grid-template-columns: repeat(4, minmax(54px, 1fr)); grid-auto-rows: minmax(54px, auto); gap: .5rem; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.numpad-key { display: grid; min-width: 54px; min-height: 54px; place-items: center; border: 1px solid var(--line-strong); border-radius: 12px; background: #fff; color: var(--ink); font: 850 1.45rem var(--font-display); box-shadow: 0 3px 0 #d7dcef; transition: transform .08s ease, box-shadow .08s ease, background-color .15s; -webkit-tap-highlight-color: transparent; }
+.numpad-key:active:not(:disabled) { transform: scale(.95); box-shadow: 0 1px 0 #d7dcef; background: #f2f0ff; }
+.numpad-key:disabled { opacity: .45; }
+.numpad-key svg { width: 1.45rem; height: 1.45rem; }
+.numpad-key.action { background: #f4f5fb; color: var(--ink-soft); font-size: 1.1rem; }
+.numpad-key.submit { background: linear-gradient(160deg,#6651e2,var(--green-dark)); color: #fff; border-color: transparent; box-shadow: 0 3px 0 #2b1d86; }
+.numpad-key.submit svg { width: 1.8rem; height: 1.8rem; }
+.number-answer-wrap:has(.numpad-answer) { max-width: 360px; }
+
+/* ───── Module 1.2 · Chế độ tập trung: ẩn những gì không phục vụ câu đang giải ───── */
+html.focus-mode .global-nav, html.focus-mode .header-badges, html.focus-mode .mission-edition-banner,
+html.focus-mode .dino-story-banner, html.focus-mode .mission-guide, html.focus-mode .deep-steps,
+html.focus-mode .lesson-heading > div > p:not(.eyebrow), html.focus-mode .diagnostic-note,
+html.focus-mode .skill-lab-note, html.focus-mode .question-meta small, html.focus-mode .skill-label { display: none !important; }
+html.focus-mode .app-header { opacity: .55; transition: opacity .2s; }
+html.focus-mode .app-header:hover, html.focus-mode .app-header:focus-within { opacity: 1; }
+html.focus-mode .lesson-heading { margin-block: .4rem; }
+html.focus-mode .app-shell { background: var(--paper); }
+
+/* Thanh công cụ nổi: Vẽ nháp · Tập trung */
+.study-toolbar { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 60; display: flex; gap: .5rem; padding: .4rem; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.94); box-shadow: 0 10px 28px rgba(34,39,70,.16); backdrop-filter: blur(8px); }
+.study-tool { display: inline-flex; min-height: 48px; align-items: center; gap: .4rem; padding: 0 1rem; border: 0; border-radius: 999px; background: transparent; color: var(--ink); font-size: .8rem; font-weight: 800; }
+.study-tool svg { width: 1.2rem; height: 1.2rem; }
+.study-tool.active { background: #eeecff; color: var(--green-dark); }
+.study-tool:active { transform: scale(.96); }
+.page-wrap:has(.study-toolbar) { padding-bottom: 6.5rem; }
+
+/* ───── Module 2 · Bảng vẽ nháp (lớp trong suốt phủ lên đề) ───── */
+.scratchpad-layer { position: fixed; inset: 0; z-index: 70; }
+.scratchpad-layer:not(.is-open) { visibility: hidden; pointer-events: none; }
+.scratchpad-layer.is-open { background: rgba(255,253,245,.18); outline: 3px dashed rgba(92,73,216,.35); outline-offset: -6px; }
+.scratchpad-canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.scratchpad-toolbar { position: absolute; top: max(12px, env(safe-area-inset-top)); left: 50%; display: flex; gap: .4rem; align-items: center; max-width: calc(100% - 24px); padding: .35rem .45rem; transform: translateX(-50%); border: 1px solid var(--line); border-radius: 999px; background: #fff; box-shadow: 0 8px 24px rgba(34,39,70,.18); }
+.scratchpad-title { display: inline-flex; align-items: center; gap: .3rem; padding: 0 .5rem; color: var(--green-dark); font-size: .78rem; font-weight: 850; }
+.scratchpad-title svg { width: 1rem; }
+.scratch-tool { display: grid; width: 48px; height: 48px; flex: none; place-items: center; border: 2px solid transparent; border-radius: 999px; background: #f4f5fb; color: var(--ink); }
+.scratch-tool svg { width: 1.25rem; }
+.scratch-tool.pen i { width: 22px; height: 22px; border-radius: 999px; }
+.scratch-tool.active { border-color: var(--green); background: #eeecff; }
+.scratch-tool.close { background: var(--ink); color: #fff; }
+
+/* ───── Module 3 · Đọc đề karaoke ───── */
+.karaoke-reader { display: grid; gap: .25rem; margin-bottom: .6rem; }
+.karaoke-reader > h1, .karaoke-reader > h2 { margin-bottom: .2rem; }
+.word-token { border-radius: .3em; padding: 0 .04em; transition: background-color .12s, box-shadow .12s; }
+.word-token.active-highlight { background: #fff1a8; box-shadow: 0 0 0 .12em #fff1a8; font-weight: 900; color: #2a2150; }
+.karaoke-controls { display: flex; flex-wrap: wrap; gap: .45rem; }
+.karaoke-button { display: inline-flex; min-height: 44px; align-items: center; gap: .35rem; padding: 0 1rem; border: 1px solid #cfc8ff; border-radius: 999px; background: #fff; color: var(--green-dark); font-size: .78rem; font-weight: 800; }
+.karaoke-button.primary { background: #f2f0ff; }
+.karaoke-button svg { width: 1rem; }
+.karaoke-button:active { transform: scale(.96); }
+.math-english-prompt .karaoke-reader strong { display: block; }
+
+/* ───── Module 4 · Gợi ý 3 tầng có khoá đếm ngược ───── */
+.hint-ladder-button { gap: .5rem; min-height: 48px; }
+.hint-ladder-button.is-locked { opacity: 1 !important; border-style: dashed; color: var(--ink-soft); }
+.hint-countdown { position: relative; display: inline-grid; width: 28px; height: 28px; place-items: center; }
+.hint-countdown svg { position: absolute; inset: 0; width: 28px !important; height: 28px !important; transform: rotate(-90deg); }
+.hint-countdown circle { fill: none; stroke-width: 3; }
+.hint-countdown .track { stroke: #ece9fb; }
+.hint-countdown .ring { stroke: var(--amber); stroke-linecap: round; transition: stroke-dashoffset .2s linear; }
+.hint-countdown b { position: relative; font-size: .7rem; font-weight: 900; color: var(--ink); }
+.hint-stack.tiered { margin-top: 1rem; }
+.hint-stack.tiered .hint-box { margin-top: 0; }
+.hint-stack.tiered .hint-box:not(.latest) { opacity: .75; }
+.hint-box.tier-2 { background: #eaf4ff; color: #1f4f82; }
+.hint-box.tier-3 { background: #ffece8; color: #8a3524; }
+.hint-box.latest { box-shadow: 0 0 0 2px rgba(244,169,30,.45); }
+.scaffold-note { display: flex; gap: .45rem; align-items: center; margin-top: .8rem; padding: .6rem .8rem; border-radius: .8rem; background: #eef8ff; color: #1f4f82; font-size: .78rem; font-weight: 750; }
+.scaffold-note svg { width: 1rem; flex: none; }
+.spark-earned { display: inline-block; margin-top: .4rem !important; padding: .25rem .6rem; border-radius: 999px; background: #fff3c4; color: #7a5200 !important; font-weight: 850; }
+
+/* ───── Module 5 · Phòng Luyện Xoắn Ốc & sơ đồ đoạn thẳng ───── */
+.spiral-variant-strip { display: grid; grid-template-columns: auto 1fr auto; gap: 1rem; align-items: center; margin: 1rem 0; padding: 1.1rem 1.3rem; border: 1px solid #cfe3ff; border-radius: 1.2rem; background: linear-gradient(120deg,#eef6ff,#f6f2ff); }
+.spiral-variant-strip > span { font-size: 2rem; }
+.spiral-variant-strip h2 { margin: .1rem 0 .25rem; font: 850 1.15rem/1.3 var(--font-display); }
+.spiral-variant-strip p:last-child { color: var(--ink-soft); font-size: .76rem; line-height: 1.5; }
+.spiral-emoji { font-size: 1.4rem; background: #eef6ff; }
+.spiral-room-done { display: grid; gap: .8rem; justify-items: start; margin-top: 1.2rem; }
+.bar-model { margin: .6rem 0 1rem; padding: .7rem; border: 1px solid #cfe3ff; border-radius: 1rem; background: #f7fbff; }
+.bar-model svg { display: block; width: 100%; height: auto; }
+.bar-seg { stroke: #fff; stroke-width: 2; }
+.bar-seg.tone-0 { fill: #7c6cf0; }
+.bar-seg.tone-1 { fill: #3f9bd6; }
+.bar-seg.tone-2 { fill: #1b9a83; }
+.bar-seg.unknown { fill: #fff3c4; stroke: #f4a91e; stroke-dasharray: 5 3; }
+.bar-text { fill: #fff; font: 800 13px var(--font-ui); }
+.bar-seg.unknown + .bar-text { fill: #7a5200; font-size: 16px; }
+.bar-label { fill: var(--ink); font: 800 12px var(--font-ui); }
+.bar-bracket path { fill: none; stroke: var(--ink-soft); stroke-width: 1.5; }
+.bar-bracket text { fill: var(--ink); font: 800 13px var(--font-ui); }
+
+/* ───── Module 6.1 · Bảo tàng Hóa thạch ───── */
+.dino-island-stats button.dino-streak { display: flex; min-width: 88px; flex-direction: column; align-items: flex-start; padding: .55rem .65rem; border: 1px solid var(--line); border-radius: .8rem; background: rgba(255,255,255,.85); color: var(--ink-soft); font-size: .68rem; font-weight: 750; text-align: left; }
+.dino-island-stats button.dino-streak strong { font-size: .95rem; }
+.fossil-museum { display: grid; gap: .75rem; margin: 1rem 0; padding: 1.1rem 1.25rem; border: 1px solid #e7d9bd; border-radius: 1.2rem; background: linear-gradient(135deg,#fffaf0,#f6efe2); }
+.fossil-head { display: grid; grid-template-columns: auto 1fr; gap: .8rem; align-items: center; }
+.fossil-head > svg { width: 2.4rem; height: 2.4rem; padding: .45rem; border-radius: .9rem; background: #8a6a3d; color: #fff; }
+.fossil-head h3 { margin: .1rem 0; font: 800 1.05rem var(--font-display); }
+.fossil-head h3 strong { color: #8a5a1c; font-size: 1.4rem; }
+.fossil-head small { color: #6d5a3d; font-size: .72rem; }
+.fossil-week { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
+.fossil-week i { width: 26px; height: 26px; border: 2px dashed #cdb68d; border-radius: 999px; }
+.fossil-week i.done { border: 0; background: #8a6a3d; box-shadow: inset 0 0 0 5px #efe4cf; }
+.fossil-week span { margin-left: .3rem; color: #6d5a3d; font-size: .76rem; font-weight: 800; }
+.fossil-shelf { display: flex; flex-wrap: wrap; gap: .35rem; }
+.shelf-slot { display: grid; width: 40px; height: 40px; place-items: center; border-radius: .7rem; background: #efe4cf; font-size: 1.15rem; }
+.shelf-slot.resting { color: #b7a78a; }
+.shelf-slot.in-progress { outline: 2px dashed #cdb68d; }
+.fossil-shields { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; justify-content: space-between; color: #5d4a2d; font-size: .76rem; font-weight: 800; }
+.fossil-shields span { display: inline-flex; align-items: center; gap: .35rem; }
+.fossil-shields svg { width: 1rem; }
+.fossil-rescue { min-height: 44px; padding: 0 1rem; border: 0; border-radius: 999px; background: #8a6a3d; color: #fff; font-weight: 850; }
+
+/* ───── Module 6.2 · Cổng Phụ Huynh ───── */
+.parent-portal-trigger { display: inline-flex; width: fit-content; min-height: 48px; align-items: center; gap: .45rem; padding: 0 1.1rem; border: 2px solid #3c2aa8; border-radius: 999px; background: #fff; color: #3c2aa8; font-size: .85rem; font-weight: 850; }
+.parent-portal-trigger svg { width: 1.1rem; }
+.parent-gate-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: rgba(20,22,45,.55); }
+.parent-gate { position: relative; display: grid; gap: .55rem; justify-items: center; width: min(420px, 100%); max-height: calc(100dvh - 32px); overflow: auto; padding: 1.4rem; border-radius: 1.3rem; background: #fff; text-align: center; }
+.parent-gate-icon { width: 2.2rem; height: 2.2rem; color: var(--green); }
+.parent-gate h2 { font: 850 1.2rem var(--font-display); }
+.parent-gate p { color: var(--ink-soft); font-size: .82rem; }
+.parent-gate .parent-gate-question { color: var(--ink); font: 900 2rem var(--font-display); }
+.parent-gate-close { position: absolute; top: .6rem; right: .6rem; display: grid; width: 44px; height: 44px; place-items: center; border: 0; border-radius: 999px; background: #f4f5fb; }
+.parent-gate-close svg { width: 1.1rem; }
+.parent-gate .parent-gate-message { display: inline-flex; gap: .35rem; align-items: center; color: #9a3b2d; font-weight: 800; }
+.parent-gate-message svg { width: 1rem; }
+.parent-report { display: grid; gap: 1rem; padding: 1.2rem; border: 2px solid #d9d3ff; border-radius: 1.2rem; background: #fbfaff; }
+.parent-report-head { display: flex; flex-wrap: wrap; gap: .8rem; align-items: flex-start; justify-content: space-between; }
+.parent-report-head h2 { margin: .1rem 0; font: 850 1.35rem var(--font-display); }
+.parent-report-meta { color: var(--ink-soft); font-size: .72rem; }
+.parent-report-actions { display: flex; gap: .4rem; }
+.parent-report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .8rem; }
+.parent-report article { display: grid; gap: .45rem; align-content: start; padding: .95rem; border: 1px solid var(--line); border-radius: 1rem; background: #fff; font-size: .82rem; line-height: 1.55; }
+.parent-report h3 { font: 850 .95rem var(--font-display); }
+.socratic-list { display: grid; gap: .35rem; padding-left: 1.2rem; list-style: decimal; font-weight: 700; }
+.parent-avoid { padding-left: 1.1rem; list-style: disc; color: #8a3524; font-size: .75rem; }
+.parent-report-note { color: var(--ink-soft); font-size: .74rem; }
+.parent-stats { display: flex; flex-wrap: wrap; gap: .5rem; }
+.parent-stats span { padding: .45rem .7rem; border-radius: .8rem; background: #f2f0ff; font-size: .74rem; }
+.parent-stats strong { color: var(--green-dark); font-size: 1rem; }
+.parent-table { width: 100%; border-collapse: collapse; font-size: .75rem; }
+.parent-table th, .parent-table td { padding: .45rem .4rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.parent-table td small { display: block; color: var(--ink-soft); font-style: italic; }
+.parent-week-summary { overflow-x: auto; }
+
+/* ───── Module 6.3 · Báo cáo Radar Canvas ───── */
+.radar-report { display: grid; gap: 1rem; }
+.radar-canvas { display: block; width: min(360px, 100%); aspect-ratio: 1; margin: 0 auto; }
+.radar-summary { padding: .75rem .9rem; border-radius: .9rem; background: #f2f0ff; color: #3c2aa8; font-size: .82rem; font-weight: 750; line-height: 1.55; }
+.radar-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: .7rem; }
+.radar-columns > div { display: grid; gap: .5rem; align-content: start; padding: .85rem; border-radius: .9rem; font-size: .78rem; line-height: 1.55; }
+.radar-columns h3 { font: 850 .9rem var(--font-display); }
+.radar-strengths { background: #eaf8f3; color: #1f5a47; }
+.radar-growth { background: #fff8df; color: #6b4d12; }
+.radar-growth em { display: block; margin-top: .2rem; font-style: normal; font-weight: 700; }
+
+/* In / Lưu PDF: khi phụ huynh bấm "In", chỉ in phần báo cáo (globals.css mặc định ẩn mọi thứ khi in) */
+@media print {
+  html.print-parent-report .authentic-task, html.print-parent-report .authentic-task * { visibility: hidden !important; }
+  html.print-parent-report .parent-report, html.print-parent-report .parent-report * { visibility: visible !important; }
+  html.print-parent-report .parent-report { position: absolute; top: 0; left: 0; width: 100%; border: 0; background: #fff; }
+  html.print-parent-report .parent-report-actions { display: none !important; }
+  .study-toolbar, .scratchpad-layer { display: none !important; }
+}
+
+/* Màn hình hẹp: bàn phím số trải hết chiều ngang, thanh công cụ chỉ còn biểu tượng */
+@media (max-width: 767px) {
+  .numpad-answer, .number-answer-wrap:has(.numpad-answer) { max-width: none; }
+  .study-tool span { display: none; }
+  .spiral-variant-strip { grid-template-columns: 1fr; }
+  .scratchpad-title { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .numpad-key:active:not(:disabled), .study-tool:active, .karaoke-button:active { transform: none; }
+  .word-token { transition: none; }
+}
