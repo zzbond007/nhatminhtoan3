@@ -1,6 +1,7 @@
 import { DOMAINS, type DomainId, type PracticeQuestion } from "./content";
 import { MISSION_LIBRARY, type DailyPuzzle, type Mission, type MissionLevel } from "./missions";
 import { DINO_MISSION_STORIES } from "./dino/dino-mission-stories";
+import { distinctOptions, shuffleById } from "./option-order";
 
 export const CURRICULUM_VERSION = 11;
 
@@ -117,7 +118,7 @@ const extensions: Record<DomainId, ExtensionSpec[]> = {
       practice: [
         q("487 + 316 gần số nào nhất?", "choice", "800", "Làm tròn 487 thành 500 và 316 thành 300.", "500 + 300 = 800.", ["600", "700", "800", "900"], "Ước lượng"),
         q("49 × 6 gần số nào nhất?", "choice", "300", "Thay 49 bằng 50.", "50 × 6 = 300; đáp án thật là 294.", ["200", "250", "300", "350"], "Nhân gần đúng"),
-        q("Kết quả nào chắc chắn sai với 398 + 205?", "choice", "503", "Tổng phải lớn hơn 398 + 200.", "398 + 205 = 603 nên 503 vô lý.", ["603", "600", "Khoảng 600", "503"], "Bắt lỗi"),
+        q("Kết quả nào chắc chắn sai với 398 + 205?", "choice", "503", "Tổng phải lớn hơn 398 + 200.", "398 + 200 đã là 598, nên tổng phải lớn hơn 598. Vậy 503 vô lý; tổng đúng là 603.", ["603", "Lớn hơn 598", "Khoảng 600", "503"], "Bắt lỗi"),
         q("Một bạn tính 72 × 4 = 248. Cách kiểm tra nhanh nào phát hiện sai?", "choice", "70 × 4 gần 280", "Ước lượng bằng số tròn chục.", "72 × 4 phải gần 280, nên 248 đáng nghi; kết quả đúng là 288.", ["70 × 4 gần 280", "72 gần 70", "4 là số chẵn", "248 là số chẵn"], "Chuyển giao"),
       ],
     },
@@ -306,6 +307,37 @@ const missionGuideByDomain: Record<DomainId, { materials: string[]; connection: 
   word: { materials: ["Giấy nháp", "Bút chì"], connection: "Dùng manh mối, thử–sửa và suy luận như một thám tử toán học." },
 };
 
+/**
+ * Bài Tương tác dùng câu luyện đầu tiên. Khi câu ấy là câu điền số, mỗi nhiệm vụ cần hai phương án nhiễu
+ * ứng với hai lỗi hay gặp (ghi trong chú thích), thay cho các lựa chọn độn kiểu “Cần thử thêm”.
+ */
+const LAB_DISTRACTORS: Record<string, [string, string]> = {
+  "number-1": ["20", "24"], // cộng 2 hoặc cộng 6 thay vì cộng 4
+  "number-2": ["3", "9"], // chỉ đếm hàng trăm; cho phép lặp chữ số
+  "number-4": ["18", "20"], // cộng 3 hoặc cộng 5 thay vì cộng 4
+  "number-6": ["9", "39"], // làm một lần; làm ba lần thao tác
+  "calculation-1": ["346", "334"], // thêm 2 mà quên bớt; quên nhớ sang hàng chục
+  "calculation-2": ["242", "246"], // quên nhân phần đơn vị; nhân 6 với 1 thay vì 2
+  "calculation-3": ["32", "143"], // dừng sau bước trừ; làm xuôi thay vì đi ngược
+  "calculation-4": ["446", "434"], // thêm 2 mà quên bớt; quên nhớ
+  "measurement-2": ["20", "160"], // chia 2 thay vì 4; nhân 4 thay vì chia
+  "measurement-4": ["12", "40"], // cộng thay vì nhân; đếm điểm thay vì đếm đoạn
+  "measurement-6": ["62000", "54000"], // chỉ trừ một chiếc; dừng ở tổng tiền mua
+  "geometry-2": ["4", "9"], // quên hình vuông lớn; đếm điểm thay vì đếm ô
+  "geometry-3": ["4", "7"], // chỉ đếm ô đơn; dừng ở độ dài 1 và 2 ô
+  "geometry-4": ["2", "8"], // quên hai đường chéo; đếm mỗi trục hai lần
+  "data-1": ["5", "3"], // cộng thay vì nhân; chỉ đếm một nhóm
+  "data-2": ["5", "2"],
+  "data-4": ["98", "50"], // cộng thay vì trừ; đọc lại một cột
+  "data-5": ["1", "3"],
+  "word-1": ["58", "38"], // cộng thay vì trừ; trừ sai hàng chục
+  "word-2": ["6", "9"], // chưa chia độ lệch cho 2; chia đôi tổng số chân
+  "word-3": ["1", "3"], // bỏ sót một cách; đếm thêm cách không đủ tiền
+  "word-5": ["35", "6"], // dừng sau bước trừ; thử 6 mà chưa kiểm tra
+  "word-6": ["8", "5"], // tính cả đổi chỗ; tính cả đống rỗng
+};
+const LAB_OPTION_NOTE = "Chạm để chọn";
+
 function makeExtension(base: Mission, spec: ExtensionSpec, sequence: 4 | 5 | 6): Mission {
   const level = (sequence - 3) as MissionLevel;
   return {
@@ -339,6 +371,7 @@ function hintLadder(question: PracticeQuestion): HintLadder {
 function deepQuestion(question: PracticeQuestion, id: string): DeepQuestion {
   return {
     ...question,
+    options: question.options ? shuffleById(question.options, id) : undefined,
     id,
     hints: hintLadder(question),
     misconception: question.type === "number"
@@ -370,7 +403,7 @@ function standardize(mission: Mission, sequence: DeepMission["sequence"]): DeepM
     lab: {
       type: "choice",
       prompt: first.prompt,
-      options: (first.options ?? [first.answer, "Cần thử thêm", "Chưa đủ dữ kiện"]).map((value) => ({ value, label: value, note: value === first.answer ? "Phương án cần kiểm chứng" : "Thử và đối chiếu" })),
+      options: shuffleById(first.options ?? distinctOptions(first.answer, LAB_DISTRACTORS[mission.id] ?? []), `${mission.id}-lab`).map((value) => ({ value, label: value, note: LAB_OPTION_NOTE })),
       answer: first.answer,
       explanation: first.explanation,
     },
@@ -467,7 +500,8 @@ function makeDailyPuzzles(): DailyPuzzle[] {
     const yes = 6 + (i % 4);
     puzzles.push({ id: `evidence-${i}`, prompt: `Hỏi ${sample} bạn, có ${yes} bạn chọn A. Điều gì chắc chắn?`, note: "Không kết luận vượt dữ liệu", options: [`${yes} bạn được hỏi chọn A`, "Cả lớp chọn A", "Cả trường chọn A"], answer: `${yes} bạn được hỏi chọn A`, hint: "Chỉ nói về nhóm đã được hỏi.", explanation: `Dữ liệu chỉ bảo đảm ${yes} trong ${sample} bạn được hỏi chọn A.` });
   }
-  return puzzles;
+  // Xáo trộn theo mã câu đố: đáp án đúng không còn nằm cố định một vị trí.
+  return puzzles.map((puzzle) => ({ ...puzzle, options: shuffleById(puzzle.options, puzzle.id) }));
 }
 
 export const DAILY_PUZZLES_60 = makeDailyPuzzles();
@@ -478,6 +512,8 @@ export function validateCurriculum() {
   if (new Set(ALL_DEEP_MISSIONS.map((mission) => mission.id)).size !== 36) errors.push("Mã nhiệm vụ bị trùng.");
   ALL_DEEP_MISSIONS.forEach((mission) => {
     if (mission.deepPractice.length < 3) errors.push(`${mission.id}: cần ít nhất 3 bài luyện.`);
+    if (mission.lab.options.length < 2 || new Set(mission.lab.options.map((option) => option.value)).size !== mission.lab.options.length) errors.push(`${mission.id}: bài Tương tác thiếu phương án nhiễu.`);
+    if (mission.lab.type === "choice" && mission.practice[0].type === "number" && mission.lab.options.length < 3) errors.push(`${mission.id}: bài Tương tác dạng số cần 2 phương án nhiễu trong LAB_DISTRACTORS.`);
     if (mission.strategies.length !== 2) errors.push(`${mission.id}: cần đúng 2 chiến lược.`);
     if (mission.reflectionStems.length !== 3) errors.push(`${mission.id}: cần 3 câu phản tư.`);
     if (mission.materials.length < 2) errors.push(`${mission.id}: cần hướng dẫn học liệu.`);

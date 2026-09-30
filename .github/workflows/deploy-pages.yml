@@ -39,6 +39,8 @@ jobs:
         run: npm ci
       - name: Validate reviewed content
         run: npm run content:validate
+      - name: Audit the maths in every question
+        run: npm run content:audit
       - name: Build static PWA
         run: NEXT_PUBLIC_BASE_PATH="$PAGES_BASE_PATH" npm run build:github
       - name: Upload Pages artifact

@@ -1,3 +1,4 @@
+import { shuffleById } from "./option-order";
 import type { AnswerType, DomainId } from "./content";
 
 export type SkillLabStrandId =
@@ -80,7 +81,8 @@ export const SKILL_LAB_STRANDS: SkillLabStrand[] = [
   { id: "math-english", name: "Toán bằng tiếng Anh", short: "Math English", emoji: "🌍", description: "Làm quen từ khóa sum, difference, product, quotient và fraction.", color: "#217a8c", soft: "#e2f6fa" },
 ];
 
-const q = (question: SkillLabQuestion) => question;
+/** Xáo trộn lựa chọn theo mã câu hỏi để đáp án đúng không dồn về một vị trí. */
+const q = (question: SkillLabQuestion): SkillLabQuestion => (question.options ? { ...question, options: shuffleById(question.options, question.id) } : question);
 
 export const SKILL_LAB_QUESTIONS: SkillLabQuestion[] = [
   q({ id: "pv-01", strand: "place-value", prompt: "Số “năm nghìn hai trăm ba mươi tư” được viết bằng chữ số như thế nào?", type: "choice", answer: "5234", options: ["5234", "5243", "2534", "5324"], hints: ["Tách số thành nghìn, trăm, chục và đơn vị.", "Có 5 nghìn, 2 trăm, 3 chục và 4 đơn vị.", "Ghép lần lượt 5 – 2 – 3 – 4."], explanation: "5 nghìn + 2 trăm + 3 chục + 4 đơn vị tạo số 5234.", misconception: "Con có thể đã đổi chỗ hàng chục và hàng đơn vị. Hãy đọc từng hàng từ trái sang phải." }),
@@ -210,7 +212,7 @@ export function validateSkillLabQuestions() {
     if (!question.prompt.trim() || !question.answer.trim()) errors.push(`${question.id}: thiếu đề hoặc đáp án.`);
     if (question.hints.length !== 3 || question.hints.some((hint) => !hint.trim())) errors.push(`${question.id}: cần đủ 3 tầng gợi ý.`);
     if (!question.explanation.trim() || !question.misconception.trim()) errors.push(`${question.id}: thiếu lời giải hoặc phản hồi sai lầm.`);
-    if (question.type === "number" && !/^-?\d+$/.test(question.answer)) errors.push(`${question.id}: đáp án số phải là số nguyên.`);
+    if (question.type === "number" && !/^\d+$/.test(question.answer)) errors.push(`${question.id}: đáp án số phải là số tự nhiên.`);
     if (question.type === "choice" && (!question.options?.includes(question.answer) || new Set(question.options).size < 2)) errors.push(`${question.id}: lựa chọn hoặc đáp án không hợp lệ.`);
   });
   SKILL_LAB_STRANDS.forEach((strand) => {

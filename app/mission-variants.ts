@@ -1,7 +1,10 @@
 import type { AnswerType, DomainId } from "./content";
 import type { DeepMission, DeepQuestion, HintLadder } from "./curriculum";
+import { distinctOptions, shuffleById } from "./option-order";
 
 export const VARIANTS_PER_MISSION = 12;
+/** Mỗi phiên bản có 4 câu luyện sâu và 1 câu chuyển giao (nhiệm vụ gốc chỉ có 3 câu luyện). */
+export const PRACTICE_PER_EDITION = 4;
 
 export type DifficultyBand = "support" | "core" | "stretch";
 
@@ -39,10 +42,13 @@ const THINKING_LENSES: Record<DomainId, string[]> = {
 };
 
 const CONTEXTS = ["vườn trường", "trạm không gian", "xưởng thủ công", "thư viện", "cửa hàng nhỏ", "sân thể thao", "bảo tàng", "trại hè", "phòng thí nghiệm", "khu phố", "câu lạc bộ", "chuyến dã ngoại"];
+/** Những nơi đo bằng mét là hợp lý nhất (không quá nhỏ, không dài tới ki-lô-mét). */
+const METRE_PLACES = ["lớp học", "sân trường", "hành lang", "thư viện", "bể bơi", "sân bóng", "vườn trường", "phòng thể chất", "nhà xe", "sân khấu", "phòng ăn", "bãi cát"];
 const WEEKDAYS = ["Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
 
 function mod(value: number, size: number) { return ((value % size) + size) % size; }
 function options(values: Array<string | number>) { return values.map(String); }
+function clock(minutes: number) { return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`; }
 function hints(one: string, two: string, three: string): HintLadder {
   return [`Tầng 1: ${one}`, `Tầng 2: ${two}`, `Tầng 3: ${three}`];
 }
@@ -52,7 +58,8 @@ function makeQuestion(id: string, input: QuestionInput): DeepQuestion {
     prompt: input.prompt,
     type: input.type,
     answer: String(input.answer),
-    options: input.options ? options(input.options) : undefined,
+    // Thứ tự lựa chọn phụ thuộc mã câu hỏi: cùng một câu luôn hiện cùng thứ tự.
+    options: input.options ? shuffleById(options(input.options), id) : undefined,
     hint: input.hint1,
     hints: hints(input.hint1, input.hint2, input.hint3),
     explanation: input.explanation,
@@ -121,7 +128,7 @@ function numberQuestions(sequence: number, v: number, band: DifficultyBand): Que
       { prompt: `Hôm nay là ${WEEKDAYS[startDay]}. Sau ${days} ngày là thứ mấy?`, type: "choice", answer: WEEKDAYS[resultDay], options: [WEEKDAYS[resultDay], WEEKDAYS[mod(resultDay + 1, 7)], WEEKDAYS[mod(resultDay + 2, 7)], WEEKDAYS[mod(resultDay + 6, 7)]], hint1: "Tách các tuần trọn vẹn.", hint2: `${days} chia 7 dư ${days % 7}.`, hint3: `Tiến ${days % 7} ngày từ ${WEEKDAYS[startDay]}.`, explanation: `Các tuần trọn vẹn không đổi thứ; phần dư đưa ta đến ${WEEKDAYS[resultDay]}.`, tag: "Chu kỳ tuần" },
       { prompt: `Đồng hồ đang chỉ ${hour} giờ. Sau ${after} giờ sẽ chỉ mấy giờ?`, type: "number", answer: resultHour, hint1: "Mặt đồng hồ lặp lại sau 12 giờ.", hint2: `${after} giờ = 12 giờ + ${after - 12} giờ.`, hint3: `Tiến ${after - 12} giờ từ ${hour}.`, explanation: `Bỏ một vòng 12 giờ, đồng hồ chỉ ${resultHour} giờ.`, tag: "Chu kỳ 12" },
       { prompt: `Một hoạt động lặp lại mỗi ${3 + mod(v, 4)} ngày. Lần đầu vào ngày ${2 + mod(v, 5)}. Lần thứ tư vào ngày nào?`, type: "number", answer: 2 + mod(v, 5) + 3 * (3 + mod(v, 4)), hint1: "Giữa lần thứ nhất và lần thứ tư có mấy khoảng?", hint2: "Có 3 khoảng bằng nhau.", hint3: `Lấy ngày đầu cộng 3 × chu kỳ.`, explanation: `Lần thứ tư cách lần đầu 3 chu kỳ, nên rơi vào ngày ${2 + mod(v, 5) + 3 * (3 + mod(v, 4))}.`, tag: "Mốc và khoảng" },
-      { prompt: `Một đèn đổi màu theo vòng Đỏ – Vàng – Xanh. Lần 1 là Đỏ. Lần ${10 + v} là màu gì?`, type: "choice", answer: ["Xanh", "Đỏ", "Vàng"][mod(v, 3)], options: ["Đỏ", "Vàng", "Xanh"], hint1: "Mỗi vòng có 3 lần.", hint2: `Xét số dư của ${10 + v} khi chia 3.`, hint3: "Dư 1 là Đỏ, dư 2 là Vàng, chia hết là Xanh.", explanation: `Theo chu kỳ 3 màu, lần ${10 + v} là ${["Xanh", "Đỏ", "Vàng"][mod(v, 3)]}.`, tag: "Chu kỳ màu" },
+      { prompt: `Một đèn đổi màu theo vòng Đỏ – Vàng – Xanh. Lần 1 là Đỏ. Lần ${10 + v} là màu gì?`, type: "choice", answer: ["Xanh", "Đỏ", "Vàng"][mod(10 + v, 3)], options: ["Đỏ", "Vàng", "Xanh"], hint1: "Mỗi vòng có 3 lần.", hint2: `Xét số dư của ${10 + v} khi chia 3.`, hint3: "Dư 1 là Đỏ, dư 2 là Vàng, chia hết là Xanh.", explanation: `Theo chu kỳ 3 màu, lần ${10 + v} là ${["Xanh", "Đỏ", "Vàng"][mod(10 + v, 3)]}.`, tag: "Chu kỳ màu" },
       { prompt: `Ngày 1 là ${WEEKDAYS[startDay]}. Ngày ${22 + v} là thứ mấy?`, type: "choice", answer: WEEKDAYS[mod(startDay + 21 + v, 7)], options: [WEEKDAYS[mod(startDay + 21 + v, 7)], WEEKDAYS[mod(startDay + 22 + v, 7)], WEEKDAYS[mod(startDay + 20 + v, 7)]], hint1: "Từ ngày 1 đến ngày cần tìm ít hơn số ghi trên lịch 1 ngày.", hint2: `Khoảng cách là ${21 + v} ngày.`, hint3: `Lấy ${21 + v} chia 7 rồi tiến phần dư.`, explanation: `Sau ${21 + v} ngày, ta đến ${WEEKDAYS[mod(startDay + 21 + v, 7)]}.`, tag: "Chuyển giao lịch" },
     ];
   }
@@ -139,13 +146,14 @@ function numberQuestions(sequence: number, v: number, band: DifficultyBand): Que
 function calculationQuestions(sequence: number, v: number, band: DifficultyBand): QuestionInput[] {
   const bump = band === "stretch" ? 20 : band === "support" ? 0 : 10;
   if (sequence === 1) {
-    const base = 198 + 10 * mod(v, 5) + bump; const add = 37 + mod(v, 20); const round = Math.ceil(base / 100) * 100; const move = round - base;
+    // Số hạng thứ nhất luôn cách số tròn trăm từ 1 đến 5 đơn vị, nên phần chuyển sang luôn nhỏ hơn số hạng thứ hai.
+    const move = 1 + mod(v, 5); const round = 100 * (2 + mod(v, 4) + bump / 10); const base = round - move; const add = 37 + mod(v, 20);
     return [
       { prompt: `Tính nhẩm thuận tiện: ${base} + ${add}.`, type: "number", answer: base + add, hint1: `Đưa ${base} lên số tròn ${round}.`, hint2: `Chuyển ${move} từ số hạng thứ hai sang số hạng thứ nhất.`, hint3: `${round} + ${add - move} = ?`, explanation: `${base} + ${add} = ${round} + ${add - move} = ${base + add}.`, tag: "Bù trừ" },
       { prompt: `Tính nhanh: ${round + 3} − ${98 - mod(v, 5)}.`, type: "number", answer: round + 3 - (98 - mod(v, 5)), hint1: "Cùng tăng hai số để số trừ thành tròn trăm.", hint2: `Cần cộng ${2 + mod(v, 5)} vào cả hai số.`, hint3: `${round + 5 + mod(v, 5)} − 100 = ?`, explanation: `Giữ hiệu không đổi, kết quả là ${round + 3 - (98 - mod(v, 5))}.`, tag: "Giữ hiệu" },
       { prompt: `Biểu thức nào thuận tiện nhất để tính ${99 - mod(v, 3)} × ${6 + mod(v, 3)}?`, type: "choice", answer: `100 × ${6 + mod(v, 3)} − ${1 + mod(v, 3)} × ${6 + mod(v, 3)}`, options: [`100 × ${6 + mod(v, 3)} − ${1 + mod(v, 3)} × ${6 + mod(v, 3)}`, `${90 - mod(v, 3)} + ${6 + mod(v, 3)}`, `${99 - mod(v, 3)} + ${6 + mod(v, 3)}`, `100 × ${6 + mod(v, 3)} + ${6 + mod(v, 3)}`], hint1: "So sánh thừa số với 100.", hint2: `Thừa số đầu ít hơn 100 đúng ${1 + mod(v, 3)}.`, hint3: "Nhân 100 rồi bớt phần đã thêm.", explanation: "Dùng số gần tròn giúp tính nhẩm và giữ đúng giá trị.", tag: "Chọn chiến lược" },
       { prompt: `Điền số để tổng không đổi: ${base} + ${add} = ${base + move} + □.`, type: "number", answer: add - move, hint1: "Số thứ nhất tăng bao nhiêu?", hint2: `Nó tăng ${move}, nên số kia phải giảm ${move}.`, hint3: `${add} − ${move} = ?`, explanation: `Chuyển ${move} giữa hai số hạng, ô trống là ${add - move}.`, tag: "Giải thích biến đổi" },
-      { prompt: `Tính nhẩm và kiểm tra bằng cách khác: ${48 + v} + ${52 + v}.`, type: "number", answer: 100 + 2 * v, hint1: "Ghép hai phần gần 50.", hint2: `${48 + v} + ${52 + v} = 100 + ${2 * v}.`, hint3: `Kết quả là ${100 + 2 * v}.`, explanation: `Hai số gốc ghép thành 100, hai phần tăng thêm tạo ${2 * v}.`, tag: "Chuyển giao" },
+      { prompt: `Tính nhẩm và kiểm tra bằng cách khác: ${49 + v} + ${53 + v}.`, type: "number", answer: 102 + 2 * v, hint1: "Ghép hai phần gần 50.", hint2: `${49 + v} + ${53 + v} = 100 + ${2 + 2 * v}.`, hint3: `Kết quả là ${102 + 2 * v}.`, explanation: `Tách 50 + 50 = 100; hai phần còn lại cộng thêm ${2 + 2 * v}.`, tag: "Chuyển giao" },
     ];
   }
   if (sequence === 2) {
@@ -179,11 +187,15 @@ function calculationQuestions(sequence: number, v: number, band: DifficultyBand)
     ];
   }
   if (sequence === 5) {
-    const a = 340 + 10 * mod(v, 6) + mod(v, 9); const b = 260 + 10 * mod(v + 2, 5) + mod(v + 3, 9); const exact = a + b;
+    // Mỗi số hạng lệch khỏi số tròn trăm dưới 25 đơn vị và tổng hai độ lệch dưới 10,
+    // nên làm tròn từng số hay tính chính xác đều dẫn về cùng một mốc trăm.
+    const near = mod(v, 6);
+    const a = 300 + 100 * mod(v, 3) + [12, -9, 18, -14, 7, -21][near]; const b = 200 + 100 * Math.floor(v / 6) + 100 * mod(v + 1, 2) + [-8, 15, -11, 9, -16, 13][near]; const exact = a + b;
     const rounded = Math.round(a / 100) * 100 + Math.round(b / 100) * 100;
+    const nearFifty = [48, 49, 52, 51][mod(v, 4)]; const times = 5 + mod(v, 4); const product = 50 * times;
     return [
       { prompt: `${a} + ${b} gần số nào nhất?`, type: "choice", answer: rounded, options: [rounded - 200, rounded - 100, rounded, rounded + 100], hint1: "Làm tròn từng số đến hàng trăm.", hint2: `${a} gần ${Math.round(a / 100) * 100}; ${b} gần ${Math.round(b / 100) * 100}.`, hint3: "Cộng hai số đã làm tròn.", explanation: `Ước lượng được ${rounded}; kết quả chính xác là ${exact}.`, tag: "Ước lượng tổng" },
-      { prompt: `${48 + mod(v, 4)} × ${5 + mod(v, 4)} gần số nào nhất?`, type: "choice", answer: 50 * (5 + mod(v, 4)), options: [200, 250, 300, 350, 400].filter((x) => Math.abs(x - 50 * (5 + mod(v, 4))) <= 100), hint1: `Thay ${48 + mod(v, 4)} bằng 50.`, hint2: `Tính 50 × ${5 + mod(v, 4)}.`, hint3: "Dùng tích gần đúng để chọn.", explanation: `Tích gần ${50 * (5 + mod(v, 4))}.`, tag: "Ước lượng tích" },
+      { prompt: `${nearFifty} × ${times} gần số nào nhất?`, type: "choice", answer: product, options: [product - 100, product - 50, product, product + 50], hint1: `Thay ${nearFifty} bằng 50.`, hint2: `Tính 50 × ${times}.`, hint3: "Dùng tích gần đúng để chọn.", explanation: `50 × ${times} = ${product}; tích chính xác là ${nearFifty * times}, gần ${product} nhất.`, tag: "Ước lượng tích" },
       { prompt: `Một bạn tính ${a} + ${b} = ${exact - 100}. Kết quả này có hợp lý không?`, type: "choice", answer: "Không", options: ["Có", "Không", "Không thể kiểm tra"], hint1: "So với ước lượng hàng trăm.", hint2: `Tổng phải gần ${rounded}.`, hint3: `${exact - 100} cách kết quả đúng 100.`, explanation: `Ước lượng cho thấy ${exact - 100} quá thấp; tổng đúng là ${exact}.`, tag: "Bắt lỗi" },
       { prompt: `Khoảng nào chắc chắn chứa tổng ${a} + ${b}?`, type: "choice", answer: `${Math.floor(exact / 100) * 100} đến ${Math.floor(exact / 100) * 100 + 100}`, options: [`${Math.floor(exact / 100) * 100 - 100} đến ${Math.floor(exact / 100) * 100}`, `${Math.floor(exact / 100) * 100} đến ${Math.floor(exact / 100) * 100 + 100}`, `${Math.floor(exact / 100) * 100 + 100} đến ${Math.floor(exact / 100) * 100 + 200}`], hint1: "Không cần tính từng chữ số; tìm hai trăm liên tiếp bao quanh tổng.", hint2: `Tổng chính xác là gần ${rounded}.`, hint3: `Kiểm tra ${exact} nằm giữa hai mốc nào.`, explanation: `${exact} nằm trong khoảng đã chọn.`, tag: "Khoảng hợp lý" },
       { prompt: `Ước lượng rồi tính: ${a - 100} + ${b + 50}. Kết quả chính xác là bao nhiêu?`, type: "number", answer: exact - 50, hint1: "So với tổng ban đầu, một số giảm 100 và số kia tăng 50.", hint2: "Tổng mới giảm 50.", hint3: `${exact} − 50 = ?`, explanation: `Tổng mới là ${exact - 50}, phù hợp với ước lượng.`, tag: "Chuyển giao" },
@@ -202,17 +214,18 @@ function calculationQuestions(sequence: number, v: number, band: DifficultyBand)
 function measurementQuestions(sequence: number, v: number, band: DifficultyBand): QuestionInput[] {
   const extra = band === "stretch" ? 2 : 0;
   if (sequence === 1) {
-    const length = 80 + 10 * v; const estimate = Math.round(length / 100) * 100 || 100;
+    // Tránh 150 cm (cách đều 1 m và 2 m) và để số đo thật luôn khác số dự đoán.
+    const length = [80, 90, 100, 110, 120, 130, 170, 180, 190, 200, 210, 220][v]; const estimate = Math.round(length / 100) * 100; const measured = length - 3 - mod(v, 4);
     return [
       { prompt: `Một chiếc bàn dài khoảng ${length} cm. Ước lượng hợp lý nhất theo mét là bao nhiêu?`, type: "choice", answer: length < 150 ? "Khoảng 1 m" : "Khoảng 2 m", options: ["Khoảng 1 m", "Khoảng 2 m", "Khoảng 10 m"], hint1: "Nhớ 1 m = 100 cm.", hint2: `So ${length} cm với 100 cm và 200 cm.`, hint3: `Chọn mốc gần ${length} nhất.`, explanation: `${length} cm gần ${length < 150 ? 100 : 200} cm.`, tag: "Ước lượng đơn vị" },
       { prompt: `Đổi ${3 + mod(v, 5)} m ${20 + 5 * mod(v, 8)} cm thành xăng-ti-mét.`, type: "number", answer: (3 + mod(v, 5)) * 100 + 20 + 5 * mod(v, 8), hint1: "Đổi mét sang xăng-ti-mét trước.", hint2: `Nhân ${3 + mod(v, 5)} với 100.`, hint3: "Cộng phần xăng-ti-mét còn lại.", explanation: `Kết quả là ${(3 + mod(v, 5)) * 100 + 20 + 5 * mod(v, 8)} cm.`, tag: "Đổi đơn vị" },
-      { prompt: `Một sợi dây dự đoán dài ${estimate} cm, đo thật được ${length} cm. Sai lệch bao nhiêu xăng-ti-mét?`, type: "number", answer: Math.abs(estimate - length), hint1: "Lấy số lớn trừ số nhỏ.", hint2: `So ${estimate} và ${length}.`, hint3: `Sai lệch là |${estimate} − ${length}|.`, explanation: `Sai lệch ${Math.abs(estimate - length)} cm.`, tag: "Kiểm chứng ước lượng" },
-      { prompt: `Đơn vị nào phù hợp nhất để đo chiều dài ${CONTEXTS[v]}?`, type: "choice", answer: "Mét", options: ["Mi-li-mét", "Xăng-ti-mét", "Mét", "Ki-lô-mét"], hint1: "Hình dung độ dài của cả một khu vực.", hint2: "Nó lớn hơn đồ vật nhỏ nhưng chưa phải khoảng cách giữa hai thành phố.", hint3: "Chọn mét.", explanation: "Mét phù hợp với kích thước một khu vực trong trường hoặc sinh hoạt.", tag: "Chọn đơn vị" },
+      { prompt: `Một sợi dây dự đoán dài ${estimate} cm, đo thật được ${measured} cm. Sai lệch bao nhiêu xăng-ti-mét?`, type: "number", answer: Math.abs(estimate - measured), hint1: "Lấy số lớn trừ số nhỏ.", hint2: `So ${estimate} và ${measured}: số nào lớn hơn?`, hint3: `Tính ${Math.max(estimate, measured)} − ${Math.min(estimate, measured)}.`, explanation: `${Math.max(estimate, measured)} − ${Math.min(estimate, measured)} = ${Math.abs(estimate - measured)} cm.`, tag: "Kiểm chứng ước lượng" },
+      { prompt: `Đơn vị nào phù hợp nhất để đo chiều dài ${METRE_PLACES[v]}?`, type: "choice", answer: "Mét", options: ["Mi-li-mét", "Xăng-ti-mét", "Mét", "Ki-lô-mét"], hint1: "Hình dung độ dài của cả một khu vực.", hint2: "Nó lớn hơn đồ vật nhỏ nhưng chưa phải khoảng cách giữa hai thành phố.", hint3: "Chọn mét.", explanation: "Mét phù hợp với kích thước một khu vực trong trường hoặc sinh hoạt.", tag: "Chọn đơn vị" },
       { prompt: `Một đoạn đường dài ${1 + mod(v, 3)} km và ${250 + 50 * mod(v, 6)} m. Tổng cộng bao nhiêu mét?`, type: "number", answer: (1 + mod(v, 3)) * 1000 + 250 + 50 * mod(v, 6), hint1: "Đưa tất cả về mét.", hint2: "1 km = 1 000 m.", hint3: "Cộng hai phần sau khi đổi.", explanation: `Tổng là ${(1 + mod(v, 3)) * 1000 + 250 + 50 * mod(v, 6)} m.`, tag: "Chuyển giao" },
     ];
   }
   if (sequence === 2) {
-    const perimeter = 28 + 4 * mod(v + extra, 7); const length = perimeter / 2 - (5 + mod(v, 4)); const width = perimeter / 2 - length;
+    const perimeter = 28 + 4 * mod(v + extra, 7); const length = perimeter / 2 - (3 + mod(v, 4)); const width = perimeter / 2 - length; // chiều dài luôn lớn hơn chiều rộng
     const startHour = 8 + mod(v, 3); const startMinute = 10 + 5 * mod(v, 7); const duration = 35 + 5 * mod(v, 5); const totalMinutes = startHour * 60 + startMinute + duration;
     return [
       { prompt: `Có ${perimeter} cm dây làm khung chữ nhật dài ${length} cm. Chiều rộng là bao nhiêu?`, type: "number", answer: width, hint1: "Dây quanh khung là chu vi.", hint2: `Nửa chu vi là ${perimeter / 2}.`, hint3: `${perimeter / 2} − ${length} = ?`, explanation: `Chiều rộng ${width} cm; kiểm tra (${length} + ${width}) × 2 = ${perimeter}.`, tag: "Giới hạn vật liệu" },
@@ -243,9 +256,9 @@ function measurementQuestions(sequence: number, v: number, band: DifficultyBand)
     ];
   }
   if (sequence === 5) {
-    const startH = 8 + mod(v, 4); const startM = 5 * mod(v + 2, 9); const first = 25 + 5 * mod(v, 5); const rest = 10 + 5 * mod(v, 3); const second = 20 + 5 * mod(v + 1, 5); const total = first + rest + second; const end = startH * 60 + startM + total;
+    const startH = 8 + mod(v, 4); const startM = 5 * mod(v + 2, 9); const first = 25 + 5 * mod(v, 5); const rest = 10 + 5 * mod(v, 3); const second = 20 + 5 * mod(v + 1, 5); const total = first + rest + second; const end = startH * 60 + startM + total; const firstEnd = startH * 60 + startM + first;
     return [
-      { prompt: `Bắt đầu ${startH}:${String(startM).padStart(2, "0")}, học ${first} phút. Kết thúc lúc nào?`, type: "choice", answer: `${Math.floor((startH * 60 + startM + first) / 60)}:${String((startM + first) % 60).padStart(2, "0")}`, options: [`${Math.floor((startH * 60 + startM + first) / 60)}:${String((startM + first) % 60).padStart(2, "0")}`, `${startH}:${String((startM + first) % 60).padStart(2, "0")}`, `${Math.floor((startH * 60 + startM + first + 10) / 60)}:${String((startM + first + 10) % 60).padStart(2, "0")}`], hint1: "Cộng thời lượng vào mốc bắt đầu.", hint2: "Đổi 60 phút thành một giờ khi cần.", hint3: "Có thể đổi cả hai về phút.", explanation: `Hoạt động kết thúc sau ${first} phút.`, tag: "Mốc thời gian" },
+      { prompt: `Bắt đầu ${startH}:${String(startM).padStart(2, "0")}, học ${first} phút. Kết thúc lúc nào?`, type: "choice", answer: clock(firstEnd), options: distinctOptions(clock(firstEnd), [`${startH}:${String(firstEnd % 60).padStart(2, "0")}`, clock(firstEnd + 10), clock(firstEnd - 10)]), hint1: "Cộng thời lượng vào mốc bắt đầu.", hint2: "Đổi 60 phút thành một giờ khi cần.", hint3: "Có thể đổi cả hai về phút.", explanation: `Thêm ${first} phút vào ${clock(startH * 60 + startM)} được ${clock(firstEnd)}.`, tag: "Mốc thời gian" },
       { prompt: `Một buổi gồm ${first} phút đọc, nghỉ ${rest} phút, rồi ${second} phút vẽ. Tổng bao nhiêu phút?`, type: "number", answer: total, hint1: "Tính cả thời gian nghỉ.", hint2: `Cộng ${first} + ${rest} + ${second}.`, hint3: `Tổng là ${total}.`, explanation: `Buổi hoạt động dài ${total} phút.`, tag: "Lịch nhiều phần" },
       { prompt: `Buổi trên bắt đầu ${startH}:${String(startM).padStart(2, "0")}. Kết thúc lúc nào?`, type: "choice", answer: `${Math.floor(end / 60)}:${String(end % 60).padStart(2, "0")}`, options: [`${Math.floor(end / 60)}:${String(end % 60).padStart(2, "0")}`, `${Math.floor((end - rest) / 60)}:${String((end - rest) % 60).padStart(2, "0")}`, `${Math.floor((end + 10) / 60)}:${String((end + 10) % 60).padStart(2, "0")}`], hint1: "Dùng tổng thời gian vừa tính.", hint2: `Cộng ${total} phút vào mốc đầu.`, hint3: "Theo dõi giờ khi số phút qua 60.", explanation: `Kết thúc lúc ${Math.floor(end / 60)}:${String(end % 60).padStart(2, "0")}.`, tag: "Lập lịch" },
       { prompt: `Có ${total + 25} phút cho cả buổi. Sau ba phần trên còn bao nhiêu phút?`, type: "number", answer: 25, hint1: "Lấy quỹ thời gian trừ thời gian đã dùng.", hint2: `${total + 25} − ${total}.`, hint3: "Phần còn lại là 25 phút.", explanation: "Còn 25 phút dự phòng.", tag: "Khoảng trống" },
@@ -311,7 +324,7 @@ function geometryQuestions(sequence: number, v: number, band: DifficultyBand): Q
     const r = 4 + 2 * mod(v, 4); const c = 6 + 2 * mod(v + 1, 4); const tile = 2 + mod(v, 2);
     return [
       { prompt: `Một bảng ${r}×${c} ô cần bao nhiêu gạch 1×1 để lát kín?`, type: "number", answer: r * c, hint1: "Không để hở hay chồng.", hint2: "Số gạch bằng diện tích bảng.", hint3: `${r} × ${c} = ?`, explanation: `Cần ${r * c} viên gạch.`, tag: "Lát kín" },
-      { prompt: `Gạch ${tile}×${tile} có lát kín bảng ${r}×${c} không?`, type: "choice", answer: r % tile === 0 && c % tile === 0 ? "Có" : "Không", options: ["Có", "Không", "Chỉ khi cắt gạch"], hint1: "Mỗi kích thước của bảng có chia hết cho cạnh viên gạch không?", hint2: `Kiểm tra ${r} và ${c} với ${tile}.`, hint3: "Cả hai chiều phải ghép vừa.", explanation: `${r} và ${c} ${r % tile === 0 && c % tile === 0 ? "đều" : "không cùng"} chia hết cho ${tile}.`, tag: "Điều kiện lát" },
+      { prompt: `Gạch ${tile}×${tile} có lát kín bảng ${r}×${c} không?`, type: "choice", answer: r % tile === 0 && c % tile === 0 ? "Có" : "Không", options: ["Có", "Không", "Không thể biết"], hint1: "Mỗi kích thước của bảng có chia hết cho cạnh viên gạch không?", hint2: `Kiểm tra ${r} và ${c} với ${tile}.`, hint3: "Cả hai chiều phải ghép vừa.", explanation: `${r} và ${c} ${r % tile === 0 && c % tile === 0 ? "đều" : "không cùng"} chia hết cho ${tile}.`, tag: "Điều kiện lát" },
       { prompt: `Bảng ${r}×${c} lát bằng gạch 2×2 cần bao nhiêu viên?`, type: "number", answer: r * c / 4, hint1: "Một viên phủ 4 ô.", hint2: "Lấy diện tích bảng chia 4.", hint3: `${r * c} : 4 = ?`, explanation: `Cần ${r * c / 4} viên.`, tag: "Phủ theo khối" },
       { prompt: "Vì sao các hình tròn bằng nhau không lát kín mặt phẳng nếu không chồng lên nhau?", type: "choice", answer: "Giữa các hình còn khe hở", options: ["Giữa các hình còn khe hở", "Hình tròn không có diện tích", "Hình tròn quá nhỏ", "Vì có quá nhiều màu"], hint1: "Thử đặt bốn hình tròn sát nhau.", hint2: "Quan sát khoảng trống ở giữa.", hint3: "Cạnh cong không khép kín như cạnh thẳng phù hợp.", explanation: "Các đường tròn tiếp xúc vẫn để lại khe giữa chúng.", tag: "Giải thích hình học" },
       { prompt: `Gạch 1×${tile} có lát kín một hàng dài ${c + tile} ô không?`, type: "choice", answer: (c + tile) % tile === 0 ? "Có" : "Không", options: ["Có", "Không", "Chỉ khi xếp chéo"], hint1: "Chiều dài hàng có chia hết cho chiều dài viên gạch?", hint2: `Tính ${c + tile} : ${tile}.`, hint3: "Không được cắt gạch.", explanation: `${c + tile} ${ (c + tile) % tile === 0 ? "chia hết" : "không chia hết"} cho ${tile}.`, tag: "Chuyển giao" },
@@ -323,7 +336,7 @@ function geometryQuestions(sequence: number, v: number, band: DifficultyBand): Q
     { prompt: `Hình ${worst[0]}×${worst[1]} có chu vi bao nhiêu?`, type: "number", answer: 2 * (worst[0] + worst[1]), hint1: "Cộng hai cạnh rồi nhân 2.", hint2: `(${worst[0]} + ${worst[1]}) × 2.`, hint3: "Không nhầm với diện tích.", explanation: `Chu vi ${2 * (worst[0] + worst[1])}.`, tag: "Tính chuẩn" },
     { prompt: `Hai hình ${worst[0]}×${worst[1]} và ${best[0]}×${best[1]} cùng diện tích ${area}. Hình nào gọn hơn theo chu vi?`, type: "choice", answer: `${best[0]}×${best[1]}`, options: [`${worst[0]}×${worst[1]}`, `${best[0]}×${best[1]}`, "Bằng nhau"], hint1: "“Gọn hơn” ở đây nghĩa là chu vi nhỏ hơn.", hint2: "So hai chu vi.", hint3: `${2 * (best[0] + best[1])} nhỏ hơn ${2 * (worst[0] + worst[1])}.`, explanation: `${best[0]}×${best[1]} dùng ít đường viền hơn.`, tag: "Tiêu chí tối ưu" },
     { prompt: "Muốn chứng minh một hình là tối ưu trong các hình cạnh nguyên, ta cần làm gì?", type: "choice", answer: "Xét mọi cặp thừa số có thể", options: ["Chỉ nhìn bằng mắt", "Xét mọi cặp thừa số có thể", "Thử một hình vuông", "Đoán cạnh dài nhất"], hint1: "Cần chứng minh không còn phương án tốt hơn.", hint2: "Mỗi hình chữ nhật tương ứng một cặp thừa số.", hint3: "Liệt kê đủ rồi so sánh.", explanation: "Xét mọi cặp thừa số giúp kết luận không bỏ sót.", tag: "Chứng minh tối ưu" },
-    { prompt: `Một hình chữ nhật diện tích ${area} có cạnh ${best[0]}. Cạnh kia và chu vi lần lượt là gì?`, type: "choice", answer: `${best[1]} và ${2 * (best[0] + best[1])}`, options: [`${best[1]} và ${2 * (best[0] + best[1])}`, `${best[0]} và ${area}`, `${area} và ${best[1]}`, `${best[1]} và ${area}`], hint1: "Tìm cạnh kia bằng phép chia.", hint2: `Cạnh kia = ${area} : ${best[0]}.`, hint3: "Sau đó cộng hai cạnh và nhân 2.", explanation: `Cạnh kia ${best[1]}, chu vi ${2 * (best[0] + best[1])}.`, tag: "Chuyển giao" },
+    { prompt: `Một hình chữ nhật diện tích ${area} có cạnh ${best[0]}. Cạnh kia và chu vi lần lượt là gì?`, type: "choice", answer: `${best[1]} và ${2 * (best[0] + best[1])}`, options: distinctOptions(`${best[1]} và ${2 * (best[0] + best[1])}`, [`${best[1]} và ${area}`, `${area} và ${best[1]}`, `${best[1]} và ${best[0] + best[1]}`, `${best[0]} và ${area}`], 4), hint1: "Tìm cạnh kia bằng phép chia.", hint2: `Cạnh kia = ${area} : ${best[0]}.`, hint3: "Sau đó cộng hai cạnh và nhân 2.", explanation: `Cạnh kia ${best[1]}, chu vi ${2 * (best[0] + best[1])}.`, tag: "Chuyển giao" },
   ];
 }
 
@@ -406,20 +419,23 @@ function wordQuestions(sequence: number, v: number): QuestionInput[] {
       { prompt: `Tìm số cặp tự nhiên không âm x, y thỏa x + y = ${target + 2}. Có bao nhiêu cặp có thứ tự?`, type: "number", answer: target + 3, hint1: "Cho x chạy từ 0 đến tổng.", hint2: "Mỗi x xác định đúng một y.", hint3: `Có các giá trị x: 0, 1, …, ${target + 2}.`, explanation: `Có ${target + 3} cặp có thứ tự.`, tag: "Chuyển giao" },
     ];
   }
+  // Khoảng mở (low, low + 4) với low chẵn chứa đúng ba số, trong đó chỉ số ở giữa là số chẵn.
+  const low = 20 + 2 * v;
   if (sequence === 4) return [
-    { prompt: `Cần tìm một số. Manh mối 1: lớn hơn ${20 + v}. Manh mối 2: nhỏ hơn ${24 + v}. Có xác định duy nhất không?`, type: "choice", answer: "Không", options: ["Có", "Không", "Chỉ khi số chẵn"], hint1: "Liệt kê các số nguyên ở giữa.", hint2: `Có ${21 + v}, ${22 + v}, ${23 + v}.`, hint3: "Nhiều hơn một số thỏa.", explanation: "Hai manh mối chưa đủ để xác định duy nhất.", tag: "Manh mối thiếu" },
-    { prompt: `Thêm manh mối “số đó là số chẵn” vào khoảng trên. Nếu ${22 + v} là số chẵn, số cần tìm là bao nhiêu?`, type: "number", answer: (22 + v) % 2 === 0 ? 22 + v : 21 + v, hint1: "Lọc các số trong khoảng theo tính chẵn.", hint2: "Nhìn chữ số tận cùng.", hint3: "Chỉ giữ số chẵn.", explanation: `Số phù hợp là ${(22 + v) % 2 === 0 ? 22 + v : 21 + v}.`, tag: "Lọc điều kiện" },
+    { prompt: `Cần tìm một số. Manh mối 1: lớn hơn ${low}. Manh mối 2: nhỏ hơn ${low + 4}. Có xác định duy nhất không?`, type: "choice", answer: "Không", options: ["Có", "Không", "Chỉ khi số chẵn"], hint1: "Liệt kê các số nguyên ở giữa.", hint2: `Có ${low + 1}, ${low + 2}, ${low + 3}.`, hint3: "Nhiều hơn một số thỏa.", explanation: "Hai manh mối chưa đủ để xác định duy nhất.", tag: "Manh mối thiếu" },
+    { prompt: `Một số lớn hơn ${low} và nhỏ hơn ${low + 4}. Thêm manh mối “số đó là số chẵn”. Số cần tìm là bao nhiêu?`, type: "number", answer: low + 2, hint1: "Lọc các số trong khoảng theo tính chẵn.", hint2: `Xét ${low + 1}, ${low + 2}, ${low + 3}: nhìn chữ số tận cùng.`, hint3: "Chỉ giữ số chẵn.", explanation: `Trong ${low + 1}, ${low + 2}, ${low + 3} chỉ có ${low + 2} là số chẵn.`, tag: "Lọc điều kiện" },
     { prompt: "Một bộ manh mối tốt để tìm duy nhất một số cần điều gì?", type: "choice", answer: "Chỉ còn đúng một số thỏa tất cả", options: ["Chỉ còn đúng một số thỏa tất cả", "Có thật nhiều câu chữ", "Luôn nhắc màu sắc", "Có ít nhất một phép cộng"], hint1: "Mục tiêu là loại mọi phương án khác.", hint2: "Kiểm tra giao của các điều kiện.", hint3: "Cần đúng một ứng viên.", explanation: "Tính đủ của manh mối được xác nhận khi chỉ còn một nghiệm.", tag: "Đủ dữ kiện" },
     { prompt: `Số cần tìm nằm giữa ${30 + v} và ${36 + v}, chia hết cho 3. Có bao nhiêu khả năng?`, type: "number", answer: Array.from({ length: 5 }, (_, i) => 31 + v + i).filter((n) => n % 3 === 0).length, hint1: "Liệt kê các số nằm giữa, không lấy hai đầu.", hint2: "Kiểm tra tổng chữ số hoặc phép chia cho 3.", hint3: "Đếm những số thỏa cả hai điều kiện.", explanation: `Có ${Array.from({ length: 5 }, (_, i) => 31 + v + i).filter((n) => n % 3 === 0).length} khả năng.`, tag: "Giao điều kiện" },
     { prompt: `Tìm số lớn hơn ${40 + v}, nhỏ hơn ${47 + v}, vừa chẵn vừa chia hết cho 3.`, type: "number", answer: Array.from({ length: 6 }, (_, i) => 41 + v + i).find((n) => n % 6 === 0)!, hint1: "Số vừa chẵn vừa chia hết cho 3 thì chia hết cho 6.", hint2: "Liệt kê các số trong khoảng.", hint3: "Chọn bội của 6.", explanation: `Số phù hợp là ${Array.from({ length: 6 }, (_, i) => 41 + v + i).find((n) => n % 6 === 0)}.`, tag: "Chuyển giao" },
   ];
   if (sequence === 5) {
-    const target = 40 + 2 * v; const priceA = 3 + mod(v, 4); const priceB = 5 + mod(v + 1, 4); let countA = 0; let countB = 0; for (let a = 0; a <= target / priceA; a += 1) { const rest = target - a * priceA; if (rest >= 0 && rest % priceB === 0) { countA = a; countB = rest / priceB; break; } }
+    // Thẻ A luôn nhiều điểm hơn thẻ B, nên đổi một thẻ B lấy một thẻ A làm tổng TĂNG (không có số âm).
+    const priceB = 2 + mod(v, 3); const priceA = priceB + 2 + mod(v, 4); const countA = 2 + mod(v, 5); const countB = 3 + mod(v + 1, 4); const target = countA * priceA + countB * priceB;
     return [
       { prompt: `Cần đạt tổng ${target} điểm. Mỗi thẻ A được ${priceA} điểm, thẻ B được ${priceB} điểm. Một phương án phù hợp là gì?`, type: "choice", answer: `${countA} thẻ A và ${countB} thẻ B`, options: [`${countA} thẻ A và ${countB} thẻ B`, `${countA + 1} thẻ A và ${countB} thẻ B`, `${countA} thẻ A và ${countB + 1} thẻ B`], hint1: "Thử số thẻ A theo một trật tự.", hint2: "Sau mỗi lần thử, tính phần điểm còn thiếu.", hint3: `Kiểm tra ${countA}×${priceA} + ${countB}×${priceB}.`, explanation: `Phương án cho đúng ${target} điểm.`, tag: "Thử và sửa" },
       { prompt: `Kiểm tra ${countA} thẻ A và ${countB} thẻ B được tổng bao nhiêu điểm?`, type: "number", answer: target, hint1: "Tính điểm từng loại.", hint2: `${countA} × ${priceA} và ${countB} × ${priceB}.`, hint3: "Cộng hai phần.", explanation: `Tổng đúng ${target}.`, tag: "Kiểm tra phương án" },
       { prompt: "Thử và sửa có chiến lược khác đoán mò ở điểm nào?", type: "choice", answer: "Ghi lại kết quả và thay đổi một yếu tố có chủ đích", options: ["Ghi lại kết quả và thay đổi một yếu tố có chủ đích", "Thử thật nhanh", "Không cần kiểm tra", "Luôn bắt đầu bằng số lớn nhất"], hint1: "Chiến lược cần học từ lần thử trước.", hint2: "Chỉ thay một yếu tố để thấy tác động.", hint3: "Ghi chép giúp tránh lặp.", explanation: "Mỗi lần thử tạo bằng chứng cho lần điều chỉnh tiếp theo.", tag: "Chiến lược thử" },
-      { prompt: `Nếu tăng 1 thẻ A và giảm 1 thẻ B, tổng điểm thay đổi bao nhiêu?`, type: "number", answer: priceA - priceB, hint1: "Một phần tăng, một phần giảm.", hint2: `Thay đổi là +${priceA} − ${priceB}.`, hint3: "Có thể cho kết quả âm.", explanation: `Tổng thay đổi ${priceA - priceB} điểm.`, tag: "Điều chỉnh có kiểm soát" },
+      { prompt: `Thẻ A được ${priceA} điểm, thẻ B được ${priceB} điểm. Nếu thêm 1 thẻ A và bớt 1 thẻ B, tổng điểm tăng thêm bao nhiêu?`, type: "number", answer: priceA - priceB, hint1: "Một phần tăng, một phần giảm.", hint2: `Thêm ${priceA} điểm rồi bớt ${priceB} điểm.`, hint3: `Tính ${priceA} − ${priceB}.`, explanation: `Thẻ A nhiều điểm hơn thẻ B nên tổng tăng ${priceA} − ${priceB} = ${priceA - priceB} điểm.`, tag: "Điều chỉnh có kiểm soát" },
       { prompt: `Mục tiêu mới ${target + priceA} điểm. Từ phương án cũ, cách sửa nhanh nhất là gì?`, type: "choice", answer: "Thêm 1 thẻ A", options: ["Thêm 1 thẻ A", "Bớt 1 thẻ A", "Thêm 1 thẻ B", "Giữ nguyên"], hint1: "Mục tiêu tăng đúng bằng giá trị một thẻ A.", hint2: `Cần thêm ${priceA} điểm.`, hint3: "Thêm một thẻ A.", explanation: "Thêm 1 thẻ A đạt đúng mục tiêu mới.", tag: "Chuyển giao" },
     ];
   }
@@ -448,8 +464,8 @@ export function createMissionEdition(base: DeepMission, completedCount = 0, auto
   const generated = generateQuestions(base.domain, base.sequence, variant, band).map((input, index) => makeQuestion(`${base.id}-v${variant + 1}-q${index + 1}`, index === 0 ? { ...input, prompt: `Tại ${CONTEXTS[variant]}, ${input.prompt.charAt(0).toLocaleLowerCase("vi")}${input.prompt.slice(1)}` } : input));
   const mission: DeepMission = {
     ...base,
-    deepPractice: generated.slice(0, 4),
-    transfer: generated[4],
+    deepPractice: generated.slice(0, PRACTICE_PER_EDITION),
+    transfer: generated[PRACTICE_PER_EDITION],
   };
   return {
     id: `${base.id}-v${variant + 1}-${band}`,
@@ -475,8 +491,8 @@ export function validateMissionVariants(missions: DeepMission[]) {
       questions.forEach((question) => {
         if (!question.prompt.trim() || !question.answer.trim()) errors.push(`${question.id}: thiếu đề hoặc đáp án.`);
         if (question.hints.length !== 3) errors.push(`${question.id}: cần 3 tầng gợi ý.`);
-        if (question.type === "number" && !/^-?\d+$/.test(question.answer)) errors.push(`${question.id}: đáp án số phải là số nguyên.`);
-        if (question.type === "choice" && (!question.options?.includes(question.answer) || new Set(question.options).size < 2)) errors.push(`${question.id}: lựa chọn hoặc đáp án không hợp lệ.`);
+        if (question.type === "number" && (!/^\d+$/.test(question.answer) || Number(question.answer) > 100_000)) errors.push(`${question.id}: đáp án số phải là số tự nhiên trong phạm vi 100 000.`);
+        if (question.type === "choice" && (!question.options?.includes(question.answer) || new Set(question.options).size !== question.options.length)) errors.push(`${question.id}: lựa chọn trùng nhau hoặc thiếu đáp án.`);
       });
     }
     if (openingPrompts.size !== VARIANTS_PER_MISSION) errors.push(`${mission.id}: câu mở đầu chưa tạo đủ ${VARIANTS_PER_MISSION} biến thể khác nhau.`);

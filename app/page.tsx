@@ -21,7 +21,7 @@ import {
   ALL_DEEP_MISSIONS, CURRICULUM_VERSION, DAILY_PUZZLES_60, DEEP_MISSION_LIBRARY,
   type DeepMission, type DeepQuestion,
 } from "./curriculum";
-import { createMissionEdition, VARIANTS_PER_MISSION } from "./mission-variants";
+import { createMissionEdition, PRACTICE_PER_EDITION, VARIANTS_PER_MISSION } from "./mission-variants";
 import {
   findPlannedTask, selectEnrichmentTask, validateCuratedPack,
   type ContentCatalog, type CuratedContentPack,
@@ -30,7 +30,8 @@ import {
   MONTH_THEMES, PROGRAM_SESSIONS, WEEKLY_RHYTHM, YEAR_WEEKS, weekProgress,
 } from "./year-plan";
 import { contentRouteWeek, lessonStageIndex, parseContentRoute } from "./content-route";
-import { localCalendarDayIndex } from "./calendar-day";
+import { localCalendarDayIndex, localDayKey } from "./calendar-day";
+import { beginMissionSession, editionInputs, sessionSparkGain, sparkPointsOf, type MissionSessionStart } from "./mission-session";
 import { correctOnFirstAttempt, missionStrength, wrongAnswerFeedback } from "./learning-feedback";
 import {
   buildSkillLabSession, nextSkillLabRecord, WEEKLY_FOCUS_STRANDS, SKILL_LAB_QUESTIONS, SKILL_LAB_QUESTION_COUNT, SKILL_LAB_STRANDS,
@@ -128,10 +129,6 @@ const APP_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const CONTENT_RELEASE_URL = `${APP_BASE_PATH}/content-release.json`;
 const CONTENT_CATALOG_URL = `${APP_BASE_PATH}/content-catalog.json`;
 const DAY = 86_400_000;
-const SESSION_NOW = Date.now();
-const LOCAL_DAY_INDEX = localCalendarDayIndex(new Date(SESSION_NOW));
-/** Cùng định dạng với discoveryDays (ngày theo ISO). */
-const TODAY = new Date(SESSION_NOW).toISOString().slice(0, 10);
 const DOMAIN_ICONS: Record<DomainId, typeof Calculator> = {
   number: Target, calculation: Calculator, measurement: Ruler,
   geometry: Shapes, data: BarChart3, word: BookOpenCheck,
@@ -298,6 +295,13 @@ export default function Home() {
   const [diagnosticIndex, setDiagnosticIndex] = useState(0);
   const [diagnosticAnswers, setDiagnosticAnswers] = useState<string[]>(Array(DIAGNOSTIC_QUESTIONS.length).fill(""));
   const [missionId, setMissionId] = useState("geometry-1");
+  // Ảnh chụp đầu buổi học: cố định phiên bản bài luyện và nhớ số tia sáng để tính phần thực nhận.
+  const [missionSession, setMissionSession] = useState<MissionSessionStart | null>(null);
+  // “Bây giờ” của ứng dụng. Tính lại khi ứng dụng được mở lại hoặc sang ngày mới,
+  // để chuỗi ngày, lịch ôn và câu đố ngày không bị kẹt ở ngày PWA được nạp.
+  const [sessionNow, setSessionNow] = useState(() => Date.now());
+  const todayKey = localDayKey(new Date(sessionNow));
+  const localDayIndex = localCalendarDayIndex(new Date(sessionNow));
   const [stage, setStage] = useState<MissionStage>("predict");
   const [predictionChoice, setPredictionChoice] = useState("");
   const [predictionRevealed, setPredictionRevealed] = useState(false);
@@ -368,9 +372,26 @@ export default function Home() {
   const serviceWorkerRef = useRef<ServiceWorkerRegistration | null>(null);
   const updateReloadRef = useRef(false);
   const deepLinkHandledRef = useRef(false);
+  // Hồ sơ mới nhất cho các hiệu ứng chạy trễ (liên kết sâu) mà không cần chạy lại mỗi khi hồ sơ đổi.
+  const learningRef = useRef(learning);
+  useEffect(() => { learningRef.current = learning; }, [learning]);
   const [linkedWeekNumber, setLinkedWeekNumber] = useState<number | null>(null);
   const [linkedOpenTaskWeek, setLinkedOpenTaskWeek] = useState<number | null>(null);
 
+  useEffect(() => {
+    const refreshNow = () => { if (document.visibilityState === "visible") setSessionNow(Date.now()); };
+    // Ứng dụng mở liên tục qua nửa đêm: chỉ cập nhật khi ngày địa phương đã đổi.
+    const midnightWatch = window.setInterval(() => setSessionNow((previous) => (localDayKey(new Date(previous)) === localDayKey() ? previous : Date.now())), 60_000);
+    document.addEventListener("visibilitychange", refreshNow);
+    window.addEventListener("pageshow", refreshNow);
+    window.addEventListener("focus", refreshNow);
+    return () => {
+      window.clearInterval(midnightWatch);
+      document.removeEventListener("visibilitychange", refreshNow);
+      window.removeEventListener("pageshow", refreshNow);
+      window.removeEventListener("focus", refreshNow);
+    };
+  }, []);
   useEffect(() => {
     const task = window.setTimeout(() => {
       try {
@@ -428,6 +449,7 @@ export default function Home() {
         ? (["predict", "strategies", "practice", "transfer", "reflect"] as MissionStage[])[lessonStageIndex(route.id)]
         : "predict";
       setMissionId(linkedMission.id);
+      setMissionSession(beginMissionSession(linkedMission.id, learningRef.current.missionRecords[linkedMission.id], sparkPointsOf(learningRef.current)));
       setStage(linkedStage);
       setPredictionChoice("");
       setPredictionRevealed(false);
@@ -436,9 +458,9 @@ export default function Home() {
       setPracticeIndex(0);
       setPracticeAnswer("");
       setPracticeChecked(false);
-      setFirstAttempts(Array(linkedMission.deepPractice.length).fill(null));
-      setAttemptCounts(Array(linkedMission.deepPractice.length).fill(0));
-      setHintDepths(Array(linkedMission.deepPractice.length).fill(0));
+      setFirstAttempts(Array(PRACTICE_PER_EDITION).fill(null));
+      setAttemptCounts(Array(PRACTICE_PER_EDITION).fill(0));
+      setHintDepths(Array(PRACTICE_PER_EDITION).fill(0));
       setTransferAnswer("");
       setTransferChecked(false);
       setTransferFirst(null);
@@ -579,16 +601,17 @@ export default function Home() {
   }, [learning.diagnostic]);
   const currentBaseMission = ALL_DEEP_MISSIONS.find((mission) => mission.id === missionId) ?? ALL_DEEP_MISSIONS[0];
   const currentRecord = learning.missionRecords[currentBaseMission.id];
-  const currentEdition = useMemo(
-    () => createMissionEdition(currentBaseMission, currentRecord?.completedCount ?? 0, currentRecord?.autonomy ?? 0),
-    [currentBaseMission, currentRecord?.completedCount, currentRecord?.autonomy],
-  );
+  // Phiên bản được cố định theo ảnh chụp đầu buổi: hoàn thành bài không làm màn kết quả nhảy sang phiên bản kế tiếp.
+  const currentEdition = useMemo(() => {
+    const inputs = editionInputs(missionSession, currentBaseMission.id, currentRecord);
+    return createMissionEdition(currentBaseMission, inputs.completedCount, inputs.autonomy);
+  }, [currentBaseMission, currentRecord, missionSession]);
   const currentMission = currentEdition.mission;
   const currentPractice = currentMission.deepPractice[practiceIndex];
   const currentPracticeCorrect = practiceChecked && answerIsCorrect(currentPractice, practiceAnswer);
   const transferCorrect = transferChecked && answerIsCorrect(currentMission.transfer, transferAnswer);
   const currentDiagnostic = DIAGNOSTIC_QUESTIONS[diagnosticIndex];
-  const todayPuzzle = DAILY_PUZZLES_60[LOCAL_DAY_INDEX % DAILY_PUZZLES_60.length];
+  const todayPuzzle = DAILY_PUZZLES_60[localDayIndex % DAILY_PUZZLES_60.length];
   const skillLabQuestions = skillLabQuestionIds.map((id) => SKILL_LAB_QUESTIONS.find((question) => question.id === id)).filter((question): question is SkillLabQuestion => Boolean(question));
   const currentSkillLabQuestion = skillLabQuestions[skillLabIndex];
   const currentSkillLabStrand = currentSkillLabQuestion ? SKILL_LAB_STRANDS.find((strand) => strand.id === currentSkillLabQuestion.strand) : null;
@@ -597,7 +620,7 @@ export default function Home() {
   const skillLabMasteredCount = Object.values(learning.skillLabRecords).filter((record) => record.streak >= 2 && !record.needsReview).length;
   const skillLabAttemptedCount = Object.values(learning.skillLabRecords).filter((record) => record.attempts > 0).length;
   const dinoSummary = summarizeDinoIsland(learning.dinoCollection);
-  const streak = learningStreak(learning.discoveryDays, TODAY);
+  const streak = learningStreak(learning.discoveryDays, todayKey);
   const rareCount = Object.keys(learning.dinoRares).length;
   const missionForSpecies = (species: DinoSpecies) => DEEP_MISSION_LIBRARY[species.domain][species.slotInDomain - 1];
   const nestFriends: NestFriend[] = [
@@ -616,7 +639,7 @@ export default function Home() {
     }),
   ];
   const companion = nestFriends.find((friend) => friend.kind.id === learning.dinoNest.companionId) ?? nestFriends[0] ?? null;
-  const careDoneToday = learning.dinoNest.careDay === TODAY ? learning.dinoNest.careDone : [];
+  const careDoneToday = learning.dinoNest.careDay === todayKey ? learning.dinoNest.careDone : [];
   const galleryItem = (species: DinoSpecies): GalleryItem => {
     const progress = learning.dinoCollection[species.id];
     const owned = Boolean(progress && progress.stage !== "trung");
@@ -636,9 +659,10 @@ export default function Home() {
   const reflectionCount = Object.values(learning.missionRecords).filter((record) => record.reflection.trim()).length;
   const totalHints = Object.values(learning.missionRecords).reduce((sum, record) => sum + record.hintsUsed, 0);
   const totalRetries = Object.values(learning.missionRecords).reduce((sum, record) => sum + record.retries, 0);
-  const sparkPoints = (learning.diagnostic ? 60 : 0) + totalSessions * 120 + reflectionCount * 20 + learning.enrichmentCompleted.length * 80 + skillLabMasteredCount * 15 + learning.sparkBonus;
-  const museum = fossilMuseum(learning.discoveryDays, learning.fossilShieldUses, TODAY);
-  const spiralDueCount = dueReviewStates(learning.cognitiveStates, new Date(SESSION_NOW).toISOString()).length;
+  const sparkPoints = sparkPointsOf(learning);
+  const sessionSparks = sessionSparkGain(missionSession, sparkPoints);
+  const museum = fossilMuseum(learning.discoveryDays, learning.fossilShieldUses, todayKey);
+  const spiralDueCount = dueReviewStates(learning.cognitiveStates, new Date(sessionNow).toISOString()).length;
   const missionCounts = Object.fromEntries(Object.entries(learning.missionRecords).map(([id, record]) => [id, record.completedCount]));
   const yearProgress = YEAR_WEEKS.map((week) => ({ week, progress: weekProgress(week, missionCounts, learning.enrichmentCompleted) }));
   const completedWeeks = yearProgress.filter((item) => item.progress.complete).length;
@@ -648,7 +672,7 @@ export default function Home() {
   const activeWeekProgress = activeYearItem.progress;
   const plannedEnrichmentTask = findPlannedTask(curatedPacks, activeWeek.taskId);
   const fallbackPack = curatedPacks[0];
-  const enrichmentTask = plannedEnrichmentTask ?? (fallbackPack ? selectEnrichmentTask(fallbackPack, learning.enrichmentCompleted, LOCAL_DAY_INDEX) : null);
+  const enrichmentTask = plannedEnrichmentTask ?? (fallbackPack ? selectEnrichmentTask(fallbackPack, learning.enrichmentCompleted, localDayIndex) : null);
 
   useEffect(() => {
     if (!linkedOpenTaskWeek || !learning.diagnostic || !plannedEnrichmentTask) return;
@@ -671,10 +695,10 @@ export default function Home() {
   function nextForDomain(domain: DomainId) {
     const missions = DEEP_MISSION_LIBRARY[domain];
     return missions.find((mission) => missionIsUnlocked(mission) && !learning.missionRecords[mission.id])
-      ?? missions.find((mission) => missionIsUnlocked(mission) && new Date(learning.missionRecords[mission.id]?.reviewAt ?? Infinity).getTime() <= SESSION_NOW)
+      ?? missions.find((mission) => missionIsUnlocked(mission) && new Date(learning.missionRecords[mission.id]?.reviewAt ?? Infinity).getTime() <= sessionNow)
       ?? [...missions].reverse().find(missionIsUnlocked) ?? missions[0];
   }
-  const dueMissions = ALL_DEEP_MISSIONS.filter((mission) => learning.missionRecords[mission.id] && new Date(learning.missionRecords[mission.id].reviewAt).getTime() <= SESSION_NOW).sort((a, b) => learning.missionRecords[a.id].autonomy - learning.missionRecords[b.id].autonomy);
+  const dueMissions = ALL_DEEP_MISSIONS.filter((mission) => learning.missionRecords[mission.id] && new Date(learning.missionRecords[mission.id].reviewAt).getTime() <= sessionNow).sort((a, b) => learning.missionRecords[a.id].autonomy - learning.missionRecords[b.id].autonomy);
   const adaptivePlan = roadmap.map((domain) => nextForDomain(domain.id));
   const yearMission = ALL_DEEP_MISSIONS.find((mission) => mission.id === activeWeek.missionId) ?? adaptivePlan[0];
   const recommendedMission = yearMission;
@@ -731,13 +755,13 @@ export default function Home() {
   }
   function toggleFocusMode() { setPrefs((current) => ({ ...current, focusMode: !current.focusMode })); }
   function openSpiralReview() {
-    const items = buildSpiralReviewSet(learning.cognitiveStates, new Date().toISOString(), LOCAL_DAY_INDEX + learning.skillLabSessions.length);
+    const items = buildSpiralReviewSet(learning.cognitiveStates, new Date().toISOString(), localDayIndex + learning.skillLabSessions.length);
     if (!items.length) return;
     setSpiralItems(items); setView("spiral-review"); scrollTop();
   }
   function handleSpiralAttempt({ item, correct, hintDepth, reward }: SpiralAttempt) {
     const now = new Date().toISOString();
-    const today = now.slice(0, 10);
+    const today = localDayKey();
     setLearning((profile) => ({
       ...profile,
       cognitiveStates: recordCognitiveAttempt(profile.cognitiveStates, item.source, { correct, hintDepth, now, source: "review" }),
@@ -747,7 +771,7 @@ export default function Home() {
     }));
   }
   function rescueWithFossilShield() {
-    setLearning((profile) => ({ ...profile, fossilShieldUses: applyFossilShield(profile.discoveryDays, profile.fossilShieldUses, TODAY, new Date().toISOString()) }));
+    setLearning((profile) => ({ ...profile, fossilShieldUses: applyFossilShield(profile.discoveryDays, profile.fossilShieldUses, localDayKey(), new Date().toISOString()) }));
   }
   /** Báo cáo tuần cho Cổng Phụ Huynh (Module 6.2): mục tiêu tuần, câu hỏi Socratic, bài làm 7 ngày qua. */
   function buildWeeklyReport(domain: DomainId, taskTitle: string): WeeklyReport {
@@ -783,7 +807,7 @@ export default function Home() {
     setView("skill-lab"); scrollTop();
   }
   function startSkillLab(mode: SkillLabMode) {
-    const session = buildSkillLabSession(learning.skillLabRecords, LOCAL_DAY_INDEX + learning.skillLabSessions.length, mode, 10, mode === "spiral" ? weeklyFocusStrands.map((strand) => strand.id) : []);
+    const session = buildSkillLabSession(learning.skillLabRecords, localDayIndex + learning.skillLabSessions.length, mode, 10, mode === "spiral" ? weeklyFocusStrands.map((strand) => strand.id) : []);
     setSkillLabMode(mode); setSkillLabQuestionIds(session.map((question) => question.id)); setSkillLabIndex(0);
     setSkillLabAnswer(""); setSkillLabChecked(false); setSkillLabHintDepth(0); setSkillLabFirstTry(null);
     setSkillLabResults([]); setSkillLabFinished(false); resetQuestionAids(); setView("skill-lab"); scrollTop();
@@ -806,7 +830,7 @@ export default function Home() {
     if (!currentSkillLabQuestion || !currentSkillLabCorrect) return;
     const finalResults = [...skillLabResults, { id: currentSkillLabQuestion.id, firstTry: Boolean(skillLabFirstTry) }];
     if (skillLabIndex === skillLabQuestions.length - 1) {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDayKey();
       const session: SkillLabSession = {
         finishedAt: new Date().toISOString(), mode: skillLabMode,
         correctFirst: finalResults.filter((result) => result.firstTry).length,
@@ -838,7 +862,7 @@ export default function Home() {
     const scores = Object.fromEntries(DOMAINS.map((domain) => { const item = raw[domain.id]; const percent = Math.round((item.correct / item.total) * 100); return [domain.id, { ...item, percent, status: scoreStatus(percent) }]; })) as Record<DomainId, DomainScore>;
     const correct = Object.values(raw).reduce((sum, item) => sum + item.correct, 0);
     const percent = Math.round((correct / DIAGNOSTIC_QUESTIONS.length) * 100);
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDayKey();
     setLearning((profile) => ({ ...profile, diagnostic: { correct, total: DIAGNOSTIC_QUESTIONS.length, percent, placement: placementFor(percent), scores, finishedAt: new Date().toISOString() }, discoveryDays: profile.discoveryDays.includes(today) ? profile.discoveryDays : [...profile.discoveryDays, today] }));
     setView("diagnostic-result"); scrollTop();
   }
@@ -846,9 +870,10 @@ export default function Home() {
   function startMission(mission: DeepMission) {
     if (!learning.diagnostic) { setView("diagnostic-intro"); return; }
     if (!missionIsUnlocked(mission)) return;
-    setMissionId(mission.id); setStage("predict"); setPredictionChoice(""); setPredictionRevealed(false);
+    setMissionId(mission.id); setMissionSession(beginMissionSession(mission.id, learning.missionRecords[mission.id], sparkPoints));
+    setStage("predict"); setPredictionChoice(""); setPredictionRevealed(false);
     setLabChoice(""); setLabChecked(false); setPracticeIndex(0); setPracticeAnswer(""); setPracticeChecked(false);
-    setFirstAttempts(Array(mission.deepPractice.length).fill(null)); setAttemptCounts(Array(mission.deepPractice.length).fill(0)); setHintDepths(Array(mission.deepPractice.length).fill(0));
+    setFirstAttempts(Array(PRACTICE_PER_EDITION).fill(null)); setAttemptCounts(Array(PRACTICE_PER_EDITION).fill(0)); setHintDepths(Array(PRACTICE_PER_EDITION).fill(0));
     setTransferAnswer(""); setTransferChecked(false); setTransferFirst(null); setTransferAttempts(0); setTransferHintDepth(0);
     setReflectionPrompt(0); setReflectionDraft(learning.missionRecords[mission.id]?.reflection ?? ""); setUsedTwoStrategies(false); setDinoOutcome(null); setRewardNotes([]); resetQuestionAids(); setView("mission"); scrollTop();
   }
@@ -888,7 +913,7 @@ export default function Home() {
     const focusNeeds = currentMission.deepPractice.filter((_, index) => firstAttempts[index] === false || hintDepths[index] > 0).map((question) => question.challengeTag ?? currentMission.unit);
     if (!transferFirst) focusNeeds.push(`Chuyển giao: ${currentMission.transfer.challengeTag ?? currentMission.unit}`);
     const session: SessionEvidence = { finishedAt: now.toISOString(), firstScore, autonomy, averageHintDepth: Number(averageHintDepth.toFixed(2)), transferFirstTry: Boolean(transferFirst), editionId: currentEdition.id, difficulty: currentEdition.difficulty, usedTwoStrategies };
-    const today = now.toISOString().slice(0, 10);
+    const today = localDayKey(now);
     const dinoResult: MissionCompletionResult = { band: currentEdition.difficulty, maxHintDepth, usedTwoStrategies };
     const braveCount = countBraveAnswers([...firstAttempts, transferFirst], [...hintDepths, transferHintDepth]);
     const braveAll = braveCount === currentMission.deepPractice.length + 1;
@@ -962,8 +987,8 @@ export default function Home() {
   function careForDino(action: CareAction) {
     if (!companion) return;
     const nest = { ...learning.dinoNest, companionId: companion.kind.id };
-    const preview = careForCompanion(nest, action, TODAY);
-    setLearning((profile) => ({ ...profile, dinoNest: careForCompanion({ ...profile.dinoNest, companionId: companion.kind.id }, action, TODAY).nest }));
+    const preview = careForCompanion(nest, action, localDayKey());
+    setLearning((profile) => ({ ...profile, dinoNest: careForCompanion({ ...profile.dinoNest, companionId: companion.kind.id }, action, localDayKey()).nest }));
     const lines: Record<CareAction, string> = {
       "cho-an": `${companion.kind.name} ăn ngon lành rồi vẫy đuôi cảm ơn con.`,
       "vuot-ve": `${companion.kind.name} dụi đầu vào tay con, thở đều và mắt lim dim.`,
@@ -1012,7 +1037,7 @@ export default function Home() {
   function nextCheckInQuestion() {
     if (!checkInAnswers[checkInIndex]) return;
     if (checkInIndex < checkInItems.length - 1) { setCheckInIndex((index) => index + 1); scrollTop(); return; }
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDayKey();
     const result = scoreCheckIn(checkInMonth, checkInItems, checkInItems.map((item, index) => answerIsCorrect(item.question, checkInAnswers[index])), new Date().toISOString());
     setLearning((profile) => ({
       ...profile,
@@ -1053,7 +1078,7 @@ export default function Home() {
   }
   function exportBackup() {
     const blob = new Blob([JSON.stringify({ product: "Math Raccoon", schemaVersion: CURRICULUM_VERSION, exportedAt: new Date().toISOString(), profile: learning }, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `math-raccoon-${new Date().toISOString().slice(0, 10)}.json`; link.click(); URL.revokeObjectURL(url);
+    const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `math-raccoon-${localDayKey()}.json`; link.click(); URL.revokeObjectURL(url);
     setBackupStatus("Đã tạo bản sao lưu. Hãy giữ tệp này ở nơi an toàn.");
   }
   async function importBackup(file?: File) {
@@ -1144,7 +1169,7 @@ export default function Home() {
   }
   function completeEnrichment() {
     if (!enrichmentTask || enrichmentReflection.trim().length < 5) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDayKey();
     const firstTime = !learning.enrichmentCompleted.includes(enrichmentTask.id);
     const weekMission = enrichmentTask.week ? ALL_DEEP_MISSIONS.find((mission) => mission.id === YEAR_WEEKS[enrichmentTask.week! - 1]?.missionId) : undefined;
     const legendaryTarget = weekMission ?? { domain: enrichmentTask.domain };
@@ -1236,7 +1261,7 @@ export default function Home() {
   if (view === "enrichment" && enrichmentTask) {
     const domain = DOMAINS.find((item) => item.id === enrichmentTask.domain)!;
     const Icon = DOMAIN_ICONS[enrichmentTask.domain];
-    return <main className="app-shell min-h-screen"><div className="page-wrap narrow"><AppHeader current={navCurrent} back={goDashboard} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} totalSessions={totalSessions} /><section className="enrichment-hero"><span style={{ background: domain.soft, color: domain.color }}><Icon /></span><div><p className="eyebrow">Tuần {enrichmentTask.week ?? activeWeek.week} · Phòng bài toán mở · {domain.short}</p><h1>{enrichmentTask.title}</h1><p>Không chỉ có một con đường đúng</p><div className="task-tags"><span><Clock3 /> {enrichmentTask.minutes} phút</span><span><UserRound /> Cần người lớn cùng làm</span></div></div></section><section className="deep-card enrichment-card"><div className="source-chip"><Globe2 /><span>Nội dung Internet đã biên soạn và kiểm duyệt · không mở liên kết cho trẻ</span></div>{enrichmentTask.materials && <p className="task-materials"><Tablet /> <strong>Chuẩn bị:</strong> {enrichmentTask.materials}</p>}<KaraokeReader key={`open-${enrichmentTask.id}`} text={enrichmentTask.prompt} /><div className="launch-grid">{enrichmentTask.launchQuestions.map((question, index) => <div key={question}><span>{index + 1}</span><p>{question}</p></div>)}</div><div className="enrichment-actions"><Button variant="outline" onClick={() => setEnrichmentHintDepth((depth) => Math.min(3, depth + 1))} disabled={enrichmentHintDepth === 3}><Lightbulb /> {enrichmentHintDepth === 0 ? "Mở gợi ý tầng 1" : enrichmentHintDepth === 3 ? "Đã mở đủ gợi ý" : `Mở gợi ý tầng ${enrichmentHintDepth + 1}`}</Button></div>{enrichmentHintDepth > 0 && <div className="hint-stack">{enrichmentTask.hints.slice(0, enrichmentHintDepth).map((hint, index) => <div className="hint-box" key={hint}><Lightbulb /><div><strong>Gợi ý tầng {index + 1}</strong><p>{hint}</p></div></div>)}</div>}{enrichmentTask.extension && <div className="family-prompt"><Sparkles /><div><strong>Nếu con muốn đi xa hơn</strong><p>{enrichmentTask.extension}</p></div></div>}<div className="family-prompt"><UserRound /><div><strong>Cùng người lớn đào sâu</strong><p>{enrichmentTask.familyPrompt}</p></div></div><ParentPortal report={buildWeeklyReport(enrichmentTask.domain, enrichmentTask.title)} /><details className="parent-prompts"><summary><ShieldCheck /> Thẻ gợi mở cho phụ huynh <small>không cần biết đáp án</small></summary><div><strong>Bố/mẹ có thể hỏi con</strong><ol>{parentPromptsFor(enrichmentTask.domain, enrichmentTask.title).ask.map((line) => <li key={line}>{line}</li>)}</ol><strong>Bố/mẹ không nên</strong><ul>{parentPromptsFor(enrichmentTask.domain, enrichmentTask.title).avoid.map((line) => <li key={line}>{line}</li>)}</ul></div></details><label className="enrichment-reflection"><span>Con đã thử cách nào? Con phát hiện điều gì?</span><Textarea value={enrichmentReflection} onChange={(event) => setEnrichmentReflection(event.target.value)} placeholder="Con đã thử… và con nhận ra…" /></label><div className="stage-actions"><Button variant="outline" onClick={goDashboard}>Để lần sau</Button><Button onClick={completeEnrichment} disabled={enrichmentReflection.trim().length < 5} className="primary-action small">Ghi nhận khám phá · +80 tia sáng <Medal /></Button></div><details className="source-detail"><summary>Dành cho phụ huynh: đáp án, lưu ý và nguồn</summary>{enrichmentTask.answerGuide && <p><strong>Hướng dẫn kiểm tra:</strong> {enrichmentTask.answerGuide}</p>}{enrichmentTask.reviewNotes && <p><strong>Cách đồng hành:</strong> {enrichmentTask.reviewNotes}</p>}<p>{enrichmentTask.source.adaptationNote}</p><a href={enrichmentTask.source.url} target="_blank" rel="noreferrer">{enrichmentTask.source.title}</a></details></section></div></main>;
+    return <main className="app-shell min-h-screen"><div className="page-wrap narrow"><AppHeader current={navCurrent} back={goDashboard} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} totalSessions={totalSessions} /><section className="enrichment-hero"><span style={{ background: domain.soft, color: domain.color }}><Icon /></span><div><p className="eyebrow">Tuần {enrichmentTask.week ?? activeWeek.week} · Phòng bài toán mở · {domain.short}</p><h1>{enrichmentTask.title}</h1><p>Không chỉ có một con đường đúng</p><div className="task-tags"><span><Clock3 /> {enrichmentTask.minutes} phút</span><span><UserRound /> Cần người lớn cùng làm</span></div></div></section><section className="deep-card enrichment-card"><div className="source-chip"><Globe2 /><span>Nội dung Internet đã biên soạn và kiểm duyệt · không mở liên kết cho trẻ</span></div>{enrichmentTask.materials && <p className="task-materials"><Tablet /> <strong>Chuẩn bị:</strong> {enrichmentTask.materials}</p>}<KaraokeReader key={`open-${enrichmentTask.id}`} text={enrichmentTask.prompt} /><div className="launch-grid">{enrichmentTask.launchQuestions.map((question, index) => <div key={question}><span>{index + 1}</span><p>{question}</p></div>)}</div><div className="enrichment-actions"><Button variant="outline" onClick={() => setEnrichmentHintDepth((depth) => Math.min(3, depth + 1))} disabled={enrichmentHintDepth === 3}><Lightbulb /> {enrichmentHintDepth === 0 ? "Mở gợi ý tầng 1" : enrichmentHintDepth === 3 ? "Đã mở đủ gợi ý" : `Mở gợi ý tầng ${enrichmentHintDepth + 1}`}</Button></div>{enrichmentHintDepth > 0 && <div className="hint-stack">{enrichmentTask.hints.slice(0, enrichmentHintDepth).map((hint, index) => <div className="hint-box" key={hint}><Lightbulb /><div><strong>Gợi ý tầng {index + 1}</strong><p>{hint}</p></div></div>)}</div>}{enrichmentTask.extension && <div className="family-prompt"><Sparkles /><div><strong>Nếu con muốn đi xa hơn</strong><p>{enrichmentTask.extension}</p></div></div>}<div className="family-prompt"><UserRound /><div><strong>Cùng người lớn đào sâu</strong><p>{enrichmentTask.familyPrompt}</p></div></div><ParentPortal report={buildWeeklyReport(enrichmentTask.domain, enrichmentTask.title)} /><details className="parent-prompts"><summary><ShieldCheck /> Thẻ gợi mở cho phụ huynh <small>không cần biết đáp án</small></summary><div><strong>Bố/mẹ có thể hỏi con</strong><ol>{parentPromptsFor(enrichmentTask.domain, enrichmentTask.title).ask.map((line) => <li key={line}>{line}</li>)}</ol><strong>Bố/mẹ không nên</strong><ul>{parentPromptsFor(enrichmentTask.domain, enrichmentTask.title).avoid.map((line) => <li key={line}>{line}</li>)}</ul></div></details><label className="enrichment-reflection"><span>Con đã thử cách nào? Con phát hiện điều gì?</span><Textarea value={enrichmentReflection} onChange={(event) => setEnrichmentReflection(event.target.value)} placeholder="Con đã thử… và con nhận ra…" /></label><div className="stage-actions"><Button variant="outline" onClick={goDashboard}>Để lần sau</Button><Button onClick={completeEnrichment} disabled={enrichmentReflection.trim().length < 5} className="primary-action small">Ghi nhận khám phá{learning.enrichmentCompleted.includes(enrichmentTask.id) ? "" : " · +80 tia sáng"} <Medal /></Button></div><details className="source-detail"><summary>Dành cho phụ huynh: đáp án, lưu ý và nguồn</summary>{enrichmentTask.answerGuide && <p><strong>Hướng dẫn kiểm tra:</strong> {enrichmentTask.answerGuide}</p>}{enrichmentTask.reviewNotes && <p><strong>Cách đồng hành:</strong> {enrichmentTask.reviewNotes}</p>}<p>{enrichmentTask.source.adaptationNote}</p><a href={enrichmentTask.source.url} target="_blank" rel="noreferrer">{enrichmentTask.source.title}</a></details></section></div></main>;
   }
 
   if (view === "mission") {
@@ -1250,7 +1275,7 @@ export default function Home() {
       const authenticTask = AUTHENTIC_TASKS[currentMission.id];
       const braveCount = latestSession?.braveCount ?? 0;
       const braveTotal = currentMission.deepPractice.length + 1;
-      return <main className="app-shell min-h-screen"><div className="page-wrap narrow"><AppHeader current={navCurrent} back={goDashboard} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} /><section className="lesson-result"><div className="mastery-badge passed"><Medal /></div><p className="eyebrow">Buổi học hoàn thành · +120 tia sáng</p><h1>{(record?.autonomy ?? 0) >= 85 ? "Nhà nghiên cứu tự lực" : (record?.autonomy ?? 0) >= 65 ? "Nhà chiến lược bền bỉ" : "Nhà thám hiểm dám sửa"}</h1><p>Hệ thống ghi nhận không chỉ đáp án: đúng lần đầu, độ sâu gợi ý, số lần thử lại và khả năng dùng ý tưởng trong câu mới.</p><div className="result-strength"><Sparkles /><div><span>Điểm mạnh nổi bật</span><strong>{missionStrength(latestSession)}</strong></div></div><div className="mastery-meter"><Progress value={record?.autonomy ?? 0} /><span style={{ left: `${Math.max(8, record?.autonomy ?? 0)}%` }}>{record?.autonomy ?? 0}% tự lực</span></div><div className="evidence-grid"><div><strong>{firstTryCorrect}/{currentMission.deepPractice.length}</strong><span>câu đúng ngay lần đầu</span></div><div><strong>{latestSession?.firstScore ?? record?.bestFirstScore ?? 0}%</strong><span>điểm lần đầu buổi này</span></div><div><strong>{record?.maxHintDepth ?? 0}/3</strong><span>gợi ý sâu nhất</span></div><div><strong>{latestSession?.transferFirstTry ? "Đạt" : "Cần ôn"}</strong><span>chuyển giao lần đầu</span></div></div>{record?.focusNeeds.length ? <div className="adaptive-note"><Brain /><div><strong>Động cơ thích ứng đã ghi nhận</strong><p>Gặp lại sau: {record.focusNeeds.join(" · ")}. Lịch ôn: {new Date(record.reviewAt).toLocaleDateString("vi-VN")}.</p></div></div> : <div className="adaptive-note"><CheckCircle2 /><div><strong>Ý tưởng đã đứng vững</strong><p>Con giải độc lập và chuyển được sang tình huống mới.</p></div></div>}<div className="result-advice"><Lightbulb /><div><strong>Phát hiện con đã ghi</strong><p>{record?.reflection}</p></div></div>{dinoOutcome && outcomeSpecies && <div className={`dino-hatch-note ${dinoOutcome.justHatched || dinoOutcome.evolvedTo ? "celebrate" : ""}`}><span>{dinoOutcome.progress.stage === "trung" ? <DinoEgg cracks={dinoOutcome.progress.shards} /> : <DinoFigure kind={outcomeSpecies} stage={dinoOutcome.progress.stage} animated />}</span><div><strong>{dinoOutcome.justHatched ? `Trứng đã nở: ${outcomeSpecies.name}!` : dinoOutcome.evolvedTo ? `${outcomeSpecies.name} đã lớn thành ${DINO_STAGE_LABELS[dinoOutcome.evolvedTo].toLocaleLowerCase("vi")}!` : dinoOutcome.progress.stage === "trung" ? `+${dinoOutcome.shardsEarned} mảnh trứng · ${dinoOutcome.progress.shards}/${SHARDS_TO_HATCH}` : `${outcomeSpecies.name} vui vì con quay lại`}</strong><p>{dinoOutcome.justHatched ? `${outcomeSpecies.genus} · độ hiếm ${EGG_RARITY_LABELS[dinoOutcome.progress.rarity ?? "thuong"]}. ${outcomeSpecies.funFact}` : dinoOutcome.progress.stage === "trung" ? `Trứng ở ${DINO_REGIONS[outcomeSpecies.domain].name} đang ấm dần. Làm phiên bản mới của nhiệm vụ này để trứng nở.` : dinoOutcome.progress.stage === "thieu-nien" ? `Hoàn thành một phiên bản mức Bứt phá để ${outcomeSpecies.name} trưởng thành.` : `${outcomeSpecies.name} đã trưởng thành ở ${DINO_REGIONS[outcomeSpecies.domain].name}.`}</p></div></div>}{dinoOutcome?.justHatched && outcomeSpecies && <HatchReveal kind={outcomeSpecies} soundOn={prefs.sound} caption={`${outcomeSpecies.name} vừa chui ra khỏi trứng!`} />}<div className={`brave-summary ${braveCount === braveTotal ? "all" : ""}`}><DinoEgg hue={braveCount === braveTotal ? 45 : 200} /><div><strong>Trứng Dũng cảm: {braveCount}/{braveTotal} câu tự làm không cần gợi ý</strong><p>{braveCount === braveTotal ? "Trọn vẹn! Con có thêm cơ hội gặp một loài khủng long hiếm." : "Câu nào con thử trước khi mở gợi ý đều làm trứng ấm hơn. Lần sau thử thêm một câu nhé."}</p></div></div>{rewardNotes.map((note) => <div key={note} className="dino-hatch-note celebrate"><span><Sparkles /></span><div><p>{note}</p></div></div>)}{authenticTask && <section className={`authentic-task ${record?.completedCount === 4 ? "highlight" : ""}`}><div className="authentic-task-heading"><span><House /></span><div><p className="eyebrow">{record?.completedCount === 4 ? "Buổi 4 tuần này · Chuyển giao đời sống" : "Nhiệm vụ đời thực · làm cùng người lớn"}</p><h2>{authenticTask.title}</h2></div></div><ol>{authenticTask.steps.map((step) => <li key={step}>{step}</li>)}</ol><p className="authentic-task-share"><strong>Cùng kể lại:</strong> {authenticTask.share}</p><div className="authentic-task-actions"><Button variant="outline" onClick={() => window.print()}><Download /> In nhiệm vụ</Button>{learning.authenticDone.includes(currentMission.id) ? <span className="pack-success"><CheckCircle2 /> Đã làm cùng người lớn</span> : <Button variant="outline" onClick={() => markAuthenticDone(currentMission.id)}><CheckCircle2 /> Đã làm xong cùng người lớn</Button>}</div></section>}<div className="result-actions"><Button variant="outline" onClick={() => startMission(currentMission)}><RefreshCw /> Thử phiên bản khác</Button><Button onClick={startYearRecommendation} className="primary-action small">Buổi tiếp theo trong tuần <ArrowRight /></Button></div></section></div></main>;
+      return <main className="app-shell min-h-screen"><div className="page-wrap narrow"><AppHeader current={navCurrent} back={goDashboard} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} /><section className="lesson-result"><div className="mastery-badge passed"><Medal /></div><p className="eyebrow">Buổi học hoàn thành · +{sessionSparks} tia sáng</p><h1>{(record?.autonomy ?? 0) >= 85 ? "Nhà nghiên cứu tự lực" : (record?.autonomy ?? 0) >= 65 ? "Nhà chiến lược bền bỉ" : "Nhà thám hiểm dám sửa"}</h1><p>Hệ thống ghi nhận không chỉ đáp án: đúng lần đầu, độ sâu gợi ý, số lần thử lại và khả năng dùng ý tưởng trong câu mới.</p><div className="result-strength"><Sparkles /><div><span>Điểm mạnh nổi bật</span><strong>{missionStrength(latestSession)}</strong></div></div><div className="mastery-meter"><Progress value={record?.autonomy ?? 0} /><span style={{ left: `${Math.max(8, record?.autonomy ?? 0)}%` }}>{record?.autonomy ?? 0}% tự lực</span></div><div className="evidence-grid"><div><strong>{firstTryCorrect}/{currentMission.deepPractice.length}</strong><span>câu đúng ngay lần đầu</span></div><div><strong>{latestSession?.firstScore ?? record?.bestFirstScore ?? 0}%</strong><span>điểm lần đầu buổi này</span></div><div><strong>{record?.maxHintDepth ?? 0}/3</strong><span>gợi ý sâu nhất</span></div><div><strong>{latestSession?.transferFirstTry ? "Đạt" : "Cần ôn"}</strong><span>chuyển giao lần đầu</span></div></div>{record?.focusNeeds.length ? <div className="adaptive-note"><Brain /><div><strong>Động cơ thích ứng đã ghi nhận</strong><p>Gặp lại sau: {record.focusNeeds.join(" · ")}. Lịch ôn: {new Date(record.reviewAt).toLocaleDateString("vi-VN")}.</p></div></div> : <div className="adaptive-note"><CheckCircle2 /><div><strong>Ý tưởng đã đứng vững</strong><p>Con giải độc lập và chuyển được sang tình huống mới.</p></div></div>}<div className="result-advice"><Lightbulb /><div><strong>Phát hiện con đã ghi</strong><p>{record?.reflection}</p></div></div>{dinoOutcome && outcomeSpecies && <div className={`dino-hatch-note ${dinoOutcome.justHatched || dinoOutcome.evolvedTo ? "celebrate" : ""}`}><span>{dinoOutcome.progress.stage === "trung" ? <DinoEgg cracks={dinoOutcome.progress.shards} /> : <DinoFigure kind={outcomeSpecies} stage={dinoOutcome.progress.stage} animated />}</span><div><strong>{dinoOutcome.justHatched ? `Trứng đã nở: ${outcomeSpecies.name}!` : dinoOutcome.evolvedTo ? `${outcomeSpecies.name} đã lớn thành ${DINO_STAGE_LABELS[dinoOutcome.evolvedTo].toLocaleLowerCase("vi")}!` : dinoOutcome.progress.stage === "trung" ? `+${dinoOutcome.shardsEarned} mảnh trứng · ${dinoOutcome.progress.shards}/${SHARDS_TO_HATCH}` : `${outcomeSpecies.name} vui vì con quay lại`}</strong><p>{dinoOutcome.justHatched ? `${outcomeSpecies.genus} · độ hiếm ${EGG_RARITY_LABELS[dinoOutcome.progress.rarity ?? "thuong"]}. ${outcomeSpecies.funFact}` : dinoOutcome.progress.stage === "trung" ? `Trứng ở ${DINO_REGIONS[outcomeSpecies.domain].name} đang ấm dần. Làm phiên bản mới của nhiệm vụ này để trứng nở.` : dinoOutcome.progress.stage === "thieu-nien" ? `Hoàn thành một phiên bản mức Bứt phá để ${outcomeSpecies.name} trưởng thành.` : `${outcomeSpecies.name} đã trưởng thành ở ${DINO_REGIONS[outcomeSpecies.domain].name}.`}</p></div></div>}{dinoOutcome?.justHatched && outcomeSpecies && <HatchReveal kind={outcomeSpecies} soundOn={prefs.sound} caption={`${outcomeSpecies.name} vừa chui ra khỏi trứng!`} />}<div className={`brave-summary ${braveCount === braveTotal ? "all" : ""}`}><DinoEgg hue={braveCount === braveTotal ? 45 : 200} /><div><strong>Trứng Dũng cảm: {braveCount}/{braveTotal} câu tự làm không cần gợi ý</strong><p>{braveCount === braveTotal ? "Trọn vẹn! Con có thêm cơ hội gặp một loài khủng long hiếm." : "Câu nào con thử trước khi mở gợi ý đều làm trứng ấm hơn. Lần sau thử thêm một câu nhé."}</p></div></div>{rewardNotes.map((note) => <div key={note} className="dino-hatch-note celebrate"><span><Sparkles /></span><div><p>{note}</p></div></div>)}{authenticTask && <section className={`authentic-task ${record?.completedCount === 4 ? "highlight" : ""}`}><div className="authentic-task-heading"><span><House /></span><div><p className="eyebrow">{record?.completedCount === 4 ? "Buổi 4 tuần này · Chuyển giao đời sống" : "Nhiệm vụ đời thực · làm cùng người lớn"}</p><h2>{authenticTask.title}</h2></div></div><ol>{authenticTask.steps.map((step) => <li key={step}>{step}</li>)}</ol><p className="authentic-task-share"><strong>Cùng kể lại:</strong> {authenticTask.share}</p><div className="authentic-task-actions"><Button variant="outline" onClick={() => window.print()}><Download /> In nhiệm vụ</Button>{learning.authenticDone.includes(currentMission.id) ? <span className="pack-success"><CheckCircle2 /> Đã làm cùng người lớn</span> : <Button variant="outline" onClick={() => markAuthenticDone(currentMission.id)}><CheckCircle2 /> Đã làm xong cùng người lớn</Button>}</div></section>}<div className="result-actions"><Button variant="outline" onClick={() => startMission(currentMission)}><RefreshCw /> Thử phiên bản khác</Button><Button onClick={startYearRecommendation} className="primary-action small">Buổi tiếp theo trong tuần <ArrowRight /></Button></div></section></div></main>;
     }
     return <main className="app-shell min-h-screen"><div className="page-wrap mission-wrap"><AppHeader current={navCurrent} back={goDashboard} onHome={goDashboard} sparkPoints={sparkPoints} completedMissions={completedMissions} /><section className="lesson-heading"><span className="lesson-icon" style={{ background: domain.soft, color: domain.color }}><Icon /></span><div><p className="eyebrow">{domain.name} · chặng {currentMission.sequence}/6</p><h1>{currentMission.title}</h1><p>{currentMission.goal}</p></div></section><nav className="deep-steps">{STAGES.map((item) => { const currentIndex = STAGES.findIndex((step) => step.id === stage); const itemIndex = STAGES.findIndex((step) => step.id === item.id); return <span key={item.id} className={item.id === stage ? "active" : itemIndex < currentIndex ? "done" : ""}><strong>{itemIndex < currentIndex ? <Check /> : item.short}</strong>{item.label}</span>; })}</nav>
       <section className="mission-edition-banner"><div><RefreshCw /><span><strong>{currentEdition.label}</strong><small>Bài luyện thay đổi sau mỗi lần hoàn thành</small></span></div><div><Brain /><span><strong>Ống kính: {currentEdition.thinkingLens}</strong><small>Mức thích ứng: {currentEdition.difficultyLabel}</small></span></div><em>{VARIANTS_PER_MISSION * ALL_DEEP_MISSIONS.length} phiên bản trong toàn chương trình</em></section>

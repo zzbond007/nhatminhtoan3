@@ -1,3 +1,5 @@
+import { shuffleById } from "./option-order";
+
 export type DomainId = "number" | "calculation" | "measurement" | "geometry" | "data" | "word";
 export type AnswerType = "choice" | "number";
 
@@ -62,7 +64,7 @@ const q = (
   id: string, domain: DomainId, difficulty: 1 | 2 | 3, skill: string,
   prompt: string, type: AnswerType, answer: string, hint: string,
   explanation: string, options?: string[], context?: DiagnosticQuestion["context"],
-): DiagnosticQuestion => ({ id, domain, difficulty, skill, prompt, type, answer, hint, explanation, options, context });
+): DiagnosticQuestion => ({ id, domain, difficulty, skill, prompt, type, answer, hint, explanation, options: options ? shuffleById(options, id) : undefined, context });
 
 export const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
   q("n1", "number", 1, "Nhìn ra quy luật", "Dãy số 4, 7, 10, 13, … có số tiếp theo là bao nhiêu?", "number", "16", "Quan sát khoảng cách giữa hai số liên tiếp.", "Mỗi lần dãy tăng 3 nên số tiếp theo là 16."),
