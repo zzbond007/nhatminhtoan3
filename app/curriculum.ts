@@ -2,6 +2,8 @@ import { DOMAINS, type DomainId, type PracticeQuestion } from "./content";
 import { MISSION_LIBRARY, type DailyPuzzle, type Mission, type MissionLevel } from "./missions";
 import { DINO_MISSION_STORIES } from "./dino/dino-mission-stories";
 import { distinctOptions, shuffleById } from "./option-order";
+import { EXTENSION_MODELS } from "./extension-models";
+import { PREDICTION_UNSURE, PREDICTIONS } from "./predictions";
 
 export const CURRICULUM_VERSION = 11;
 
@@ -9,7 +11,16 @@ export type HintLadder = [string, string, string];
 export type DeepQuestion = PracticeQuestion & {
   id: string;
   hints: HintLadder;
+  /** Phản hồi chung khi đáp án sai không thuộc lỗi nào đã biết. */
   misconception: string;
+  /** Phản hồi riêng cho từng đáp án sai hay gặp (phương án nhiễu hoặc một số sai). */
+  feedbackByAnswer?: Record<string, string>;
+  /** Số bước suy luận của câu hỏi. */
+  steps?: number;
+  /** Đề có một dữ kiện không cần dùng (dải Bứt phá). */
+  extraData?: boolean;
+  /** Sơ đồ mở sẵn dưới đề (dải Gỡ nút). */
+  scaffold?: string;
 };
 
 export type DeepMission = Mission & {
@@ -350,11 +361,8 @@ function makeExtension(base: Mission, spec: ExtensionSpec, sequence: 4 | 5 | 6):
     wonder: spec.wonder,
     ideaTitle: "Tạo bằng chứng, không đoán mò",
     idea: spec.idea,
-    model: {
-      prompt: spec.practice[0].prompt,
-      steps: [spec.practice[0].hint, spec.practice[0].explanation, "Đổi một dữ kiện nhỏ và kiểm tra xem chiến lược còn dùng được không."],
-      answer: spec.practice[0].answer,
-    },
+    // Bài mẫu riêng, không trùng câu luyện hay bài Tương tác (xem extension-models.ts).
+    model: EXTENSION_MODELS[`${base.domain}-${sequence}`],
     practice: spec.practice,
     reflection: `Con đã dùng bằng chứng nào trong nhiệm vụ “${spec.title}”? Nếu đổi một dữ kiện, cách nghĩ của con đổi ra sao?`,
   };
@@ -395,10 +403,12 @@ function standardize(mission: Mission, sequence: DeepMission["sequence"]): DeepM
       "Con mang ý tưởng sang câu chuyển giao rồi nói lại điều đã hiểu.",
     ],
     realWorldConnection: missionGuideByDomain[mission.domain].connection,
+    // Hai nhận định toán học cụ thể của riêng nhiệm vụ (xem predictions.ts) và lựa chọn “Con chưa chắc”.
     prediction: {
       prompt: mission.wonder,
-      options: ["Con đã có một dự đoán", "Con nghĩ có hơn một cách", "Con chưa chắc và muốn thử"],
-      reveal: `Dự đoán không bị chấm điểm. Điều quan trọng là giữ lại ý tưởng ban đầu để so với bằng chứng sau thí nghiệm. ${mission.idea}`,
+      options: [...PREDICTIONS[mission.id].options, PREDICTION_UNSURE],
+      answer: PREDICTIONS[mission.id].answer,
+      reveal: PREDICTIONS[mission.id].reveal,
     },
     lab: {
       type: "choice",
@@ -419,12 +429,7 @@ function standardize(mission: Mission, sequence: DeepMission["sequence"]): DeepM
   if (mission.id !== "geometry-1") return generic;
   return {
     ...generic,
-    prediction: {
-      prompt: "Ba hình 1×12, 2×6 và 3×4 đều dùng 12 ô. Chu vi của chúng có bằng nhau không?",
-      options: ["Có, vì cùng 12 ô", "Không, hình gọn hơn có chu vi nhỏ hơn", "Con chưa chắc"],
-      answer: "Không, hình gọn hơn có chu vi nhỏ hơn",
-      reveal: "Cùng diện tích chưa chắc cùng chu vi. Dự đoán này sẽ được kiểm tra bằng cách xếp đúng 12 ô theo ba cấu hình.",
-    },
+    prediction: { ...generic.prediction, prompt: "Ba hình 1×12, 2×6 và 3×4 đều dùng 12 ô. Chu vi của chúng có bằng nhau không?" },
     lab: {
       type: "tile-rectangles",
       prompt: "Chọn từng cách xếp 12 viên gạch. Quan sát diện tích và chu vi thay đổi ra sao.",
@@ -515,6 +520,8 @@ export function validateCurriculum() {
     if (mission.lab.options.length < 2 || new Set(mission.lab.options.map((option) => option.value)).size !== mission.lab.options.length) errors.push(`${mission.id}: bài Tương tác thiếu phương án nhiễu.`);
     if (mission.lab.type === "choice" && mission.practice[0].type === "number" && mission.lab.options.length < 3) errors.push(`${mission.id}: bài Tương tác dạng số cần 2 phương án nhiễu trong LAB_DISTRACTORS.`);
     if (mission.strategies.length !== 2) errors.push(`${mission.id}: cần đúng 2 chiến lược.`);
+    if (mission.prediction.options.length !== 3 || !mission.prediction.answer || !mission.prediction.options.includes(mission.prediction.answer)) errors.push(`${mission.id}: bước Dự đoán cần hai nhận định toán học và đáp án.`);
+    if (!mission.model?.prompt || mission.model.steps.length < 3) errors.push(`${mission.id}: thiếu bài mẫu.`);
     if (mission.reflectionStems.length !== 3) errors.push(`${mission.id}: cần 3 câu phản tư.`);
     if (mission.materials.length < 2) errors.push(`${mission.id}: cần hướng dẫn học liệu.`);
     if (mission.successCriteria.length !== 3) errors.push(`${mission.id}: cần 3 tiêu chí hoàn thành.`);

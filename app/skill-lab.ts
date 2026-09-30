@@ -33,7 +33,39 @@ export type SkillLabQuestion = {
   hints: [string, string, string];
   explanation: string;
   misconception: string;
+  /** Nội dung vượt chương trình lớp 3 (GDPT 2018): hiện nhãn "Vượt lớp" và phần dẫn nhập trước khi hỏi. */
+  beyondGrade?: BeyondGradeTopic;
 };
+
+export type BeyondGradeTopic = "fractions" | "factors";
+export type StrandPrimer = { title: string; idea: string; example: string };
+
+/**
+ * Phần dẫn nhập ngắn cho nội dung vượt lớp. Lớp 3 mới làm quen 1/2, 1/3, …, 1/9 và phép chia hết;
+ * phân số có tử số lớn hơn 1, phân số bằng nhau, ước và bội thuộc lớp 4–6.
+ */
+export const STRAND_PRIMERS: Record<BeyondGradeTopic, StrandPrimer> = {
+  fractions: {
+    title: "Phân số có tử số lớn hơn 1",
+    idea: "Chia một cái bánh thành 4 phần bằng nhau. Lấy 1 phần là 1/4 cái bánh; lấy 3 phần là 3/4 cái bánh. Số dưới gạch cho biết bánh được chia thành mấy phần bằng nhau; số trên gạch cho biết lấy mấy phần.",
+    example: "■ ■ ■ □ — tô 3 trong 4 phần bằng nhau, viết là 3/4.",
+  },
+  factors: {
+    title: "Bội và ước",
+    idea: "Đếm cách 6 ta được 6, 12, 18, 24, … Các số ấy gọi là bội của 6, vì đều chia hết cho 6. Ngược lại, 24 chia hết cho 6 nên 6 gọi là một ước của 24.",
+    example: "24 = 6 × 4 — 24 là bội của 6 và của 4; 6 và 4 là ước của 24.",
+  },
+};
+
+/** Những câu vượt lớp trong phòng luyện (phân số tổng quát, phân số bằng nhau, ước và bội). */
+const BEYOND_GRADE: Record<string, BeyondGradeTopic> = {
+  "fr-01": "fractions", "fr-02": "fractions", "fr-05": "fractions", "en-06": "fractions",
+  "nt-01": "factors", "nt-02": "factors",
+};
+
+export function isBeyondGrade(question: Pick<SkillLabQuestion, "beyondGrade">) {
+  return Boolean(question.beyondGrade);
+}
 
 export type SkillLabRecordLike = {
   attempts: number;
@@ -82,7 +114,11 @@ export const SKILL_LAB_STRANDS: SkillLabStrand[] = [
 ];
 
 /** Xáo trộn lựa chọn theo mã câu hỏi để đáp án đúng không dồn về một vị trí. */
-const q = (question: SkillLabQuestion): SkillLabQuestion => (question.options ? { ...question, options: shuffleById(question.options, question.id) } : question);
+const q = (question: SkillLabQuestion): SkillLabQuestion => ({
+  ...question,
+  options: question.options ? shuffleById(question.options, question.id) : undefined,
+  beyondGrade: BEYOND_GRADE[question.id],
+});
 
 export const SKILL_LAB_QUESTIONS: SkillLabQuestion[] = [
   q({ id: "pv-01", strand: "place-value", prompt: "Số “năm nghìn hai trăm ba mươi tư” được viết bằng chữ số như thế nào?", type: "choice", answer: "5234", options: ["5234", "5243", "2534", "5324"], hints: ["Tách số thành nghìn, trăm, chục và đơn vị.", "Có 5 nghìn, 2 trăm, 3 chục và 4 đơn vị.", "Ghép lần lượt 5 – 2 – 3 – 4."], explanation: "5 nghìn + 2 trăm + 3 chục + 4 đơn vị tạo số 5234.", misconception: "Con có thể đã đổi chỗ hàng chục và hàng đơn vị. Hãy đọc từng hàng từ trái sang phải." }),
@@ -110,7 +146,7 @@ export const SKILL_LAB_QUESTIONS: SkillLabQuestion[] = [
   q({ id: "nt-02", strand: "number-theory", prompt: "Số nào là ước của 24?", type: "choice", answer: "8", options: ["5", "7", "8", "10"], hints: ["Ước là số chia 24 không dư.", "Thử ghép các cặp thừa số của 24.", "3 × 8 = 24."], explanation: "8 là ước của 24 vì 24 : 8 = 3.", misconception: "Đừng nhầm ước với số nhỏ hơn; số nhỏ hơn 24 vẫn có thể không chia hết 24." }),
   q({ id: "nt-03", strand: "number-theory", prompt: "Số nào chia hết cho cả 2 và 5?", type: "choice", answer: "130", options: ["125", "128", "130", "135"], hints: ["Số chia hết cho 2 phải chẵn.", "Số chia hết cho 5 tận cùng bằng 0 hoặc 5.", "Muốn thỏa cả hai, chữ số tận cùng phải là 0."], explanation: "130 tận cùng bằng 0 nên chia hết cho cả 2 và 5.", misconception: "Tận cùng bằng 5 chỉ bảo đảm chia hết cho 5, nhưng số đó không chẵn." }),
   q({ id: "nt-04", strand: "number-theory", prompt: "Ba số chẵn liên tiếp có tổng bằng 42. Số ở giữa là bao nhiêu?", type: "number", answer: "14", hints: ["Ba số liên tiếp đối xứng quanh số giữa.", "Tổng của ba số bằng 3 lần số giữa.", "42 : 3 = 14."], explanation: "Ba số là 12, 14, 16; số giữa là 14.", misconception: "“Chẵn liên tiếp” nghĩa là mỗi số cách nhau 2, không phải cách nhau 1." }),
-  q({ id: "nt-05", strand: "number-theory", prompt: "Chia 38 viên bi đều vào các túi, mỗi túi 6 viên. Còn dư mấy viên?", type: "number", answer: "2", hints: ["Tìm bội lớn nhất của 6 không vượt 38.", "6 × 6 = 36.", "38 − 36 = 2."], explanation: "Được 6 túi đầy và còn dư 2 viên.", misconception: "Câu hỏi hỏi số dư, không hỏi số túi đầy." }),
+  q({ id: "nt-05", strand: "number-theory", prompt: "Chia 38 viên bi đều vào các túi, mỗi túi 6 viên. Còn dư mấy viên?", type: "number", answer: "2", hints: ["Tìm số lớn nhất chia hết cho 6 mà không vượt 38.", "6 × 6 = 36.", "38 − 36 = 2."], explanation: "Được 6 túi đầy và còn dư 2 viên.", misconception: "Câu hỏi hỏi số dư, không hỏi số túi đầy." }),
   q({ id: "nt-06", strand: "number-theory", prompt: "Quy ước a ⊙ b = 2 × a + b. Tính 5 ⊙ 3.", type: "number", answer: "13", hints: ["Thay a bằng 5 và b bằng 3.", "Tính 2 × 5 trước.", "10 + 3 = 13."], explanation: "Theo quy ước mới, 5 ⊙ 3 = 2 × 5 + 3 = 13.", misconception: "Ký hiệu ⊙ có quy tắc riêng trong đề; không được coi nó là phép nhân thông thường." }),
 
   q({ id: "lg-01", strand: "logic", prompt: "An cao hơn Bình. Bình cao hơn Cường. Ai cao nhất?", type: "choice", answer: "An", options: ["An", "Bình", "Cường", "Chưa xác định"], hints: ["Viết quan hệ theo một hàng từ cao đến thấp.", "An > Bình và Bình > Cường.", "Suy ra An > Bình > Cường."], explanation: "An cao nhất vì An cao hơn Bình, còn Bình lại cao hơn Cường.", misconception: "Cần nối hai manh mối thành một chuỗi thay vì đọc riêng từng câu." }),

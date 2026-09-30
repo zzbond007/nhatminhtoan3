@@ -223,3 +223,20 @@ html.focus-mode .app-shell { background: var(--paper); }
 .second-way-message { margin-top: .6rem; color: #8a4b10; font-size: .85rem; font-weight: 700; }
 .second-way-message.ok { color: #1f6b52; }
 .mastery-next { margin-top: .5rem; color: var(--ink-soft); font-size: .85rem; }
+
+/* Giai đoạn 2 · nội dung: sơ đồ mở sẵn (Gỡ nút), nhãn vượt lớp, bài mẫu, đối chiếu dự đoán */
+.open-scaffold { display: grid; grid-template-columns: auto 1fr; gap: .6rem; margin: .8rem 0; padding: .8rem .9rem; border: 1px dashed #9bd3bd; border-radius: .9rem; background: #eaf7f2; color: #225e49; }
+.open-scaffold svg { width: 1.1rem; }
+.open-scaffold p { font-size: .95rem; line-height: 1.5; }
+.open-scaffold strong { display: block; font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; }
+.beyond-grade { margin: .6rem 0 .9rem; padding: .7rem .9rem; border: 1px solid #e5ca72; border-radius: .9rem; background: #fff8df; color: #6e4a0b; }
+.beyond-grade.pending { padding: 1rem; }
+.beyond-grade-badge { display: inline-block; margin-right: .5rem; padding: .15rem .6rem; border-radius: 999px; background: #f4a91e; color: #3f2a00; font-size: .72rem; font-weight: 800; }
+.beyond-grade > strong { display: block; margin-top: .5rem; font-size: 1rem; }
+.beyond-grade p { margin-top: .45rem; font-size: .95rem; line-height: 1.55; }
+.beyond-grade-example { font-weight: 750; }
+.beyond-grade button { min-height: 48px; margin-top: .8rem; }
+.beyond-grade small { font-size: .8rem; }
+.strategy-model { margin-top: .5rem; font-size: .85rem; line-height: 1.5; }
+.strategy-model.answer { font-weight: 800; }
+.prediction-check { margin-top: .5rem; font-size: .85rem; line-height: 1.5; }

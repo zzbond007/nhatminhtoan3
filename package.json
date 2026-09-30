@@ -15,7 +15,7 @@
     "lint": "bash scripts/sites-env.sh -- eslint . --ignore-pattern dist --ignore-pattern .next",
     "content:generate": "node scripts/generate-nine-month-packs.mjs",
     "content:validate": "node scripts/validate-content-release.mjs",
-    "content:audit": "node --test tests/content-audit.test.mjs",
+    "content:audit": "node --test tests/content-audit.test.mjs tests/pedagogy-audit.test.mjs",
     "db:generate": "bash scripts/sites-env.sh -- drizzle-kit generate"
   },
   "dependencies": {

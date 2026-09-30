@@ -34,7 +34,7 @@ function unify(group, id, question, extraTexts = []) {
     type: question.type ?? (question.options ? "choice" : "number"),
     answer: question.answer,
     options: question.options,
-    texts: [question.prompt, question.answer, question.hint, ...(question.hints ?? []), question.explanation, question.misconception, question.note, ...(question.options ?? []), ...extraTexts]
+    texts: [question.prompt, question.answer, question.hint, ...(question.hints ?? []), question.explanation, question.misconception, question.note, question.scaffold, ...Object.values(question.feedbackByAnswer ?? {}), ...(question.options ?? []), ...extraTexts]
       .filter((text) => text !== undefined && text !== null).map(String),
   };
 }
@@ -156,7 +156,8 @@ const hasOperator = (text) => /[+−×:x\-]/.test(text);
 function wrongEqualities(text) {
   const wrong = [];
   // "Tầng 3: 6 − 3 = 3" — nhãn tầng gợi ý không phải phép chia.
-  const body = String(text).replace(/^Tầng \d[^:]*:\s*/, "");
+  // Dấu hai chấm dính liền chữ hoặc số đứng trước ("Bước 1: …", "sang 297: …") là nhãn, không phải phép chia "36 : 6".
+  const body = String(text).replace(/^Tầng \d[^:]*:\s*/, "").replace(/(\S):\s/g, "$1 ; ");
   for (const clause of body.split(/[.;,!?…·→]|\s[–—]\s/)) {
     // Đề cố ý nêu một phép tính sai để trẻ bắt lỗi (“Một bạn tính …”, “Đổi đúng một dấu …”) hoặc dùng phép toán tự đặt (⊙).
     if (/[Bb]ạn [^=]*tính|Đổi đúng một dấu|⊙/.test(clause)) continue;
