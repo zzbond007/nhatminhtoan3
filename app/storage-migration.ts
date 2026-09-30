@@ -5,18 +5,23 @@
 //   2. trước lần nâng cấp đầu tiên, cất một bản sao nguyên văn vào STORAGE_BACKUP_KEY để có đường lui;
 //   3. bổ sung các trường mới với giá trị mặc định an toàn (Tia sáng thưởng, trạng thái nhận thức, khiên hóa thạch);
 //   4. gieo trạng thái nhận thức từ dữ liệu cũ (câu phòng luyện cần ôn, điểm vướng trong nhiệm vụ)
-//      để Phòng Luyện Xoắn Ốc có bài ngay từ ngày đầu nâng cấp.
+//      để Phòng Luyện Xoắn Ốc có bài ngay từ ngày đầu nâng cấp;
+//   5. (v13) dựng mức thành thạo hai chiều: `mastery` theo miền và, ở mỗi nhiệm vụ, tách mức cao nhất
+//      từng đạt (`bestAutonomy`, dùng để mở khoá — không nhiệm vụ nào bị khoá lại) khỏi mức trượt (`autonomy`).
 // Không bao giờ ném lỗi: dữ liệu hỏng → trả về null và giữ nguyên localStorage.
 
 import { cognitiveKey, REVIEW_DELAY_MS, type CognitiveMap } from "./spiral-engine";
 import type { DomainId } from "./content";
 import type { SkillLabStrandId } from "./skill-lab";
+import { normalizeMastery, replayRecordAutonomy } from "./mastery";
 
 export const STORAGE_KEY = "math-raccoon-learning-v11";
 export const LEGACY_STORAGE_KEYS = ["math-raccoon-learning-v10", "math-raccoon-learning-v9", "math-raccoon-learning-v8", "math-raccoon-learning-v7", "math-raccoon-learning-v6", "math-raccoon-learning-v5", "math-raccoon-learning-v4", "math-raccoon-learning-v3"];
 export const STORAGE_SCHEMA_KEY = "math-raccoon-storage-schema";
 export const STORAGE_BACKUP_KEY = "math-raccoon-backup-before-v12";
-export const STORAGE_SCHEMA = 12;
+/** Bản sao nguyên văn trước khi đổi cách lưu mức tự lực (v13). */
+export const STORAGE_BACKUP_KEY_V13 = "math-raccoon-backup-before-v13";
+export const STORAGE_SCHEMA = 13;
 
 type StorageLike = Pick<Storage, "getItem" | "setItem">;
 type RawProfile = Record<string, unknown>;
@@ -65,10 +70,30 @@ export function seedCognitiveStates(profile: RawProfile): CognitiveMap {
   return map;
 }
 
-/** Nâng cấp dữ liệu thô của hồ sơ lên cấu trúc v12 (thuần, không đụng storage). */
+/**
+ * v13: mỗi bản ghi nhiệm vụ có thêm `bestAutonomy`. Bản ghi cũ lưu mức CAO NHẤT trong `autonomy`;
+ * mức ấy được chuyển sang `bestAutonomy`, còn `autonomy` được tính lại thành mức trượt từ các buổi đã lưu.
+ * Bản ghi đã có `bestAutonomy` thì giữ nguyên (hàm chạy lại nhiều lần vẫn cho cùng kết quả).
+ */
+export function upgradeMissionRecords(raw: unknown): Record<string, Record<string, unknown>> | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  return Object.fromEntries(Object.entries(raw as Record<string, unknown>).map(([id, value]) => {
+    if (!value || typeof value !== "object") return [id, value as Record<string, unknown>];
+    const record = value as Record<string, unknown>;
+    if (Number.isFinite(Number(record.bestAutonomy)) && record.bestAutonomy !== null && record.bestAutonomy !== undefined) return [id, record];
+    const best = Math.max(0, Math.min(100, Math.round(Number(record.autonomy) || 0)));
+    return [id, { ...record, bestAutonomy: best, autonomy: Math.min(best, replayRecordAutonomy(record)) }];
+  }));
+}
+
+/** Nâng cấp dữ liệu thô của hồ sơ lên cấu trúc v13 (thuần, không đụng storage). */
 export function upgradeProfileData(raw: RawProfile): RawProfile {
+  const missionRecords = upgradeMissionRecords(raw.missionRecords);
   return {
     ...raw,
+    ...(missionRecords ? { missionRecords } : {}),
+    // Dựng từ dữ liệu GỐC (trước khi tính lại autonomy) để các buổi đã lưu được trộn đúng một lần.
+    mastery: normalizeMastery(raw.mastery, raw.diagnostic as Parameters<typeof normalizeMastery>[1], raw.missionRecords as Parameters<typeof normalizeMastery>[2]),
     sparkBonus: Math.max(0, Math.floor(Number(raw.sparkBonus) || 0)),
     selfReliantBadges: Math.max(0, Math.floor(Number(raw.selfReliantBadges) || 0)),
     cognitiveStates: raw.cognitiveStates && typeof raw.cognitiveStates === "object" ? raw.cognitiveStates : seedCognitiveStates(raw),
@@ -106,6 +131,7 @@ export function migrateStorageData(storage: StorageLike): RawProfile | null {
 
   // Lần đầu nâng cấp: giữ bản sao nguyên văn (chỉ ghi một lần, không đè bản sao cũ hơn).
   if (!safeGet(storage, STORAGE_BACKUP_KEY)) safeSet(storage, STORAGE_BACKUP_KEY, text);
+  if (!safeGet(storage, STORAGE_BACKUP_KEY_V13)) safeSet(storage, STORAGE_BACKUP_KEY_V13, text);
   const upgraded = upgradeProfileData(raw);
   safeSet(storage, STORAGE_KEY, JSON.stringify(upgraded));
   safeSet(storage, STORAGE_SCHEMA_KEY, String(STORAGE_SCHEMA));

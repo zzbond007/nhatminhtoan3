@@ -121,18 +121,17 @@ test("nest care adds bond once per action per day and rare companions grow with 
   assert.deepEqual(growRareCompanion(rares, "rex-ti-hon"), rares);
 });
 
-test("learning streak forgives up to two rest days a month", async () => {
-  const { learningStreak } = await vite.ssrLoadModule("/app/learning-streak.ts");
-
-  const withOneGap = learningStreak(["2026-09-20", "2026-09-21", "2026-09-23", "2026-09-24"], "2026-09-25");
-  assert.deepEqual({ streak: withOneGap.streak, learnedToday: withOneGap.learnedToday, restDays: withOneGap.restDays }, { streak: 4, learnedToday: false, restDays: ["2026-09-22"] });
-  assert.equal(withOneGap.restUsedThisMonth, 1);
-
-  const tooManyGaps = learningStreak(["2026-09-10", "2026-09-14", "2026-09-15"], "2026-09-15");
-  assert.equal(tooManyGaps.streak, 2);
-
-  assert.equal(learningStreak([], "2026-09-25").streak, 0);
-  assert.equal(learningStreak(["2026-09-25"], "2026-09-25").learnedToday, true);
+test("the single streak system follows the 5-sessions-a-week rhythm and survives weekends", async () => {
+  // Hệ chuỗi ngày liên tiếp cũ (chỉ cho 2 ngày nghỉ mỗi tháng) đã bỏ: nghỉ hai ngày cuối tuần
+  // suốt một tháng không làm mất gì, mỗi tuần đủ 5 buổi vẫn cất thêm một hóa thạch.
+  const { fossilMuseum } = await vite.ssrLoadModule("/app/fossil-streak.ts");
+  const weekdays = [];
+  for (const monday of [7, 14, 21]) for (let offset = 0; offset < 5; offset += 1) weekdays.push(`2026-09-${String(monday + offset).padStart(2, "0")}`);
+  const museum = fossilMuseum(weekdays, [], "2026-09-27");
+  assert.equal(museum.fossils, 3);
+  assert.equal(museum.thisWeek.learnedDays, 5);
+  const afterQuietWeek = fossilMuseum(weekdays, [], "2026-10-04");
+  assert.equal(afterQuietWeek.fossils, 3, "một tuần nghỉ không xoá hóa thạch đã có");
 });
 
 test("assessment visuals make d1, d3 and w3 concrete", async () => {

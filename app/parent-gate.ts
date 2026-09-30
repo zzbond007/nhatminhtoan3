@@ -1,18 +1,24 @@
-// Module 6.2 · Cổng Phụ Huynh: phép nhân hai chữ số trong bảng 6–9 (ví dụ 8 × 7) đủ khó để trẻ lớp 3
-// không bấm bừa, nhưng người lớn trả lời trong 2 giây. Sai 3 lần → khoá 30 giây.
+// Module 6.2 · Cổng Phụ Huynh.
+// Thử thách là một câu PHẦN TRĂM (ví dụ "25% của 360"): kiến thức lớp 5, trẻ lớp 3 chưa học nên không
+// tự mở được, còn người lớn nhẩm trong vài giây. (Trước đây là phép nhân trong bảng 6–9 — đúng thứ trẻ
+// lớp 3 đã thuộc lòng.) Sai 3 lần → khoá 30 giây.
 
 export const GATE_MAX_TRIES = 3;
 export const GATE_LOCK_MS = 30_000;
 
-export type GateChallenge = { a: number; b: number; answer: number };
+/** Không dùng 10%, 50%, 100%: quá dễ đoán bằng cách bỏ số 0 hoặc chia đôi. */
+export const GATE_PERCENTS = [15, 20, 25, 30, 40, 60, 75] as const;
+
+export type GateChallenge = { percent: number; base: number; answer: number; prompt: string };
 
 export function createGateChallenge(random: () => number = Math.random): GateChallenge {
-  const a = 6 + Math.floor(random() * 4);
-  const b = 6 + Math.floor(random() * 4);
-  return { a, b, answer: a * b };
+  const percent = GATE_PERCENTS[Math.min(GATE_PERCENTS.length - 1, Math.floor(random() * GATE_PERCENTS.length))];
+  // Bội của 20 từ 120 đến 480: mọi tỉ lệ ở trên đều cho kết quả là số tự nhiên.
+  const base = 20 * (6 + Math.min(18, Math.floor(random() * 19)));
+  return { percent, base, answer: (percent * base) / 100, prompt: `${percent}% của ${base} = ?` };
 }
 
-export function checkGateAnswer(challenge: GateChallenge, input: string) {
+export function checkGateAnswer(challenge: Pick<GateChallenge, "answer">, input: string) {
   return input.trim() !== "" && Number(input) === challenge.answer;
 }
 

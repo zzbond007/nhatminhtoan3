@@ -34,7 +34,7 @@ const DIFFICULTY_LABEL: Record<string, string> = { support: "Gỡ nút", core: "
 
 export function ParentPortal({ report }: { report: WeeklyReport }) {
   const [stage, setStage] = useState<"closed" | "gate" | "open">("closed");
-  const [challenge, setChallenge] = useState<GateChallenge>(() => ({ a: 8, b: 7, answer: 56 }));
+  const [challenge, setChallenge] = useState<GateChallenge>(() => createGateChallenge(() => 0));
   const [input, setInput] = useState("");
   const [tries, setTries] = useState(0);
   const [lockedUntil, setLockedUntil] = useState(0);
@@ -94,7 +94,7 @@ export function ParentPortal({ report }: { report: WeeklyReport }) {
             <KeyRound className="parent-gate-icon" />
             <h2 id="parent-gate-title">Khu vực dành cho Ba Mẹ</h2>
             <p>Để mở, ba mẹ hãy trả lời:</p>
-            <p className="parent-gate-question">{challenge.a} × {challenge.b} = ?</p>
+            <p className="parent-gate-question">{challenge.prompt}</p>
             <NumpadAnswer value={input} onChange={setInput} onSubmit={submitGate} disabled={Boolean(lockedUntil)} label="Kết quả" maxDigits={3} />
             {message && <p className="parent-gate-message" aria-live="polite">{lockedUntil ? <><LockKeyhole /> {message} ({lockSeconds}s)</> : message}</p>}
           </div>

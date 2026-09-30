@@ -174,10 +174,10 @@ test("Module 6.1: fossil museum never resets and shields rescue a short week", a
 test("Module 6.2: parent gate needs the right product", async () => {
   const { createGateChallenge, checkGateAnswer } = await vite.ssrLoadModule("/app/parent-gate.ts");
   const challenge = createGateChallenge(() => 0.7);
-  assert.deepEqual(challenge, { a: 8, b: 8, answer: 64 });
-  assert.equal(checkGateAnswer({ a: 8, b: 7, answer: 56 }, "56"), true);
-  assert.equal(checkGateAnswer({ a: 8, b: 7, answer: 56 }, "54"), false);
-  assert.equal(checkGateAnswer({ a: 8, b: 7, answer: 56 }, ""), false);
+  assert.deepEqual(challenge, { percent: 40, base: 380, answer: 152, prompt: "40% của 380 = ?" });
+  assert.equal(checkGateAnswer(challenge, "152"), true);
+  assert.equal(checkGateAnswer(challenge, "150"), false);
+  assert.equal(checkGateAnswer(challenge, ""), false);
 });
 
 test("Module 6.3: radar report names strengths first and gives home activities", async () => {
@@ -209,7 +209,7 @@ test("migrateStorageData keeps old progress and adds v12 fields", async () => {
   assert.ok(migrated.cognitiveStates["word-2::Tổng – hiệu"].needsReview);
   assert.equal(migrated.cognitiveStates["lab:fractions::fr-03"].errorCount, 2);
   assert.equal(store.get(STORAGE_BACKUP_KEY), JSON.stringify(legacy), "giữ bản sao gốc trước khi nâng cấp");
-  assert.equal(store.get(STORAGE_SCHEMA_KEY), "12");
+  assert.equal(store.get(STORAGE_SCHEMA_KEY), "13");
   assert.ok(store.has(STORAGE_KEY));
   assert.ok(store.has("math-raccoon-learning-v10"), "không xoá khoá cũ");
 

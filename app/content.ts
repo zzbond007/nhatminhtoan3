@@ -66,7 +66,7 @@ const q = (
   explanation: string, options?: string[], context?: DiagnosticQuestion["context"],
 ): DiagnosticQuestion => ({ id, domain, difficulty, skill, prompt, type, answer, hint, explanation, options: options ? shuffleById(options, id) : undefined, context });
 
-export const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
+const DIAGNOSTIC_SOURCE: DiagnosticQuestion[] = [
   q("n1", "number", 1, "Nhìn ra quy luật", "Dãy số 4, 7, 10, 13, … có số tiếp theo là bao nhiêu?", "number", "16", "Quan sát khoảng cách giữa hai số liên tiếp.", "Mỗi lần dãy tăng 3 nên số tiếp theo là 16."),
   q("n2", "number", 2, "Cấu tạo số", "Số 6□2 bằng 600 + 70 + 2. Chữ số cần điền vào ô vuông là gì?", "number", "7", "70 là giá trị của hàng chục.", "Chữ số 7 ở hàng chục có giá trị 70."),
   q("n3", "number", 3, "Đếm có hệ thống", "Dùng ba chữ số 1, 2, 3, mỗi chữ số đúng một lần. Lập được bao nhiêu số có ba chữ số khác nhau?", "number", "6", "Cố định chữ số hàng trăm rồi đếm cách xếp hai chữ số còn lại.", "Có 3 cách chọn hàng trăm, rồi 2 cách xếp phần còn lại: 3 × 2 = 6 số."),
@@ -85,7 +85,26 @@ export const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
   q("w1", "word", 1, "Suy luận điều kiện", "Có 4 con vật gồm gà và thỏ, tổng cộng 12 chân. Có bao nhiêu con thỏ?", "number", "2", "Nếu cả 4 đều là gà thì có 8 chân; mỗi lần đổi một gà thành một thỏ tăng 2 chân.", "Cần tăng từ 8 lên 12 chân, tức tăng 4 chân; vậy đổi 2 con thành thỏ."),
   q("w2", "word", 2, "Suy luận ngược", "Một số được nhân 3, sau đó cộng 7 thì bằng 34. Số ban đầu là bao nhiêu?", "number", "9", "Đi ngược từ 34: làm phép trừ trước rồi mới chia.", "34 − 7 = 27; 27 : 3 = 9."),
   { ...q("w3", "word", 3, "Logic thứ tự", "An cao hơn Bình. Chi thấp hơn Bình. Ai cao nhất?", "choice", "An", "Xếp ba bạn theo thứ tự từ thấp đến cao.", "Chi thấp hơn Bình, còn Bình thấp hơn An; vì vậy An cao nhất.", ["An", "Bình", "Chi", "Không xác định được"]), visual: { kind: "height-order", people: ["Bình", "Chi", "An"], clues: ["An cao hơn Bình.", "Chi thấp hơn Bình."] } },
+  // Bổ sung để mỗi miền có 5 câu: 2 dễ, 2 vừa, 1 khó (ba câu mỗi miền là quá thô để xếp dải khó).
+  q("n4", "number", 1, "Số liền sau", "Số liền sau của 3 999 là số nào?", "number", "4000", "Thêm 1 vào 3 999; các hàng 9 sẽ tròn lên.", "3 999 + 1 = 4 000."),
+  q("n5", "number", 2, "Lập số theo điều kiện", "Số lớn nhất có ba chữ số khác nhau là số nào?", "number", "987", "Chọn chữ số lớn nhất cho hàng trăm, rồi đến hàng chục và hàng đơn vị.", "Hàng trăm 9, hàng chục 8, hàng đơn vị 7: số 987."),
+  q("c4", "calculation", 1, "Ghép số tròn trăm", "Tính nhẩm: 46 + 54 = ?", "number", "100", "Ghép 6 với 4 thành một chục.", "40 + 50 = 90; 6 + 4 = 10; 90 + 10 = 100."),
+  q("c5", "calculation", 2, "Cân bằng hai vế", "Điền số vào ô trống: □ × 6 = 54 − 12.", "number", "7", "Tính vế phải trước.", "54 − 12 = 42; 42 : 6 = 7."),
+  q("m4", "measurement", 1, "Đổi đơn vị thời gian", "1 giờ 15 phút bằng bao nhiêu phút?", "number", "75", "1 giờ có 60 phút.", "60 + 15 = 75 phút."),
+  q("m5", "measurement", 2, "Khối lượng nhiều bước", "Một gói kẹo nặng 250 g. Bốn gói như thế nặng bao nhiêu ki-lô-gam?", "number", "1", "Tính số gam trước, rồi nhớ 1 kg = 1 000 g.", "250 × 4 = 1 000 g, tức là 1 kg."),
+  q("g4", "geometry", 1, "Chu vi hình chữ nhật", "Hình chữ nhật dài 6 cm, rộng 4 cm. Chu vi là bao nhiêu xăng-ti-mét?", "number", "20", "Cộng chiều dài và chiều rộng rồi nhân 2.", "(6 + 4) × 2 = 20 cm."),
+  q("g5", "geometry", 2, "Từ chu vi đến diện tích", "Một hình vuông có chu vi 36 cm. Diện tích hình vuông là bao nhiêu xăng-ti-mét vuông?", "number", "81", "Tìm độ dài một cạnh trước.", "36 : 4 = 9 cm; 9 × 9 = 81 cm²."),
+  q("d4", "data", 1, "So sánh khả năng", "Túi có 5 viên bi đỏ và 1 viên bi xanh. Nhắm mắt lấy một viên, màu nào dễ lấy được hơn?", "choice", "Đỏ", "So số viên bi của mỗi màu.", "Có 5 viên đỏ và chỉ 1 viên xanh, nên dễ lấy được màu đỏ hơn.", ["Đỏ", "Xanh", "Như nhau", "Không thể biết"]),
+  q("d5", "data", 2, "Chia đều dữ liệu", "Bốn bạn có số nhãn vở là 6, 8, 5 và 9. Nếu gom lại rồi chia đều cho 4 bạn thì mỗi bạn được mấy nhãn vở?", "number", "7", "Tính tổng số nhãn vở trước.", "6 + 8 + 5 + 9 = 28; 28 : 4 = 7."),
+  q("w4", "word", 1, "Nhiều hơn – ít hơn", "Lan có 12 viên kẹo. Lan có nhiều hơn Mai 4 viên. Mai có bao nhiêu viên kẹo?", "number", "8", "Ai là người có ít kẹo hơn?", "Mai có ít hơn Lan 4 viên: 12 − 4 = 8 viên."),
+  q("w5", "word", 2, "Tổng và hiệu", "Hai số có tổng là 20. Số lớn hơn số bé 4 đơn vị. Số bé là bao nhiêu?", "number", "8", "Nếu bớt 4 ở số lớn thì hai số bằng nhau.", "20 − 4 = 16; 16 : 2 = 8. Thử lại: 8 + 12 = 20."),
 ];
+
+/** 30 câu, 5 câu mỗi miền, xếp theo miền rồi từ dễ đến khó. */
+export const DIAGNOSTIC_PER_DOMAIN = 5;
+export const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = DOMAINS.flatMap((domain) => DIAGNOSTIC_SOURCE
+  .filter((question) => question.domain === domain.id)
+  .sort((left, right) => left.difficulty - right.difficulty || left.id.localeCompare(right.id)));
 
 const p = (prompt: string, type: AnswerType, answer: string, hint: string, explanation: string, options?: string[], challengeTag?: string): PracticeQuestion =>
   ({ prompt, type, answer, hint, explanation, options, challengeTag });

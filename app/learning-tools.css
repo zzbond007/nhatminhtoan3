@@ -191,3 +191,35 @@ html.focus-mode .app-shell { background: var(--paper); }
   .numpad-key:active:not(:disabled), .study-tool:active, .karaoke-button:active { transform: none; }
   .word-token { transition: none; }
 }
+
+/* Giai đoạn 2 · nền tảng: câu phản tư chạm để chọn, ghi âm, giải hai cách, mức thành thạo */
+.reflection-starters { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; margin: 1rem 0 .7rem; }
+.reflection-starters > span { width: 100%; color: var(--ink-soft); font-size: .78rem; font-weight: 700; }
+.reflection-starters button { min-height: 44px; padding: .5rem .85rem; border: 1px solid var(--line-strong); border-radius: 999px; background: #fff; color: var(--ink); font-size: .85rem; font-weight: 700; }
+.reflection-starters button.active { border-color: var(--green); background: #eeecff; color: var(--green-dark); }
+.voice-reflection { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-top: .8rem; }
+.voice-reflection audio { height: 44px; max-width: 100%; }
+.voice-reflection small { width: 100%; color: var(--ink-soft); font-size: .72rem; }
+.voice-reflection-label { display: inline-flex; gap: .35rem; align-items: center; font-size: .8rem; font-weight: 750; }
+.voice-reflection-label svg { width: 1rem; }
+.voice-button, .voice-delete { display: inline-flex; min-height: 48px; gap: .45rem; align-items: center; padding: .55rem 1rem; border: 1px solid var(--line-strong); border-radius: 999px; background: #fff; color: var(--green-dark); font-size: .9rem; font-weight: 800; }
+.voice-button svg, .voice-delete svg { width: 1.1rem; }
+.voice-button.recording { border-color: var(--red); background: #ffeef0; color: #a52a3a; }
+.voice-delete { min-width: 48px; justify-content: center; padding: .55rem; color: var(--ink-soft); }
+.second-way { margin-top: 1rem; padding: .9rem 1rem; border: 1px solid var(--line); border-radius: 1rem; background: #f8f7ff; }
+.second-way.done { border-color: #9bd3bd; background: #eaf7f2; }
+.second-way > strong { display: block; font-size: .85rem; }
+.second-way > p { margin-top: .35rem; font-size: .85rem; line-height: 1.5; }
+.second-way > small { display: block; margin-top: .5rem; color: var(--ink-soft); font-size: .72rem; }
+.second-way-display { display: block; min-height: 52px; margin-top: .7rem; padding: .6rem .9rem; border: 2px solid var(--line-strong); border-radius: .9rem; background: #fff; font-size: 1.35rem; font-weight: 800; letter-spacing: .02em; }
+.second-way-display span { color: var(--ink-soft); font-weight: 700; }
+.second-way-keys { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .4rem; max-width: 22rem; margin-top: .7rem; }
+.second-way-keys button { display: grid; min-height: 54px; place-items: center; border: 1px solid var(--line-strong); border-radius: .8rem; background: #fff; color: var(--ink); font-size: 1.25rem; font-weight: 800; }
+.second-way-keys button:nth-child(4n) { background: #eeecff; color: var(--green-dark); }
+.second-way-keys button.wide { grid-column: span 2; font-size: 1rem; }
+.second-way-keys button.wide svg { width: 1.3rem; }
+.second-way-keys button.check { grid-column: span 4; background: var(--green); color: #fff; border-color: var(--green); }
+.second-way-keys button:disabled { opacity: .5; }
+.second-way-message { margin-top: .6rem; color: #8a4b10; font-size: .85rem; font-weight: 700; }
+.second-way-message.ok { color: #1f6b52; }
+.mastery-next { margin-top: .5rem; color: var(--ink-soft); font-size: .85rem; }

@@ -1,12 +1,13 @@
 import type { AnswerType, DomainId } from "./content";
 import type { DeepMission, DeepQuestion, HintLadder } from "./curriculum";
 import { distinctOptions, shuffleById } from "./option-order";
+import { bandForMastery, MASTERY_DEFAULT, type DifficultyBand } from "./mastery";
 
 export const VARIANTS_PER_MISSION = 12;
 /** Mỗi phiên bản có 4 câu luyện sâu và 1 câu chuyển giao (nhiệm vụ gốc chỉ có 3 câu luyện). */
 export const PRACTICE_PER_EDITION = 4;
 
-export type DifficultyBand = "support" | "core" | "stretch";
+export type { DifficultyBand };
 
 export type MissionEdition = {
   id: string;
@@ -68,11 +69,6 @@ function makeQuestion(id: string, input: QuestionInput): DeepQuestion {
   };
 }
 
-function difficultyFor(completedCount: number, autonomy: number): DifficultyBand {
-  if (completedCount > 0 && autonomy < 60) return "support";
-  if (completedCount > 0 && autonomy >= 85) return "stretch";
-  return "core";
-}
 function difficultyLabel(band: DifficultyBand) {
   return band === "support" ? "Gỡ nút" : band === "stretch" ? "Bứt phá" : "Vừa sức";
 }
@@ -458,9 +454,13 @@ function generateQuestions(domain: DomainId, sequence: number, variant: number, 
   return wordQuestions(sequence, variant);
 }
 
-export function createMissionEdition(base: DeepMission, completedCount = 0, autonomy = 0): MissionEdition {
+/**
+ * `mastery`: mức thành thạo 0–100 của miền (xem mastery.ts). Dải khó theo mức này ngay từ buổi đầu tiên,
+ * nên kết quả đánh giá đầu vào có tác dụng và dải có thể hạ xuống khi con gặp khó.
+ */
+export function createMissionEdition(base: DeepMission, completedCount = 0, mastery = MASTERY_DEFAULT): MissionEdition {
   const variant = mod(completedCount, VARIANTS_PER_MISSION);
-  const band = difficultyFor(completedCount, autonomy);
+  const band = bandForMastery(mastery);
   const generated = generateQuestions(base.domain, base.sequence, variant, band).map((input, index) => makeQuestion(`${base.id}-v${variant + 1}-q${index + 1}`, index === 0 ? { ...input, prompt: `Tại ${CONTEXTS[variant]}, ${input.prompt.charAt(0).toLocaleLowerCase("vi")}${input.prompt.slice(1)}` } : input));
   const mission: DeepMission = {
     ...base,
@@ -484,7 +484,7 @@ export function validateMissionVariants(missions: DeepMission[]) {
   for (const mission of missions) {
     const openingPrompts = new Set<string>();
     for (let completed = 0; completed < VARIANTS_PER_MISSION; completed += 1) {
-      const edition = createMissionEdition(mission, completed, completed > 0 ? 75 : 0);
+      const edition = createMissionEdition(mission, completed, 70);
       const questions = [...edition.mission.deepPractice, edition.mission.transfer];
       if (questions.length !== 5) errors.push(`${edition.id}: cần 5 câu.`);
       openingPrompts.add(questions[0].prompt);

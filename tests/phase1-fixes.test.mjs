@@ -40,7 +40,6 @@ test("ngày học được ghi theo giờ địa phương, không theo giờ UTC
 
 test("hồ sơ cũ giữ nguyên chuỗi ngày sau khi chuyển sang ngày địa phương", async () => {
   const { migrateStorageData, STORAGE_KEY } = await vite.ssrLoadModule("/app/storage-migration.ts");
-  const { learningStreak } = await vite.ssrLoadModule("/app/learning-streak.ts");
   const { fossilMuseum } = await vite.ssrLoadModule("/app/fossil-streak.ts");
   const { localDayKey } = await vite.ssrLoadModule("/app/calendar-day.ts");
   // Hồ sơ cũ: các ngày được ghi bằng toISOString() (UTC) — cùng định dạng YYYY-MM-DD.
@@ -50,15 +49,16 @@ test("hồ sơ cũ giữ nguyên chuỗi ngày sau khi chuyển sang ngày đị
   const storage = { getItem: (key) => store.get(key) ?? null, setItem: (key, value) => { store.set(key, value); } };
   const migrated = migrateStorageData(storage);
   assert.deepEqual(migrated.discoveryDays, oldDays, "không ngày học nào bị mất hay bị đổi");
-  assert.deepEqual(migrated.missionRecords, oldProfile.missionRecords);
+  assert.equal(migrated.missionRecords["number-1"].completedCount, 2);
 
   // Sáng 10/03 (giờ Việt Nam), trước 7 giờ: chuỗi 6 ngày vẫn còn nguyên và buổi học mới nối tiếp thành 7.
   const today = localDayKey(new Date("2026-03-09T23:30:00.000Z"));
-  assert.equal(learningStreak(migrated.discoveryDays, today).streak, 6);
   const withToday = [...migrated.discoveryDays, today];
-  assert.equal(learningStreak(withToday, today).streak, 7);
   assert.equal(new Set(withToday).size, 7, "buổi sáng sớm không bị ghi đè lên ngày hôm trước");
-  assert.ok(fossilMuseum(withToday, [], today));
+  // Thứ Tư 04/03 → Chủ nhật 08/03 là 5 ngày học của một tuần: đủ nhịp, được một hóa thạch.
+  const museum = fossilMuseum(withToday, [], today);
+  assert.equal(museum.fossils, 1);
+  assert.equal(museum.thisWeek.learnedDays, 2, "thứ Hai 09/03 và thứ Ba 10/03");
 });
 
 test("phiên bản bài luyện đứng yên suốt một buổi học", async () => {
@@ -66,25 +66,25 @@ test("phiên bản bài luyện đứng yên suốt một buổi học", async (
   const { createMissionEdition } = await vite.ssrLoadModule("/app/mission-variants.ts");
   const { ALL_DEEP_MISSIONS } = await vite.ssrLoadModule("/app/curriculum.ts");
   const mission = ALL_DEEP_MISSIONS.find((item) => item.id === "calculation-1");
-  const edition = (session, record) => {
-    const inputs = editionInputs(session, mission.id, record);
-    return createMissionEdition(mission, inputs.completedCount, inputs.autonomy);
+  const edition = (session, record, mastery) => {
+    const inputs = editionInputs(session, mission.id, record, mastery);
+    return createMissionEdition(mission, inputs.completedCount, inputs.mastery);
   };
 
-  const before = { completedCount: 1, autonomy: 70 };
-  const session = beginMissionSession(mission.id, before, 500);
-  const during = edition(session, before);
-  // Hoàn thành buổi học: completedCount tăng và autonomy đổi — màn kết quả vẫn phải là phiên bản vừa làm.
-  const afterRecord = { completedCount: 2, autonomy: 95 };
-  const onResultScreen = edition(session, afterRecord);
+  const before = { completedCount: 1 };
+  const session = beginMissionSession(mission.id, before, 70, 500);
+  const during = edition(session, before, 70);
+  // Hoàn thành buổi học: completedCount tăng và mức thành thạo đổi — màn kết quả vẫn phải là phiên bản vừa làm.
+  const afterRecord = { completedCount: 2 };
+  const onResultScreen = edition(session, afterRecord, 95);
   assert.equal(onResultScreen.id, during.id);
   assert.deepEqual(onResultScreen.mission.deepPractice.map((q) => q.prompt), during.mission.deepPractice.map((q) => q.prompt));
   // Buổi học kế tiếp mới sang phiên bản mới.
-  const next = edition(beginMissionSession(mission.id, afterRecord, 640), afterRecord);
+  const next = edition(beginMissionSession(mission.id, afterRecord, 95, 640), afterRecord, 95);
   assert.notEqual(next.id, during.id);
   // Ảnh chụp của nhiệm vụ khác không ảnh hưởng.
-  assert.deepEqual(editionInputs(beginMissionSession("word-1", undefined, 0), mission.id, afterRecord), { completedCount: 2, autonomy: 95 });
-  assert.deepEqual(editionInputs(null, mission.id, undefined), { completedCount: 0, autonomy: 0 });
+  assert.deepEqual(editionInputs(beginMissionSession("word-1", undefined, 40, 0), mission.id, afterRecord, 95), { completedCount: 2, mastery: 95 });
+  assert.deepEqual(editionInputs(null, mission.id, undefined, 65), { completedCount: 0, mastery: 65 });
 });
 
 test("màn kết quả hiện số tia sáng thực nhận", async () => {
@@ -97,7 +97,7 @@ test("màn kết quả hiện số tia sáng thực nhận", async () => {
     sparkBonus: 7,
   };
   assert.equal(sparkPointsOf(profile), 60 + 120 + 80 + 15 + 7);
-  const session = beginMissionSession("number-1", profile.missionRecords["number-1"], sparkPointsOf(profile));
+  const session = beginMissionSession("number-1", profile.missionRecords["number-1"], 70, sparkPointsOf(profile));
   // Buổi học: +120, lần đầu viết phản tư +20, thưởng theo gợi ý +23.
   const after = { ...profile, sparkBonus: 30, missionRecords: { "number-1": { completedCount: 2, autonomy: 80, reflection: "Con đã thử hai cách." } } };
   assert.equal(sessionSparkGain(session, sparkPointsOf(after)), 163);
