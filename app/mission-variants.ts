@@ -49,7 +49,7 @@ function feedbackFor(input: Q, answer: string, options: string[] | undefined) {
   return entries.length ? Object.fromEntries(entries) : undefined;
 }
 
-function makeQuestion(id: string, input: Q, band: DifficultyBand): DeepQuestion {
+export function makeQuestion(id: string, input: Q, band: DifficultyBand): DeepQuestion {
   const answer = String(input.answer);
   // Thứ tự lựa chọn phụ thuộc mã câu hỏi: cùng một câu luôn hiện cùng thứ tự.
   const options = input.options ? shuffleById(input.options.map(String), id) : undefined;
@@ -73,7 +73,7 @@ function makeQuestion(id: string, input: Q, band: DifficultyBand): DeepQuestion 
   };
 }
 
-function difficultyLabel(band: DifficultyBand) {
+export function difficultyLabel(band: DifficultyBand) {
   return band === "support" ? "Gỡ nút" : band === "stretch" ? "Bứt phá" : "Vừa sức";
 }
 

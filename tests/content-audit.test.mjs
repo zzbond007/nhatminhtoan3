@@ -47,6 +47,7 @@ async function collect() {
   const { SKILL_LAB_QUESTIONS } = await vite.ssrLoadModule("/app/skill-lab.ts");
   const { VARIANT_TEMPLATES, generateVariant } = await vite.ssrLoadModule("/app/spiral-engine.ts");
   const { buildCheckIn } = await vite.ssrLoadModule("/app/monthly-checkin.ts");
+  const { lifeTransferQuestions } = await vite.ssrLoadModule("/app/session-plan.ts");
 
   const questions = [];
   for (const mission of ALL_DEEP_MISSIONS) {
@@ -61,6 +62,8 @@ async function collect() {
       }
     }
     [...mission.deepPractice, mission.transfer].forEach((question) => questions.push(unify("missions", question.id, question)));
+    // Buổi 4 · Chuyển giao đời sống: hai câu bối cảnh mới của mỗi nhiệm vụ, ở cả ba dải.
+    for (const band of Object.keys(BANDS)) lifeTransferQuestions(mission.id, band).forEach((question) => questions.push(unify(`life-${band}`, `${question.id}-${band}`, question)));
     questions.push(unify("mission-model", `${mission.id}-model`, { prompt: mission.model.prompt, type: "number", answer: "0" }, [...mission.model.steps, mission.model.answer, mission.idea, mission.wonder, mission.hook]));
   }
   ALL_MISSIONS.forEach((mission) => mission.practice.forEach((question, index) => questions.push(unify("mission-source", `${mission.id}-src${index + 1}`, question))));
@@ -208,6 +211,7 @@ test("có đủ các nguồn câu hỏi", () => {
   assert.equal(count("variants-core"), 36 * 12 * 5);
   assert.equal(count("variants-support"), 36 * 12 * 5);
   assert.equal(count("variants-stretch"), 36 * 12 * 5);
+  for (const band of Object.keys(BANDS)) assert.equal(count(`life-${band}`), 36 * 2, `thiếu câu đời sống ở dải ${band}`);
   assert.equal(count("daily-60"), 60);
   assert.ok(count("diagnostic") >= 18);
   assert.equal(count("skill-lab"), 48);
@@ -403,11 +407,11 @@ test("bài Tương tác có phương án nhiễu thật và ghi chú trung tính
   const errors = [];
   for (const mission of collected.missions) {
     const { lab } = mission;
+    if (lab.type !== "choice") continue; // học cụ thao tác thật: kiểm ở bài “học cụ” bên dưới
     const values = lab.options.map((option) => option.value);
     if (new Set(values).size !== values.length) errors.push(`${mission.id}: bài Tương tác có lựa chọn trùng nhau.`);
     if (values.filter((value) => value === lab.answer).length !== 1) errors.push(`${mission.id}: bài Tương tác phải chứa đúng một đáp án.`);
     if (values.length < 3 && mission.practice[0].type === "number") errors.push(`${mission.id}: bài Tương tác cần ít nhất 3 lựa chọn.`);
-    if (lab.type !== "choice") continue;
     const source = mission.practice[0];
     if (source.type === "number") {
       const filler = lab.options.filter((option) => !/^\d+$/.test(option.value));
@@ -415,6 +419,41 @@ test("bài Tương tác có phương án nhiễu thật và ghi chú trung tính
     }
     if (new Set(lab.options.map((option) => option.note)).size !== 1) errors.push(`${mission.id}: ghi chú của bài Tương tác làm lộ đáp án.`);
     if (lab.options.some((option) => /kiểm chứng|đáp án|đúng/i.test(option.note))) errors.push(`${mission.id}: ghi chú “${lab.options[0].note}” không trung tính.`);
+  }
+  report(errors);
+});
+
+test("học cụ: số liệu là số tự nhiên trong phạm vi, mọi phép tính hiện cho con đều đúng", async () => {
+  const { LAB_TOOLS, checkBar, checkClock, checkRect, rectArea, rectPerimeter } = await vite.ssrLoadModule("/app/lab-tools.ts");
+  const errors = [];
+  const natural = (value) => Number.isInteger(value) && value >= 0 && value <= MAX_ANSWER;
+  for (const [id, tool] of Object.entries(LAB_TOOLS)) {
+    const { spec } = tool;
+    const texts = [tool.prompt, tool.explanation];
+    const numbers = [];
+    if (spec.tool === "bar-model") {
+      numbers.push(spec.variable.min, spec.variable.max, spec.answer);
+      for (let x = spec.variable.min; x <= spec.variable.max; x += 1) {
+        texts.push(spec.readout(x), spec.feedback(x), checkBar(spec, x).message);
+        // Mọi đoạn phải có độ dài không âm ở mọi vị trí kéo.
+        spec.rows.forEach((row) => row.segments.forEach((segment) => { if (segment.a * x + segment.b < 0) errors.push(`${id}: đoạn âm khi x = ${x}.`); }));
+      }
+    } else if (spec.tool === "clock") {
+      numbers.push(spec.start, spec.elapsed, spec.max);
+      for (let value = 0; value <= spec.max; value += spec.hand === "minute" ? spec.step : 1) texts.push(checkClock(spec, value).message);
+    } else if (spec.tool === "bar-chart") {
+      numbers.push(spec.max, ...spec.categories.map((category) => category.value), ...(spec.reference?.values ?? []));
+      if (spec.categories.some((category) => category.value > spec.max)) errors.push(`${id}: cột vượt trục.`);
+    } else {
+      numbers.push(spec.rows, spec.cols);
+      if (spec.mode === "rect") {
+        numbers.push(spec.area ?? 0, spec.perimeter ?? 0);
+        if (spec.solution.w > spec.cols || spec.solution.h > spec.rows) errors.push(`${id}: lời giải không vừa lưới.`);
+        for (let h = 1; h <= spec.rows; h += 1) for (let w = 1; w <= spec.cols; w += 1) texts.push(checkRect(spec, { w, h }).message, `${rectArea(w, h)} ${rectPerimeter(w, h)}`);
+      }
+    }
+    numbers.filter((value) => !natural(value)).forEach((value) => errors.push(`${id}: số ${value} ngoài phạm vi.`));
+    texts.forEach((text) => wrongEqualities(text).forEach((wrong) => errors.push(`${id}: đẳng thức sai “${wrong}” trong “${text}”`)));
   }
   report(errors);
 });

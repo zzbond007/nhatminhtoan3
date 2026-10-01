@@ -46,6 +46,14 @@ function forEveryQuestion(visit) {
   }
 }
 
+const { lifeTransferQuestions } = await vite.ssrLoadModule("/app/session-plan.ts");
+/** Câu bối cảnh đời sống của Buổi 4 (hai câu mỗi nhiệm vụ), ở cả ba dải. */
+function forEveryLifeQuestion(visit) {
+  for (const mission of ALL_DEEP_MISSIONS) {
+    for (const band of Object.keys(BANDS)) lifeTransferQuestions(mission.id, band).forEach((question, index) => visit(question, { mission, variant: 0, band, index }));
+  }
+}
+
 function report(errors, limit = Number(process.env.AUDIT_LIMIT ?? 25)) {
   if (!errors.length) return;
   assert.fail(`${errors.length} lỗi sư phạm:\n${errors.slice(0, limit).join("\n")}${errors.length > limit ? `\n… và ${errors.length - limit} lỗi khác` : ""}`);
@@ -58,7 +66,7 @@ const COMMON_WORDS = new Set(["có", "không", "đúng", "sai", "chẵn", "lẻ"
 
 test("gợi ý tầng 1 là câu hỏi định hướng; tầng 3 không nêu thẳng đáp án", () => {
   const errors = [];
-  forEveryQuestion((question, { band }) => {
+  const visit = (question, { band }) => {
     const [first, , third] = question.hints.map(body);
     const id = `${question.id}-${band}`;
     if (!first.trim().endsWith("?")) errors.push(`${id}: tầng 1 phải là câu hỏi — “${first}”`);
@@ -73,7 +81,9 @@ test("gợi ý tầng 1 là câu hỏi định hướng; tầng 3 không nêu th
       errors.push(`${id}: tầng 3 chứa đáp án “${question.answer}” — “${third}”`);
     }
     if (new Set(question.hints.map(body)).size !== 3) errors.push(`${id}: ba tầng gợi ý phải khác nhau.`);
-  });
+  };
+  forEveryQuestion(visit);
+  forEveryLifeQuestion(visit);
   report(errors);
 });
 
@@ -81,7 +91,7 @@ test("mỗi đáp án sai hay gặp có phản hồi riêng cho lỗi tư duy c�
   const { wrongAnswerFeedback } = await vite.ssrLoadModule("/app/learning-feedback.ts");
   const errors = [];
   const feedbackTexts = new Set();
-  forEveryQuestion((question, { band }) => {
+  const visit = (question, { band }) => {
     const id = `${question.id}-${band}`;
     const feedback = question.feedbackByAnswer ?? {};
     if (question.answer in feedback) errors.push(`${id}: đáp án đúng không được có phản hồi sai.`);
@@ -103,7 +113,9 @@ test("mỗi đáp án sai hay gặp có phản hồi riêng cho lỗi tư duy c�
       feedbackTexts.add(text);
       if (text.trim().length < 15) errors.push(`${id}: phản hồi quá ngắn — “${text}”`);
     });
-  });
+  };
+  forEveryQuestion(visit);
+  forEveryLifeQuestion(visit);
   assert.ok(feedbackTexts.size > 300, `cần nhiều phản hồi khác nhau, hiện có ${feedbackTexts.size}`);
   report(errors);
 });
@@ -220,5 +232,123 @@ test("nhiệm vụ không dùng thuật ngữ vượt lớp (bội, ước, phâ
     const text = [question.prompt, ...question.hints, question.explanation, ...(question.options ?? []), ...Object.values(question.feedbackByAnswer ?? {})].join(" ");
     if (/(^|[^\p{L}])bội([^\p{L}]|$)|(^|[^\p{L}])ước (của|số)|là ước([^\p{L}]|$)|\d+\/\d+|phân số/iu.test(text)) errors.push(`${question.id}-${band}: dùng thuật ngữ vượt lớp — ${text.slice(0, 120)}`);
   });
+  report(errors);
+});
+
+// ───────────────────────── Đợt trải nghiệm: bốn buổi trong tuần và học cụ ─────────────────────────
+
+test("bốn buổi trong tuần khác nhau đúng như WEEKLY_RHYTHM", async () => {
+  const { buildSession } = await vite.ssrLoadModule("/app/session-plan.ts");
+  const errors = [];
+  for (const mission of ALL_DEEP_MISSIONS) {
+    for (const mastery of Object.values(BANDS)) {
+      for (let count = 0; count < 6; count += 1) {
+        const plan = buildSession(mission, count, mastery);
+        const id = `${mission.id}-lan${count + 1}-${mastery}`;
+        const roles = plan.questions.map((item) => item.role);
+        const prompts = plan.questions.map((item) => item.question.prompt);
+        if (new Set(prompts).size !== prompts.length) errors.push(`${id}: câu trong buổi bị trùng.`);
+        if (count === 0) {
+          if (plan.kind !== "curiosity" || plan.stages.join() !== "predict,explore,practice,reflect") errors.push(`${id}: Buổi 1 phải là Dự đoán → Học cụ → trường hợp nhỏ → thắc mắc.`);
+          if (roles.join() !== "case,case") errors.push(`${id}: Buổi 1 cần đúng 2 trường hợp nhỏ.`);
+          if (plan.band !== "support" || plan.questions.some((item) => item.question.scaffold)) errors.push(`${id}: trường hợp nhỏ lấy từ dải Gỡ nút và không mở sẵn sơ đồ.`);
+          if (plan.countsTowardMastery) errors.push(`${id}: Buổi 1 không được đổi mức thành thạo.`);
+        } else if (count === 1) {
+          if (plan.kind !== "strategy" || plan.stages.join() !== "strategies,practice,reflect") errors.push(`${id}: Buổi 2 phải là Bài mẫu → giải hai cách → so sánh.`);
+          if (plan.questions.length !== 2 || plan.questions.some((item) => !item.twoWay)) errors.push(`${id}: Buổi 2 cần 2 câu, câu nào cũng có cách thứ hai.`);
+        } else if (count === 3) {
+          if (plan.kind !== "transfer" || plan.stages.join() !== "practice,reflect") errors.push(`${id}: Buổi 4 sai khuôn.`);
+          if (roles.join() !== "recall,transfer,transfer,transfer") errors.push(`${id}: Buổi 4 cần 1 câu nhắc lại và 3 câu bối cảnh mới, hiện là ${roles.join()}.`);
+        } else {
+          // Buổi 3 và ôn tập (từ lần thứ 5): 5 câu theo dải thích ứng, không Dự đoán, không Tương tác.
+          if (plan.stages.join() !== "practice,reflect") errors.push(`${id}: Phòng thử thách không có Dự đoán hay Tương tác.`);
+          if (plan.questions.length !== 5) errors.push(`${id}: Phòng thử thách cần 5 câu.`);
+          if (plan.kind !== (count === 2 ? "challenge" : "review")) errors.push(`${id}: lần ${count + 1} phải là ${count === 2 ? "Buổi 3" : "ôn tập"}.`);
+        }
+        if (count !== 0 && plan.stages.includes("strategies") !== (count === 1)) errors.push(`${id}: chỉ Buổi 2 có bước Bài mẫu.`);
+        if (plan.stages.includes("predict") !== (count === 0) || plan.stages.includes("explore") !== (count === 0)) errors.push(`${id}: chỉ Buổi 1 có Dự đoán và Tương tác.`);
+        if (plan.reflection.stems.some((stem) => !stem.trim()) || plan.reflection.starters.length < 4) errors.push(`${id}: thiếu câu phản tư riêng của buổi.`);
+      }
+    }
+  }
+  report(errors);
+});
+
+test("Buổi 2: cách thứ hai của mỗi câu làm được thật", async () => {
+  const { buildSession, expressionEligible } = await vite.ssrLoadModule("/app/session-plan.ts");
+  const { checkSecondWay } = await vite.ssrLoadModule("/app/second-strategy.ts");
+  const errors = [];
+  const modes = { expression: 0, eliminate: 0, explain: 0 };
+  for (const mission of ALL_DEEP_MISSIONS) {
+    for (const mastery of Object.values(BANDS)) {
+      for (let variant = 0; variant < VARIANTS_PER_MISSION; variant += 1) {
+        // Lần hoàn thành thứ 2 (+12k) luôn là Buổi 2; phần dư chọn phiên bản.
+        const plan = buildSession(mission, 1 + variant, mastery, "strategy");
+        for (const { question, twoWay } of plan.questions) {
+          modes[twoWay] += 1;
+          if (twoWay === "expression") {
+            if (!expressionEligible(question)) errors.push(`${question.id}: câu không viết được phép tính thứ hai.`);
+            // Luôn có ít nhất một phép tính khác hợp lệ (ví dụ tách thành tổng hai số).
+            const answer = Number(question.answer);
+            if (!checkSecondWay(`${answer - 4} + 4`, answer).ok) errors.push(`${question.id}: bộ kiểm cách thứ hai từ chối một phép tính đúng.`);
+          }
+          if (twoWay === "eliminate") {
+            const distractors = question.options.filter((option) => option !== question.answer);
+            if (distractors.some((option) => !question.feedbackByAnswer?.[option])) errors.push(`${question.id}: loại trừ cần lý do cho mọi phương án sai.`);
+          }
+        }
+      }
+    }
+  }
+  // Kể bằng lời chỉ là đường lui; phần lớn câu phải có cách thứ hai được ứng dụng tự kiểm.
+  const total = modes.expression + modes.eliminate + modes.explain;
+  assert.ok(modes.explain / total < 0.35, `quá nhiều câu chỉ kể bằng lời: ${JSON.stringify(modes)}`);
+  report(errors);
+});
+
+test("Buổi 4: ba câu bối cảnh mới khác nhau và khác câu nhắc lại", async () => {
+  const { buildSession } = await vite.ssrLoadModule("/app/session-plan.ts");
+  const { LIFE_TRANSFER: LIFE } = await vite.ssrLoadModule("/app/variants/life-transfer.ts");
+  const errors = [];
+  assert.equal(Object.keys(LIFE).length, 36, "mỗi nhiệm vụ có hai câu đời sống");
+  for (const mission of ALL_DEEP_MISSIONS) {
+    if (LIFE[mission.id]?.length !== 2) errors.push(`${mission.id}: cần 2 câu đời sống.`);
+    for (const mastery of Object.values(BANDS)) {
+      const plan = buildSession(mission, 3, mastery);
+      const [recall, ...fresh] = plan.questions.map((item) => item.question.prompt);
+      const strip = (text) => text.replace(/\d+/g, "#").replace(/^Tại [^,]+, /, "").toLocaleLowerCase("vi");
+      if (fresh.some((prompt) => strip(prompt) === strip(recall))) errors.push(`${mission.id}: câu bối cảnh mới chỉ là câu nhắc lại đổi số.`);
+      if (new Set(fresh.map(strip)).size !== 3) errors.push(`${mission.id}: ba câu bối cảnh mới phải khác khuôn.`);
+    }
+  }
+  report(errors);
+});
+
+test("học cụ: 15 nhiệm vụ có thao tác thật, lời giải mẫu được chấm đúng, thao tác sai có phản hồi", async () => {
+  const { LAB_TOOLS, labToolSelfCheck } = await vite.ssrLoadModule("/app/lab-tools.ts");
+  const expected = {
+    grid: ["geometry-1", "geometry-2", "geometry-3", "geometry-5", "geometry-6", "measurement-3"],
+    "bar-model": ["word-1", "word-2", "calculation-3", "calculation-4"],
+    clock: ["measurement-5", "number-5"],
+    "bar-chart": ["data-1", "data-4", "data-6"],
+  };
+  const errors = [];
+  const withTool = ALL_DEEP_MISSIONS.filter((mission) => mission.lab.type !== "choice");
+  assert.equal(withTool.length, 15, `cần 15/36 nhiệm vụ có học cụ, hiện có ${withTool.length}`);
+  for (const [tool, ids] of Object.entries(expected)) {
+    for (const id of ids) {
+      const mission = ALL_DEEP_MISSIONS.find((item) => item.id === id);
+      if (mission.lab.type !== tool || mission.lab.tool?.tool !== tool) errors.push(`${id}: cần học cụ ${tool}, hiện là ${mission.lab.type}.`);
+    }
+  }
+  for (const [id, tool] of Object.entries(LAB_TOOLS)) {
+    const { solution, wrong } = labToolSelfCheck(tool.spec);
+    if (!solution.ok) errors.push(`${id}: lời giải mẫu bị chấm sai — “${solution.message}”`);
+    if (wrong.ok || wrong.message.trim().length < 15) errors.push(`${id}: thao tác sai cần phản hồi riêng — “${wrong.message}”`);
+    // Chữ cho trẻ: câu ngắn (mỗi câu tối đa 25 tiếng).
+    for (const sentence of `${tool.prompt} ${tool.explanation}`.split(/(?<=[.?!])\s+/)) {
+      if (sentence.split(/\s+/).length > 25) errors.push(`${id}: câu quá dài — “${sentence}”`);
+    }
+  }
   report(errors);
 });

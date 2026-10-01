@@ -83,8 +83,8 @@ test("phiên bản bài luyện đứng yên suốt một buổi học", async (
   const next = edition(beginMissionSession(mission.id, afterRecord, 95, 640), afterRecord, 95);
   assert.notEqual(next.id, during.id);
   // Ảnh chụp của nhiệm vụ khác không ảnh hưởng.
-  assert.deepEqual(editionInputs(beginMissionSession("word-1", undefined, 40, 0), mission.id, afterRecord, 95), { completedCount: 2, mastery: 95 });
-  assert.deepEqual(editionInputs(null, mission.id, undefined, 65), { completedCount: 0, mastery: 65 });
+  assert.deepEqual(editionInputs(beginMissionSession("word-1", undefined, 40, 0), mission.id, afterRecord, 95), { completedCount: 2, mastery: 95, kind: "challenge" });
+  assert.deepEqual(editionInputs(null, mission.id, undefined, 65), { completedCount: 0, mastery: 65, kind: "curiosity" });
 });
 
 test("màn kết quả hiện số tia sáng thực nhận", async () => {

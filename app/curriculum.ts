@@ -4,6 +4,7 @@ import { DINO_MISSION_STORIES } from "./dino/dino-mission-stories";
 import { distinctOptions, shuffleById } from "./option-order";
 import { EXTENSION_MODELS } from "./extension-models";
 import { PREDICTION_UNSURE, PREDICTIONS } from "./predictions";
+import { LAB_TOOLS, type LabToolSpec } from "./lab-tools";
 
 export const CURRICULUM_VERSION = 11;
 
@@ -36,11 +37,14 @@ export type DeepMission = Mission & {
     reveal: string;
   };
   lab: {
-    type: "choice" | "tile-rectangles";
+    /** "choice": chạm chọn phương án. Các loại còn lại là học cụ thao tác thật (xem lab-tools.ts). */
+    type: "choice" | LabToolSpec["tool"];
     prompt: string;
     options: { value: string; label: string; note: string }[];
     answer: string;
     explanation: string;
+    /** Đặc tả học cụ (chỉ có ở bài Tương tác không phải dạng chọn). */
+    tool?: LabToolSpec;
   };
   strategies: [
     { name: string; when: string; steps: string[] },
@@ -410,13 +414,15 @@ function standardize(mission: Mission, sequence: DeepMission["sequence"]): DeepM
       answer: PREDICTIONS[mission.id].answer,
       reveal: PREDICTIONS[mission.id].reveal,
     },
-    lab: {
-      type: "choice",
-      prompt: first.prompt,
-      options: shuffleById(first.options ?? distinctOptions(first.answer, LAB_DISTRACTORS[mission.id] ?? []), `${mission.id}-lab`).map((value) => ({ value, label: value, note: LAB_OPTION_NOTE })),
-      answer: first.answer,
-      explanation: first.explanation,
-    },
+    lab: LAB_TOOLS[mission.id]
+      ? { type: LAB_TOOLS[mission.id].spec.tool, prompt: LAB_TOOLS[mission.id].prompt, options: [], answer: LAB_TOOLS[mission.id].answer, explanation: LAB_TOOLS[mission.id].explanation, tool: LAB_TOOLS[mission.id].spec }
+      : {
+        type: "choice",
+        prompt: first.prompt,
+        options: shuffleById(first.options ?? distinctOptions(first.answer, LAB_DISTRACTORS[mission.id] ?? []), `${mission.id}-lab`).map((value) => ({ value, label: value, note: LAB_OPTION_NOTE })),
+        answer: first.answer,
+        explanation: first.explanation,
+      },
     strategies: [
       { name: "Theo dấu mẫu", when: "Khi con muốn thấy từng bước tạo ra đáp án.", steps: mission.model.steps },
       checkerByDomain[mission.domain],
@@ -430,17 +436,6 @@ function standardize(mission: Mission, sequence: DeepMission["sequence"]): DeepM
   return {
     ...generic,
     prediction: { ...generic.prediction, prompt: "Ba hình 1×12, 2×6 và 3×4 đều dùng 12 ô. Chu vi của chúng có bằng nhau không?" },
-    lab: {
-      type: "tile-rectangles",
-      prompt: "Chọn từng cách xếp 12 viên gạch. Quan sát diện tích và chu vi thay đổi ra sao.",
-      options: [
-        { value: "1x12", label: "1 × 12", note: "A = 12 · P = 26" },
-        { value: "2x6", label: "2 × 6", note: "A = 12 · P = 16" },
-        { value: "3x4", label: "3 × 4", note: "A = 12 · P = 14" },
-      ],
-      answer: "3x4",
-      explanation: "Cả ba cùng diện tích 12. Hình 3×4 có hai cạnh gần nhau nhất nên chu vi 14 là nhỏ nhất.",
-    },
     strategies: [
       { name: "Cặp thừa số", when: "Khi cần tìm đủ mọi hình chữ nhật.", steps: ["Tìm các cặp số có tích 12.", "Tính chu vi của từng cặp.", "So sánh và nêu kết luận."] },
       { name: "Đếm cạnh ngoài", when: "Khi muốn hiểu bằng hình thay vì công thức.", steps: ["Xếp đủ 12 ô, không chồng lên nhau.", "Gạch bỏ cạnh nằm giữa hai ô.", "Đếm các cạnh còn lộ ra bên ngoài."] },
@@ -471,7 +466,8 @@ function withDinoStory(mission: DeepMission): DeepMission {
     prediction: { ...mission.prediction, prompt: story.wonder },
     lab: {
       ...mission.lab,
-      prompt: story.labPrompt ?? (choiceLab ? story.practice : mission.lab.prompt),
+      // Học cụ giữ lời dẫn riêng (đã có tên nhân vật); bài chọn phương án lấy câu chuyện của câu luyện đầu.
+      prompt: choiceLab ? story.labPrompt ?? story.practice : mission.lab.prompt,
       explanation: choiceLab && story.explanation ? story.explanation : mission.lab.explanation,
     },
   };
@@ -517,7 +513,8 @@ export function validateCurriculum() {
   if (new Set(ALL_DEEP_MISSIONS.map((mission) => mission.id)).size !== 36) errors.push("Mã nhiệm vụ bị trùng.");
   ALL_DEEP_MISSIONS.forEach((mission) => {
     if (mission.deepPractice.length < 3) errors.push(`${mission.id}: cần ít nhất 3 bài luyện.`);
-    if (mission.lab.options.length < 2 || new Set(mission.lab.options.map((option) => option.value)).size !== mission.lab.options.length) errors.push(`${mission.id}: bài Tương tác thiếu phương án nhiễu.`);
+    if (mission.lab.type === "choice" && mission.lab.options.length < 2 || new Set(mission.lab.options.map((option) => option.value)).size !== mission.lab.options.length) errors.push(`${mission.id}: bài Tương tác thiếu phương án nhiễu.`);
+    if (mission.lab.type !== "choice" && (!mission.lab.tool || mission.lab.tool.tool !== mission.lab.type)) errors.push(`${mission.id}: học cụ thiếu đặc tả.`);
     if (mission.lab.type === "choice" && mission.practice[0].type === "number" && mission.lab.options.length < 3) errors.push(`${mission.id}: bài Tương tác dạng số cần 2 phương án nhiễu trong LAB_DISTRACTORS.`);
     if (mission.strategies.length !== 2) errors.push(`${mission.id}: cần đúng 2 chiến lược.`);
     if (mission.prediction.options.length !== 3 || !mission.prediction.answer || !mission.prediction.options.includes(mission.prediction.answer)) errors.push(`${mission.id}: bước Dự đoán cần hai nhận định toán học và đáp án.`);
