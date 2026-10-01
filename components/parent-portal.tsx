@@ -30,7 +30,8 @@ export type WeeklyReport = {
   reviewSkills: string[];
 };
 
-const DIFFICULTY_LABEL: Record<string, string> = { support: "Gỡ nút", core: "Vừa sức", stretch: "Bứt phá" };
+/** Buổi Khơi tò mò dùng trường hợp nhỏ để khám phá, không tính vào mức tự lực. */
+const DIFFICULTY_LABEL: Record<string, string> = { support: "Gỡ nút", core: "Vừa sức", stretch: "Bứt phá", curiosity: "Khơi tò mò (không tính)" };
 
 export function ParentPortal({ report }: { report: WeeklyReport }) {
   const [stage, setStage] = useState<"closed" | "gate" | "open">("closed");

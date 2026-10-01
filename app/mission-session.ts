@@ -3,6 +3,8 @@
 //   mức thành thạo đổi, nhưng màn kết quả vẫn phải nói về đúng phiên bản con vừa làm.
 // - Số tia sáng lúc bắt đầu được giữ lại để màn kết quả hiện số tia sáng THỰC nhận.
 
+import { sessionKindFor, type SessionKind } from "./session-plan";
+
 type RecordLike = { completedCount?: number; reflection?: string };
 type SkillRecordLike = { streak: number; needsReview: boolean };
 
@@ -12,6 +14,8 @@ export type MissionSessionStart = {
   /** Mức thành thạo của miền lúc bắt đầu buổi học (quyết định dải khó). */
   mastery: number;
   sparkPoints: number;
+  /** Kiểu buổi (Buổi 1–4 hoặc ôn tập), cố định suốt buổi. Liên kết /lesson/N có thể chọn sẵn. */
+  kind: SessionKind;
 };
 
 export type SparkProfileLike = {
@@ -36,14 +40,16 @@ export function sparkPointsOf(profile: SparkProfileLike) {
     + profile.enrichmentCompleted.length * SPARKS_PER_OPEN_TASK + mastered * 15 + profile.sparkBonus;
 }
 
-export function beginMissionSession(missionId: string, record: RecordLike | undefined, mastery: number, sparkPoints: number): MissionSessionStart {
-  return { missionId, completedCount: record?.completedCount ?? 0, mastery, sparkPoints };
+export function beginMissionSession(missionId: string, record: RecordLike | undefined, mastery: number, sparkPoints: number, kind?: SessionKind): MissionSessionStart {
+  const completedCount = record?.completedCount ?? 0;
+  return { missionId, completedCount, mastery, sparkPoints, kind: kind ?? sessionKindFor(completedCount) };
 }
 
 /** Số lần hoàn thành và mức thành thạo dùng để chọn phiên bản: lấy từ ảnh chụp đầu buổi nếu đang trong buổi học đó. */
 export function editionInputs(session: MissionSessionStart | null, missionId: string, record: RecordLike | undefined, mastery: number) {
-  if (session && session.missionId === missionId) return { completedCount: session.completedCount, mastery: session.mastery };
-  return { completedCount: record?.completedCount ?? 0, mastery };
+  if (session && session.missionId === missionId) return { completedCount: session.completedCount, mastery: session.mastery, kind: session.kind };
+  const completedCount = record?.completedCount ?? 0;
+  return { completedCount, mastery, kind: sessionKindFor(completedCount) };
 }
 
 /** Tia sáng thực nhận trong buổi học (không bao giờ âm). */

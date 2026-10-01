@@ -53,14 +53,37 @@ export function diagnosticMastery(questions: DiagnosticItem[], correctness: bool
   return Object.fromEntries(MASTERY_DOMAINS.map((domain) => [domain, possible[domain] ? clamp((earned[domain] / possible[domain]) * 100) : MASTERY_DEFAULT])) as MasteryMap;
 }
 
-type SessionLike = { finishedAt?: unknown; autonomy?: unknown };
+type SessionLike = { finishedAt?: unknown; autonomy?: unknown; kind?: unknown };
 type RecordLike = { autonomy?: unknown; bestAutonomy?: unknown; sessions?: unknown };
 type DiagnosticLike = { scores?: Partial<Record<DomainId, { percent?: unknown }>> } | null | undefined;
+
+/**
+ * Buổi "Khơi tò mò" (Buổi 1 của tuần) dùng trường hợp nhỏ của dải Gỡ nút để khám phá,
+ * nên không được tính vào mức thành thạo. Buổi cũ không có `kind` vẫn được tính như trước.
+ */
+export function countsTowardMastery(session: { kind?: unknown }) {
+  return session.kind !== "curiosity";
+}
+
+/** Bản ghi đã có buổi được tính mức tự lực chưa (bản ghi cũ không lưu danh sách buổi thì coi như có). */
+export function hasScoredSession(record: { sessions?: unknown } | undefined) {
+  if (!record) return false;
+  return !Array.isArray(record.sessions) || !record.sessions.length || (record.sessions as SessionLike[]).some((session) => session && countsTowardMastery(session));
+}
+
+/**
+ * Mức tự lực trượt của nhiệm vụ sau một buổi. Buổi không tính (Khơi tò mò) giữ nguyên mức cũ;
+ * buổi được tính đầu tiên lấy luôn kết quả buổi đó, không trộn với số 0 của bản ghi chỉ có Buổi 1.
+ */
+export function nextRecordAutonomy(previous: { autonomy?: number; sessions?: unknown } | undefined, sessionAutonomy: number, counts: boolean) {
+  if (!counts) return previous?.autonomy ?? 0;
+  return blendMastery(hasScoredSession(previous) ? previous?.autonomy : undefined, sessionAutonomy);
+}
 
 function sessionsOf(record: RecordLike): { finishedAt: string; autonomy: number }[] {
   if (!Array.isArray(record.sessions)) return [];
   return (record.sessions as SessionLike[])
-    .filter((session) => session && typeof session === "object" && Number.isFinite(Number(session.autonomy)))
+    .filter((session) => session && typeof session === "object" && Number.isFinite(Number(session.autonomy)) && countsTowardMastery(session))
     .map((session) => ({ finishedAt: typeof session.finishedAt === "string" ? session.finishedAt : "", autonomy: Number(session.autonomy) }));
 }
 

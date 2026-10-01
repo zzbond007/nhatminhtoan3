@@ -4,7 +4,7 @@
 // - hook: câu chuyện mở đầu hiện ở đầu nhiệm vụ
 // - wonder: câu Dự đoán (bước 1)
 // - practice: câu đầu tiên của practice[], cũng là câu Thử nghiệm (bước 2)
-// - labPrompt: chỉ dùng khi bước 2 là bài tương tác riêng (geometry-1)
+// - labPrompt: lời dẫn riêng cho bài Tương tác dạng chọn (học cụ trong lab-tools.ts có lời dẫn của riêng nó)
 // - explanation: lời giải mới khi đổi đồ vật trong câu practice
 
 export type DinoMissionStory = {
@@ -124,7 +124,6 @@ export const DINO_MISSION_STORIES: Record<string, DinoMissionStory> = {
     hook: "Kentro Gai Tam Giác xây tổ bằng 12 phiến đá pha lê vuông. Có nhiều cách xếp cùng 12 phiến—nhưng hàng rào gai quanh mỗi tổ có dài bằng nhau không?",
     wonder: "Kentro thử ba kiểu tổ 1×12, 2×6 và 3×4, đều dùng 12 phiến đá. Hàng rào quanh ba tổ có dài bằng nhau không?",
     practice: "Tổ 2×5 phiến đá của Kentro có diện tích bao nhiêu ô vuông?",
-    labPrompt: "Chọn từng cách xếp 12 phiến đá cho tổ của Kentro. Quan sát diện tích và chu vi thay đổi ra sao.",
   },
   "geometry-2": {
     hook: "Nodo Giáp Tròn có lớp giáp ghép từ nhiều mảnh. Cắt rồi ghép lại có thể đổi hẳn hình dáng, nhưng không phải mọi đại lượng đều thay đổi.",
