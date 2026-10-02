@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": "2026.09.26.1",
+  "version": "2026.10.02.1",
   "title": "Math Raccoon · Lộ trình nâng cao 9 tháng",
-  "publishedAt": "2026-09-26",
+  "publishedAt": "2026-10-02",
   "contentScope": {
     "missions": 36,
     "domains": 6,
@@ -20,7 +20,10 @@
     "dinoRareSpecies": 12,
     "authenticTasks": 36,
     "monthlyCheckIns": 9,
-    "checkInQuestions": 9
+    "checkInQuestions": 9,
+    "lifeTransferQuestions": 72,
+    "interactiveLabs": 15,
+    "weeklySessionTypes": 4
   },
   "approval": {
     "status": "approved-for-release",
@@ -34,6 +37,14 @@
     }
   },
   "notes": [
+    "Bốn buổi trong tuần nay khác nhau: Buổi 1 Khơi tò mò (dự đoán, học cụ, trường hợp nhỏ, ghi thắc mắc), Buổi 2 Xưởng chiến lược (bài mẫu, mỗi câu giải hai cách rồi so sánh), Buổi 3 Phòng thử thách (5 câu theo mức của con), Buổi 4 Chuyển giao đời sống (1 câu nhắc lại và 3 câu bối cảnh mới).",
+    "Buổi 1 dùng trường hợp nhỏ để khám phá nên không làm thay đổi mức thành thạo; Góc đồng hành ghi là “Khơi tò mò (không tính)”.",
+    "15 nhiệm vụ có học cụ thao tác thật, dùng tốt trên iPad: lưới ô vuông xếp hình, sơ đồ đoạn thẳng kéo được, đồng hồ kéo kim và biểu đồ cột tự dựng.",
+    "Thêm 72 câu bối cảnh đời sống (đi chợ, nấu ăn, xe buýt, tiết kiệm…) cho Buổi 4, có ba tầng gợi ý và phản hồi riêng cho từng đáp án sai.",
+    "Mức thành thạo theo từng miền nay tăng và giảm theo kết quả gần đây; bài đánh giá đầu vào 30 câu quyết định mức khó ngay từ buổi đầu.",
+    "Ba mức Gỡ nút – Vừa sức – Bứt phá khác nhau về cấu trúc bài, không chỉ đổi số; mỗi đáp án sai hay gặp có lời phản hồi riêng.",
+    "Con có thể ghi âm lời phản tư thay vì gõ chữ; bản ghi chỉ nằm trên thiết bị này.",
+    "Rà soát và sửa lỗi toán học trong toàn bộ câu hỏi; mỗi lần phát hành đều chạy bộ kiểm định tự động.",
     "Đồng bộ tuỳ chọn qua Google Sheets của chính gia đình (Apps Script), có mã gia đình và mã PIN; tự động lưu không thể ghi đè dữ liệu từ một máy mới còn trống.",
     "Đánh giá Tháng: 9 câu sau mỗi 4 tuần, không gợi ý, không đồng hồ, không lặp câu cũ; so với lần trước bằng thanh tiến trình và Bản đồ Năng lực 6 Chiều.",
     "Kết quả đánh giá đầu vào có Bản đồ Năng lực 6 Chiều kèm gợi ý bằng lời cho phụ huynh.",
@@ -51,7 +62,7 @@
     "Bài đánh giá: biểu đồ d1 ghi số trên đỉnh cột, câu d3 có hình 30 chấm minh hoạ mẫu khảo sát, câu w3 cho con tự xếp cột chiều cao trước khi trả lời.",
     "Bổ sung Đảo Khủng Long: mỗi nhiệm vụ giữ một quả trứng; hoàn thành một phiên bản nhiệm vụ cho 1–3 mảnh trứng, đủ 4 mảnh thì trứng nở thành một trong 36 loài khủng long; trứng nở trong phiên bản Bứt phá có độ hiếm Hiếm.",
     "Số mảnh trứng dựa trên mức Gỡ nút – Vừa sức – Bứt phá, độ sâu gợi ý và việc giải bằng hai cách (không tính phản tư vì bé chưa tự đánh chữ); bé khủng long lớn lên khi con ôn lại nhiệm vụ ở vòng xoắn ốc.",
-    "Bước Phản tư có thêm ô để con và người lớn xác nhận đã giải bằng cả hai cách để nhận thêm một mảnh trứng.",
+    "Giải hai cách là việc làm thật: con viết một phép tính khác cho cùng kết quả và ứng dụng tự kiểm tra, thay cho ô tích xác nhận trước đây.",
     "Hoàn thành một bài toán mở làm nở ngay trứng Huyền thoại của nhiệm vụ tuần đó; mốc 7, 30 và 60 ngày học nở trứng Đặc biệt. Hồ sơ cũ được tính lại trứng từ các buổi đã hoàn thành.",
     "Bổ sung Phòng luyện xoắn ốc gồm 48 câu thuộc 8 mảng: giá trị hàng, phân số, biểu thức, lý thuyết số, logic, tổ hợp, IQ hình và Toán tiếng Anh.",
     "Mỗi vòng luyện trộn 10 câu, ưu tiên nội dung chưa học hoặc chưa vững và có chế độ ôn riêng các câu từng làm sai.",
